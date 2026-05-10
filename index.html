@@ -1,0 +1,1439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AutoEnthra — Agentic Governance & Orchestration for the Enterprise</title>
+<meta name="description" content="AutoEnthra is the agentic governance and orchestration platform for regulated enterprises. Provision AWS Bedrock and multi-cloud agents in minutes — with FinOps, policy-as-code, and human-in-the-loop built in.">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+<link rel="shortcut icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,400;1,6..72,500;1,6..72,600&family=Mulish:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --teal-900:#0E3F3B;
+  --teal-800:#155F5A;
+  --teal-700:#1F6E6E;
+  --teal-600:#2D8B7E;
+  --teal-500:#3FA591;
+  --teal-300:#8FCFC1;
+  --teal-100:#D6ECE7;
+  --teal-50:#EEF7F4;
+  --ink-900:#0E1A1A;
+  --ink-700:#1F2D2C;
+  --ink-500:#475856;
+  --ink-400:#6B7C7A;
+  --ink-300:#9BAAA8;
+  --bg:#FFFFFF;
+  --bg-soft:#F4F8F7;
+  --bg-warm:#FBF7F2;
+  --border:#E1E8E6;
+  --border-strong:#C7D5D2;
+  --orange:#E97338;
+  --orange-700:#D65F25;
+  --orange-100:#FBE6D8;
+  --shadow-sm:0 1px 2px rgba(14,63,59,.05),0 1px 3px rgba(14,63,59,.06);
+  --shadow-md:0 4px 12px rgba(14,63,59,.08),0 2px 6px rgba(14,63,59,.04);
+  --shadow-lg:0 18px 48px rgba(14,63,59,.12),0 6px 16px rgba(14,63,59,.06);
+  --shadow-xl:0 32px 80px rgba(14,63,59,.18),0 12px 28px rgba(14,63,59,.10);
+  --radius-sm:8px;
+  --radius:14px;
+  --radius-lg:22px;
+  --radius-xl:28px;
+  --topbar-h:84px;
+  --serif:'Newsreader',Georgia,'Times New Roman',serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --bold-sans:'Mulish','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  color:var(--ink-700);
+  background:var(--bg);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--teal-700);text-decoration:none}
+a:hover{color:var(--teal-800)}
+img{max-width:100%;display:block}
+
+/* ---------- Layout ---------- */
+.container{max-width:1240px;margin:0 auto;padding:0 32px}
+.container-narrow{max-width:980px;margin:0 auto;padding:0 32px}
+section{padding:96px 0}
+@media (max-width:768px){section{padding:64px 0}.container,.container-narrow{padding:0 20px}}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(180%) blur(14px);
+  -webkit-backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--border);
+  height:var(--topbar-h);
+  display:flex;align-items:center;
+}
+@media (max-width:600px){
+  :root{--topbar-h:68px}
+}
+.topbar-inner{display:flex;align-items:center;gap:32px;width:100%}
+.brand{
+  display:flex;align-items:center;gap:0;
+  text-decoration:none;flex-shrink:0;
+  margin-right:auto;margin-left:0;
+}
+.brand img{height:56px;width:auto;object-fit:contain;display:block}
+@media (max-width:600px){
+  .brand img{height:42px}
+}
+.nav{display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
+.nav-item{
+  position:relative;
+  padding:10px 16px;border-radius:8px;
+  font-family:var(--bold-sans);
+  color:var(--ink-700);font-weight:700;font-size:15px;
+  cursor:pointer;transition:all .18s ease;
+  display:flex;align-items:center;gap:6px;
+}
+.nav-item:hover{background:var(--teal-50);color:var(--teal-800)}
+.nav-item .caret{width:10px;height:10px;opacity:.5;transition:transform .2s}
+.nav-item:hover .caret{transform:rotate(180deg)}
+.nav-actions{display:flex;align-items:center;gap:14px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:999px;
+  font-weight:600;font-size:15px;
+  border:none;cursor:pointer;
+  transition:all .2s ease;
+  font-family:inherit;
+  text-decoration:none;
+}
+.btn-primary{background:var(--orange);color:#fff;box-shadow:0 4px 12px rgba(233,115,56,.32)}
+.btn-primary:hover{background:var(--orange-700);transform:translateY(-1px);box-shadow:0 6px 16px rgba(233,115,56,.42);color:#fff}
+.btn-secondary{background:transparent;color:var(--teal-800);border:1.5px solid var(--border-strong)}
+.btn-secondary:hover{border-color:var(--teal-700);color:var(--teal-800);background:var(--teal-50)}
+.btn-ghost{background:transparent;color:var(--ink-700);font-weight:500;padding:10px 14px}
+.btn-ghost:hover{color:var(--teal-800)}
+.btn-lg{padding:15px 30px;font-size:16px}
+@media (max-width:1024px){.nav{display:none}}
+@media (max-width:600px){.nav-actions .btn-ghost{display:none}}
+
+/* ---------- Hero ---------- */
+.hero{
+  padding:96px 0 96px;
+  background:
+    radial-gradient(1200px 600px at 80% -10%,rgba(63,165,145,.10),transparent 60%),
+    radial-gradient(900px 500px at 0% 30%,rgba(233,115,56,.04),transparent 55%),
+    var(--bg);
+  position:relative;overflow:visible;
+}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--teal-50);
+  color:var(--teal-800);
+  padding:7px 14px;border-radius:999px;
+  font-size:13px;font-weight:600;letter-spacing:.02em;
+  margin-bottom:24px;
+  border:1px solid var(--teal-100);
+}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--teal-500)}
+h1.hero-title{
+  font-family:var(--serif);
+  font-size:clamp(38px,5.4vw,66px);
+  line-height:1.08;
+  letter-spacing:-.018em;
+  color:var(--ink-900);
+  margin:0 0 24px;
+  font-weight:600;
+}
+h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
+.hero-sub{
+  font-size:19px;line-height:1.55;color:var(--ink-500);
+  max-width:560px;margin:0 0 36px;
+}
+.hero-cta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:28px}
+.hero-meta{display:flex;gap:24px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--ink-400)}
+.hero-meta-item{display:flex;align-items:center;gap:6px}
+.hero-meta-item svg{color:var(--teal-600)}
+
+.hero-art{
+  position:relative;
+}
+.hero-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-xl);
+  overflow:hidden;
+  transform:rotate(.5deg);
+}
+.hero-card-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  background:var(--bg-soft);
+}
+.hero-card-bar .dot{width:11px;height:11px;border-radius:50%}
+.hero-card-bar .dot.r{background:#FF6058}
+.hero-card-bar .dot.y{background:#FFBE2F}
+.hero-card-bar .dot.g{background:#28C840}
+.hero-card-bar .url{
+  margin-left:14px;flex:1;font-size:12.5px;color:var(--ink-400);
+  background:#fff;padding:4px 12px;border-radius:6px;border:1px solid var(--border);
+  font-family:'SF Mono',Menlo,monospace;
+}
+.hero-card-body{padding:28px 28px 32px;background:#fff}
+.cmd-stage-rail{
+  display:flex;gap:6px;margin-bottom:22px;
+}
+.cmd-stage{
+  flex:1;height:6px;border-radius:3px;background:var(--border);
+}
+.cmd-stage.done{background:var(--teal-600)}
+.cmd-stage.active{background:var(--teal-600);box-shadow:0 0 0 3px var(--teal-100)}
+.cmd-msg{
+  display:flex;gap:12px;margin-bottom:16px;
+}
+.cmd-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-700),var(--teal-500));
+  color:#fff;font-size:13px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.cmd-avatar.user{background:#fff;color:var(--ink-700);border:1.5px solid var(--border-strong)}
+.cmd-bubble{
+  background:var(--bg-soft);border:1px solid var(--border);
+  border-radius:14px;padding:12px 16px;font-size:14px;line-height:1.5;
+  flex:1;color:var(--ink-700);
+}
+.cmd-bubble.you{background:#fff;border-color:var(--border)}
+.cmd-bubble strong{color:var(--teal-800)}
+.cmd-card-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 10px;border-radius:999px;
+  background:var(--teal-100);color:var(--teal-800);
+  font-size:11.5px;font-weight:600;
+  margin-right:6px;margin-top:8px;
+}
+
+.hero-floating{
+  position:absolute;background:#fff;border:1px solid var(--border);
+  border-radius:14px;box-shadow:var(--shadow-lg);
+  padding:14px 18px;display:flex;align-items:center;gap:12px;
+}
+.hero-float-1{top:-56px;right:-8px;animation:float1 6s ease-in-out infinite;z-index:3}
+.hero-float-2{bottom:-24px;left:-32px;animation:float2 7s ease-in-out infinite;z-index:3}
+.hero-float-icon{
+  width:36px;height:36px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.hero-float-icon.ok{background:var(--teal-100);color:var(--teal-800)}
+.hero-float-icon.dollar{background:var(--orange-100);color:var(--orange-700)}
+.hero-float-label{font-size:11px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.hero-float-value{font-size:16px;font-weight:700;color:var(--ink-900);font-family:var(--serif)}
+@keyframes float1{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+@media (max-width:960px){
+  .hero-grid{grid-template-columns:1fr;gap:48px}
+  .hero-art{margin-top:24px}
+  .hero-floating{display:none}
+}
+
+/* ---------- Trust band ---------- */
+.trustband{
+  padding:42px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  background:#fff;
+}
+.trust-label{
+  text-align:center;font-size:13px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.12em;
+  color:var(--ink-400);margin-bottom:24px;
+}
+.trust-logos{
+  display:grid;grid-template-columns:repeat(6,1fr);gap:32px;align-items:center;
+  opacity:.7;
+}
+.trust-logo{
+  font-family:var(--serif);font-weight:600;font-size:18px;
+  color:var(--ink-300);text-align:center;
+  letter-spacing:.02em;
+}
+@media (max-width:768px){.trust-logos{grid-template-columns:repeat(3,1fr);gap:24px}}
+
+/* ---------- Section headers ---------- */
+.sec-head{text-align:center;max-width:740px;margin:0 auto 56px}
+.sec-eyebrow{
+  font-family:var(--bold-sans);
+  font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
+  color:var(--teal-700);margin-bottom:14px;
+}
+.sec-title{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(30px,4vw,46px);line-height:1.15;letter-spacing:-.012em;
+  color:var(--ink-900);margin:0 0 18px;
+}
+.sec-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
+.sec-sub{font-size:17.5px;color:var(--ink-500);line-height:1.55;margin:0}
+
+/* ---------- Problem / pain section ---------- */
+.problem{background:var(--bg-soft)}
+.problem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.problem-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px;
+  transition:all .25s ease;
+}
+.problem-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md);border-color:var(--border-strong)}
+.problem-icon{
+  width:46px;height:46px;border-radius:12px;
+  background:var(--orange-100);color:var(--orange-700);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:18px;
+}
+.problem-card h3{
+  font-family:var(--bold-sans);font-weight:800;font-size:21px;letter-spacing:-.005em;
+  color:var(--ink-900);margin:0 0 10px;
+}
+.problem-card p{margin:0;color:var(--ink-500);font-size:15px;line-height:1.55}
+@media (max-width:768px){.problem-grid{grid-template-columns:1fr}}
+
+/* ---------- Capabilities accordion (Refill Health style) ---------- */
+.caps-grid{
+  display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:start;
+}
+.cap-list{display:flex;flex-direction:column;gap:12px}
+.cap-item{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;cursor:pointer;
+  transition:all .25s ease;
+}
+.cap-item:hover{border-color:var(--border-strong)}
+.cap-item.open{
+  border-color:var(--teal-600);
+  box-shadow:0 0 0 3px var(--teal-100);
+}
+.cap-item-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 26px;
+}
+.cap-item-title{
+  font-family:var(--bold-sans);font-weight:800;font-size:21px;letter-spacing:-.005em;
+  color:var(--ink-900);
+  display:flex;align-items:center;gap:14px;
+}
+.cap-item.open .cap-item-title{color:var(--teal-800)}
+.cap-num{
+  font-family:var(--sans);
+  font-size:11.5px;font-weight:700;color:var(--teal-700);
+  background:var(--teal-50);
+  padding:3px 8px;border-radius:6px;letter-spacing:.06em;
+}
+.cap-toggle{
+  width:32px;height:32px;border-radius:50%;
+  border:1.5px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink-500);transition:all .2s ease;flex-shrink:0;
+}
+.cap-item.open .cap-toggle{
+  background:var(--teal-600);border-color:var(--teal-600);color:#fff;
+  transform:rotate(180deg);
+}
+.cap-item-body{
+  max-height:0;overflow:hidden;
+  transition:max-height .35s ease;
+}
+.cap-item.open .cap-item-body{max-height:340px}
+.cap-item-inner{padding:0 26px 24px}
+.cap-item-inner p{margin:0 0 16px;color:var(--ink-500);font-size:15.5px;line-height:1.6}
+.cap-bullets{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none}
+.cap-bullets li{
+  display:flex;gap:10px;align-items:flex-start;
+  font-size:14px;color:var(--ink-700);
+}
+.cap-bullets li svg{color:var(--teal-600);flex-shrink:0;margin-top:3px}
+
+.cap-preview{
+  position:sticky;top:calc(var(--topbar-h) + 24px);
+}
+.cap-preview-card{
+  background:linear-gradient(160deg,var(--teal-50) 0%,#fff 60%);
+  border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:32px;min-height:520px;
+  box-shadow:var(--shadow-lg);
+  position:relative;overflow:hidden;
+}
+.cap-preview-card::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(600px 300px at 90% 0%,rgba(63,165,145,.12),transparent 60%);
+  pointer-events:none;
+}
+.cap-preview-label{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#fff;color:var(--teal-800);
+  padding:6px 14px;border-radius:999px;
+  font-size:12px;font-weight:600;letter-spacing:.04em;
+  border:1px solid var(--teal-100);
+  position:relative;z-index:1;
+  margin-bottom:18px;
+}
+.cap-preview-title{
+  font-family:var(--serif);font-weight:600;
+  font-size:24px;color:var(--ink-900);margin:0 0 8px;
+  position:relative;z-index:1;
+}
+.cap-preview-desc{
+  color:var(--ink-500);font-size:14.5px;margin:0 0 24px;
+  position:relative;z-index:1;
+}
+.cap-preview-stage{display:none;position:relative;z-index:1}
+.cap-preview-stage.active{display:block}
+
+/* Mock UI panels inside preview */
+.mock-panel{
+  background:#fff;border:1px solid var(--border);border-radius:14px;
+  padding:18px;box-shadow:var(--shadow-sm);
+}
+.mock-panel + .mock-panel{margin-top:12px}
+.mock-row{display:flex;align-items:center;justify-content:space-between;font-size:13px}
+.mock-row + .mock-row{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+.mock-pill{
+  font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;
+}
+.mock-pill.green{background:var(--teal-100);color:var(--teal-800)}
+.mock-pill.amber{background:#FFF1DB;color:#9C5A0F}
+.mock-pill.red{background:#FBE0DD;color:#9C2B23}
+.mock-bar{
+  height:8px;background:var(--bg-soft);border-radius:4px;overflow:hidden;margin-top:6px;
+}
+.mock-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal-600),var(--teal-500));border-radius:4px}
+.mock-chart{
+  height:120px;display:flex;align-items:flex-end;gap:8px;padding-top:8px;
+}
+.mock-chart-bar{
+  flex:1;background:linear-gradient(180deg,var(--teal-500),var(--teal-700));
+  border-radius:4px 4px 0 0;opacity:.85;
+}
+.mock-graph{
+  height:140px;position:relative;
+  background:linear-gradient(180deg,rgba(63,165,145,.06),transparent);
+  border-radius:8px;
+}
+.mock-graph svg{width:100%;height:100%}
+.mock-kpi{display:flex;gap:14px;margin-bottom:14px}
+.mock-kpi-card{
+  flex:1;background:var(--teal-50);border-radius:10px;padding:12px 14px;
+}
+.mock-kpi-label{font-size:11px;color:var(--ink-500);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.mock-kpi-value{font-family:var(--serif);font-weight:600;font-size:22px;color:var(--ink-900);margin-top:4px}
+.mock-kpi-delta{font-size:11px;color:var(--teal-700);font-weight:600;margin-top:2px}
+.mock-conn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mock-conn{
+  background:var(--bg-soft);border:1px solid var(--border);
+  border-radius:8px;padding:10px;text-align:center;
+  font-size:11.5px;font-weight:600;color:var(--ink-700);
+}
+.mock-conn.azure{background:#E5F0F8;color:#1B4F7C;border-color:#C8DEED}
+.mock-conn.aws{background:#FFF4E5;color:#7A4400;border-color:#F4D7AC}
+.mock-conn.bedrock{background:var(--teal-50);color:var(--teal-800);border-color:var(--teal-100)}
+.mock-graph-label{font-size:11px;color:var(--ink-400);position:absolute;bottom:6px;right:10px}
+
+@media (max-width:960px){
+  .caps-grid{grid-template-columns:1fr}
+  .cap-preview{position:static;margin-top:8px}
+  .cap-preview-card{min-height:auto}
+}
+
+/* ---------- Metrics band ---------- */
+.metrics{background:linear-gradient(180deg,#fff,var(--teal-50));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 0}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
+.metric{text-align:center}
+.metric-value{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(36px,4.5vw,52px);line-height:1;
+  background:linear-gradient(180deg,var(--teal-800),var(--teal-600));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  letter-spacing:-.02em;
+  margin-bottom:8px;
+}
+.metric-label{
+  font-size:14px;color:var(--ink-500);font-weight:500;
+}
+@media (max-width:768px){.metrics-grid{grid-template-columns:repeat(2,1fr);gap:32px 16px}}
+
+/* ---------- Industries ---------- */
+.industries{background:#fff}
+.ind-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.ind-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:36px 32px;
+  display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start;
+  transition:all .25s ease;
+  position:relative;overflow:hidden;
+}
+.ind-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--teal-600);transform:scaleY(0);transform-origin:top;
+  transition:transform .3s ease;
+}
+.ind-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md)}
+.ind-card:hover::before{transform:scaleY(1)}
+.ind-icon{
+  width:54px;height:54px;border-radius:14px;
+  background:linear-gradient(135deg,var(--teal-700),var(--teal-500));
+  display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;
+}
+.ind-card h3{
+  font-family:var(--bold-sans);font-weight:800;font-size:22px;
+  color:var(--ink-900);margin:0 0 8px;letter-spacing:-.01em;
+}
+.ind-tag{
+  display:inline-block;background:var(--teal-50);color:var(--teal-800);
+  padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:600;
+  margin-bottom:12px;
+}
+.ind-card p{margin:0 0 14px;color:var(--ink-500);font-size:14.5px;line-height:1.55}
+.ind-uses{display:flex;flex-wrap:wrap;gap:6px}
+.ind-use{
+  font-size:12px;color:var(--ink-700);font-weight:500;
+  background:var(--bg-soft);padding:4px 10px;border-radius:6px;
+  border:1px solid var(--border);
+}
+@media (max-width:768px){.ind-grid{grid-template-columns:1fr}.ind-card{padding:28px 22px}}
+
+/* ---------- How it works ---------- */
+.how{background:var(--bg-soft)}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-top:8px}
+.how-step{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius);
+  padding:28px;position:relative;
+}
+.how-num{
+  font-family:var(--serif);font-weight:600;
+  font-size:38px;line-height:1;
+  color:var(--teal-600);margin-bottom:14px;
+  display:flex;align-items:center;gap:14px;
+}
+.how-num::after{content:"";flex:1;height:1px;background:var(--border)}
+.how-step h4{
+  font-family:var(--bold-sans);font-weight:800;font-size:20px;
+  color:var(--ink-900);margin:0 0 8px;letter-spacing:-.005em;
+}
+.how-step p{margin:0;color:var(--ink-500);font-size:14.5px;line-height:1.55}
+@media (max-width:1024px){.how-steps{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:540px){.how-steps{grid-template-columns:1fr}}
+
+/* ---------- Differentiators ---------- */
+.diff-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+.diff-table{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  overflow:hidden;box-shadow:var(--shadow-md);
+}
+.diff-row{
+  display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;
+  align-items:center;padding:18px 22px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.diff-row:last-child{border-bottom:none}
+.diff-row.head{
+  background:var(--teal-800);color:#fff;font-weight:600;font-size:13px;
+  text-transform:uppercase;letter-spacing:.08em;padding:16px 22px;
+}
+.diff-row.head .col-ae{color:#fff}
+.diff-row .col-feature{font-weight:600;color:var(--ink-900)}
+.diff-row .col-ae{color:var(--teal-700);font-weight:600;text-align:center}
+.diff-row .col-other{color:var(--ink-400);text-align:center}
+.diff-row .col-ae svg{color:var(--teal-600);vertical-align:middle}
+.diff-row .col-other svg{color:var(--ink-300);vertical-align:middle}
+
+.diff-narrative h2{
+  font-family:var(--serif);font-weight:600;font-size:38px;line-height:1.12;letter-spacing:-.015em;
+  color:var(--ink-900);margin:0 0 18px;
+}
+.diff-narrative h2 .accent{color:var(--teal-700);font-style:italic;font-weight:500}
+.diff-narrative p{font-size:16.5px;line-height:1.6;color:var(--ink-500);margin:0 0 18px}
+.diff-narrative ul{padding-left:20px;color:var(--ink-700);margin:0 0 24px}
+.diff-narrative li{margin-bottom:8px;font-size:15.5px}
+@media (max-width:960px){
+  .diff-grid{grid-template-columns:1fr;gap:32px}
+  .diff-row{grid-template-columns:1.2fr .8fr .8fr .8fr;padding:14px 16px;font-size:13px}
+}
+
+/* ---------- Testimonial ---------- */
+.testimonial{background:var(--teal-900);color:#fff;position:relative;overflow:hidden}
+.testimonial::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(800px 400px at 90% 10%,rgba(63,165,145,.18),transparent 60%),
+    radial-gradient(600px 300px at 10% 100%,rgba(233,115,56,.10),transparent 60%);
+  pointer-events:none;
+}
+.testimonial .container{position:relative}
+.test-quote{
+  font-family:var(--serif);font-weight:500;font-style:italic;
+  font-size:clamp(24px,3vw,34px);line-height:1.35;letter-spacing:-.01em;
+  color:#fff;margin:0 0 32px;max-width:880px;
+}
+.test-quote::before{content:"“";font-size:60px;color:var(--teal-500);line-height:.4;margin-right:6px;vertical-align:-12px}
+.test-attr{display:flex;align-items:center;gap:18px}
+.test-avatar{
+  width:54px;height:54px;border-radius:50%;
+  background:linear-gradient(135deg,var(--teal-500),var(--teal-300));
+  display:flex;align-items:center;justify-content:center;color:var(--teal-900);
+  font-family:var(--serif);font-weight:700;font-size:20px;
+}
+.test-name{font-weight:600;font-size:16px;color:#fff}
+.test-role{font-size:14px;color:var(--teal-300);margin-top:2px}
+
+/* ---------- Final CTA ---------- */
+.cta-band{background:#fff;padding:96px 0}
+.cta-card{
+  background:linear-gradient(135deg,var(--teal-800) 0%,var(--teal-700) 60%,var(--teal-600) 100%);
+  color:#fff;border-radius:28px;padding:64px 56px;
+  display:grid;grid-template-columns:1.4fr 1fr;gap:48px;align-items:center;
+  position:relative;overflow:hidden;
+  box-shadow:var(--shadow-xl);
+}
+.cta-card::before{
+  content:"";position:absolute;right:-100px;top:-100px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(63,165,145,.4),transparent 70%);
+  pointer-events:none;
+}
+.cta-card::after{
+  content:"";position:absolute;left:-80px;bottom:-80px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(233,115,56,.18),transparent 70%);
+  pointer-events:none;
+}
+.cta-card h2{
+  font-family:var(--serif);font-weight:600;
+  font-size:clamp(28px,3.4vw,42px);line-height:1.15;letter-spacing:-.015em;
+  color:#fff;margin:0 0 14px;position:relative;
+}
+.cta-card p{font-size:17px;color:rgba(255,255,255,.85);margin:0;position:relative;line-height:1.55}
+.cta-actions{display:flex;flex-direction:column;gap:12px;position:relative}
+.cta-actions .btn-primary{background:#fff;color:var(--teal-800);box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.cta-actions .btn-primary:hover{background:var(--teal-50);color:var(--teal-900)}
+.cta-actions .btn-secondary{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:#fff}
+.cta-actions .btn-secondary:hover{border-color:#fff;background:rgba(255,255,255,.08);color:#fff}
+@media (max-width:768px){
+  .cta-card{grid-template-columns:1fr;padding:44px 28px;text-align:center}
+  .cta-actions{align-items:center}
+}
+
+/* ---------- Footer ---------- */
+.footer{background:#0A2A28;color:#9BAAA8;padding:72px 0 36px}
+.footer-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:48px;margin-bottom:56px}
+.footer-brand img{height:42px;width:auto;filter:brightness(0) invert(1);margin-bottom:18px}
+.footer-brand p{font-size:14px;color:#9BAAA8;margin:0 0 22px;line-height:1.55;max-width:300px}
+.footer-social{display:flex;gap:10px}
+.footer-social a{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+  display:flex;align-items:center;justify-content:center;
+  color:#9BAAA8;transition:all .2s;
+}
+.footer-social a:hover{background:var(--teal-600);color:#fff}
+.footer-col h5{
+  color:#fff;font-size:13px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;margin:0 0 18px;
+}
+.footer-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:11px}
+.footer-col a{color:#9BAAA8;font-size:14px;transition:color .2s}
+.footer-col a:hover{color:var(--teal-300)}
+.footer-bot{
+  border-top:1px solid rgba(255,255,255,.08);
+  padding-top:28px;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;
+  font-size:13px;color:#6B7C7A;
+}
+.footer-bot-links{display:flex;gap:24px;flex-wrap:wrap}
+.footer-bot-links a{color:#6B7C7A}
+.footer-bot-links a:hover{color:var(--teal-300)}
+@media (max-width:960px){.footer-grid{grid-template-columns:1fr 1fr;gap:36px}}
+@media (max-width:540px){.footer-grid{grid-template-columns:1fr}.footer-bot{flex-direction:column;text-align:center}}
+
+/* ---------- Demo modal ---------- */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(14,42,40,.55);
+  backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+}
+.modal-bg.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:#fff;border-radius:var(--radius-lg);
+  width:100%;max-width:520px;
+  padding:36px 36px 30px;
+  box-shadow:var(--shadow-xl);position:relative;
+}
+.modal h3{font-family:var(--serif);font-weight:600;font-size:26px;color:var(--ink-900);margin:0 0 8px}
+.modal p{color:var(--ink-500);font-size:15px;margin:0 0 24px}
+.modal-close{
+  position:absolute;top:18px;right:18px;
+  width:32px;height:32px;border-radius:50%;
+  border:none;background:var(--bg-soft);color:var(--ink-500);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover{background:var(--border)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--ink-700);margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;
+  font-family:inherit;font-size:14px;color:var(--ink-900);background:#fff;
+  transition:border-color .15s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  outline:none;border-color:var(--teal-600);box-shadow:0 0 0 3px var(--teal-100);
+}
+.modal .btn-primary{width:100%;justify-content:center;margin-top:6px}
+
+</style>
+</head>
+<body>
+
+<!-- ============== TOP BAR ============== -->
+<header class="topbar">
+  <div class="container topbar-inner">
+    <a class="brand" href="#top">
+      <img src="assets/autoenthra-logo.png" alt="AutoEnthra">
+    </a>
+    <nav class="nav">
+      <a class="nav-item" href="#platform">Platform <svg class="caret" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="nav-item" href="#solutions">Solutions <svg class="caret" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="nav-item" href="#industries">Industries</a>
+      <a class="nav-item" href="#how">How it works</a>
+      <a class="nav-item" href="#resources">Resources</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-primary" href="#" onclick="openModal();return false;">Book a demo</a>
+    </div>
+  </div>
+</header>
+
+<a id="top"></a>
+
+<!-- ============== HERO ============== -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="dot"></span>Agentic Governance & Orchestration Platform</div>
+      <h1 class="hero-title">From scattered AI experiments to <span class="accent">governed agentic operations</span> at enterprise scale.</h1>
+      <p class="hero-sub">AutoEnthra lets non-technical teams provision, govern, and scale AWS Bedrock and multi-cloud agents in minutes — with FinOps, policy-as-code, and human-in-the-loop built in from the first deployment.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">Book a demo
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-secondary btn-lg" href="#platform">Explore the platform</a>
+      </div>
+      <div class="hero-meta">
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> SOC 2 / HIPAA / GxP-ready</span>
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> AWS Bedrock & AgentCore native</span>
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> EU AI Act-aligned</span>
+      </div>
+    </div>
+
+    <div class="hero-art">
+      <div class="hero-card">
+        <div class="hero-card-bar">
+          <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+          <span class="url">app.autoenthra.com / provision</span>
+        </div>
+        <div class="hero-card-body">
+          <div class="cmd-stage-rail">
+            <div class="cmd-stage done"></div>
+            <div class="cmd-stage done"></div>
+            <div class="cmd-stage done"></div>
+            <div class="cmd-stage done"></div>
+            <div class="cmd-stage active"></div>
+            <div class="cmd-stage"></div>
+            <div class="cmd-stage"></div>
+            <div class="cmd-stage"></div>
+            <div class="cmd-stage"></div>
+          </div>
+          <div class="cmd-msg">
+            <div class="cmd-avatar user">SC</div>
+            <div class="cmd-bubble you">I want a <strong>Patient Care Hub</strong> agent that triages prescription, billing, and enrollment questions across our channels.</div>
+          </div>
+          <div class="cmd-msg">
+            <div class="cmd-avatar">AE</div>
+            <div class="cmd-bubble">
+              Got it. I'll set you up as a <strong>Supervisor agent</strong> with three specialists from your library. Connecting <strong>Salesforce Service Cloud</strong>, <strong>SAP</strong>, and <strong>Postgres</strong> via MCP. Approvals will route to clinical SMEs through Step Functions.
+              <div>
+                <span class="cmd-card-pill">PrescriptionSpecialist</span>
+                <span class="cmd-card-pill">BillingSpecialist</span>
+                <span class="cmd-card-pill">EnrollmentSpecialist</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-floating hero-float-1">
+        <div class="hero-float-icon ok">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="hero-float-label">Policy compliance</div>
+          <div class="hero-float-value">98.6%</div>
+        </div>
+      </div>
+      <div class="hero-floating hero-float-2">
+        <div class="hero-float-icon dollar">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M12 6H7.5a2 2 0 100 4h3a2 2 0 110 4H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="hero-float-label">Cost saved / quarter</div>
+          <div class="hero-float-value">$612K</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TRUST BAND ============== -->
+<div class="trustband">
+  <div class="container">
+    <div class="trust-label">Trusted by enterprise teams across regulated industries</div>
+    <div class="trust-logos">
+      <div class="trust-logo">PHARMA·CO</div>
+      <div class="trust-logo">FINSERV</div>
+      <div class="trust-logo">CARE·HEALTH</div>
+      <div class="trust-logo">UNION BANK</div>
+      <div class="trust-logo">MERIDIAN</div>
+      <div class="trust-logo">NORTHWIND</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============== PROBLEM ============== -->
+<section class="problem" id="problem">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">The enterprise AI gap</div>
+      <h2 class="sec-title">Most agentic projects stall <span class="accent">before they reach production.</span></h2>
+      <p class="sec-sub">Pilot velocity is high. Production velocity is not. The gap isn't model quality — it's governance, cost, and trust.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l9 4v5c0 5-4 9-9 10-5-1-9-5-9-10V6l9-4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 11l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Shadow AI is everywhere</h3>
+        <p>Teams stand up agents in isolated notebooks. Security has no inventory, IT has no controls, and the same connector secret lives in twelve repos.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 7h16M3 11h16M3 15h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="15" r="3" stroke="currentColor" stroke-width="1.7"/></svg>
+        </div>
+        <h3>Compliance can't keep up</h3>
+        <p>EU AI Act, HIPAA, GxP, SOC 2 — auditors ask for lineage, redaction, and approval trails that production agents simply don't produce.</p>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M16 7H8.5a2.5 2.5 0 100 5h5a2.5 2.5 0 110 5H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <h3>Costs spiral 10–100×</h3>
+        <p>Multi-agent flows blow past single-shot budgets. Without per-run unit economics and model-tier fallbacks, finance pulls the plug.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== CAPABILITIES ACCORDION ============== -->
+<section id="platform">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">The platform</div>
+      <h2 class="sec-title">One control plane <span class="accent">for every agent in your enterprise.</span></h2>
+      <p class="sec-sub">From conversational provisioning to live human-in-the-loop, AutoEnthra is the layer that makes agentic AI safe to ship — across AWS Bedrock, AgentCore, and any cloud you already run.</p>
+    </div>
+
+    <div class="caps-grid">
+      <div class="cap-list" id="capList">
+
+        <div class="cap-item open" data-cap="0">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">01</span>Conversational Provisioning</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>A 9-stage guided flow turns business intent into a production-ready agent specification. No prompt engineering, no YAML hand-rolling — non-technical owners ship in under an hour.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Use case → Persona → Model → Knowledge → Tools → Guardrails → Memory → Enterprise → Ready</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Live preview chat the moment the spec is complete</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Single-click CloudFormation export</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="1">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">02</span>Multi-Agent Orchestration</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Compose supervisor and specialist agents from a versioned library. Route work, share memory, and recover failures across teams of agents — with full lineage on every hop.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Library-driven collaborator picker</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Fork-from-version with full conversational history preserved</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Supervisor patterns: SUPERVISOR, ROUTER, CONSENSUS</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="2">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">03</span>Policy-as-Code Governance</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>OPA / Cedar policies evaluated at four hook points: publish, invoke, tool-call, and response. Block disallowed models, enforce data residency, redact PII / PHI before it leaves the boundary.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Approved-model registry per tenant and data class</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Real-time PII / PHI detection with deterministic redaction</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Tenant isolation and connector allowlists by data class</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="3">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">04</span>FinOps & Unit Economics</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Every action is logged with token cost, latency, and policy decision. Set per-team budgets, fall back across model tiers when thresholds hit, chargeback to cost centers — and prove ROI.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Per-agent / per-tenant budgets with smart throttling</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Opus → Sonnet → Haiku tiered fallback</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Native tag propagation to AWS Cost Explorer</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="4">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">05</span>Live Human-in-the-Loop</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Agents emit approval requests as first-class events. Step Functions wait-for-token holds the workflow open while the right human approves, denies, or edits — without manual orchestration code.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Pending-approval tray with full reasoning context</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Routed to roles, escalated on SLA breach</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Every decision audited to the lineage table</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="5">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">06</span>AgentCore-Native, Multi-Cloud Ready</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>First-class support for AWS Bedrock AgentCore — Identity, Memory, Observability, Gateway, Built-in Tools — plus an MCP adapter that lets you wrap Azure AI Foundry, OpenAI Assistants, or any REST API as a callable tool.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> AgentCore Identity (federated OAuth) and Memory (semantic + event)</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Gateway turns any API into MCP, instantly</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Active-passive multi-region DR by design</li>
+            </ul>
+          </div></div>
+        </div>
+
+      </div>
+
+      <div class="cap-preview">
+        <div class="cap-preview-card" id="capPreview">
+
+          <!-- Preview 0 — Conversational Provisioning -->
+          <div class="cap-preview-stage active" data-stage="0">
+            <div class="cap-preview-label">⌘ PROVISIONING SESSION</div>
+            <div class="cap-preview-title">Stage 5 of 9 — Tools & Connectors</div>
+            <div class="cap-preview-desc">A natural conversation, instrumented from the first turn.</div>
+            <div class="mock-panel">
+              <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">Salesforce Service Cloud</span><span class="mock-pill green">Connected</span></div>
+              <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">SAP S/4HANA</span><span class="mock-pill green">Connected</span></div>
+              <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">Postgres — patient_records</span><span class="mock-pill amber">Pending KMS</span></div>
+              <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">Slack — clinical-approvals</span><span class="mock-pill green">Connected</span></div>
+            </div>
+            <div class="mock-panel" style="margin-top:14px">
+              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:10px">Stage progression</div>
+              <div class="cmd-stage-rail" style="margin:0">
+                <div class="cmd-stage done"></div><div class="cmd-stage done"></div><div class="cmd-stage done"></div>
+                <div class="cmd-stage done"></div><div class="cmd-stage active"></div>
+                <div class="cmd-stage"></div><div class="cmd-stage"></div><div class="cmd-stage"></div><div class="cmd-stage"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview 1 — Multi-Agent -->
+          <div class="cap-preview-stage" data-stage="1">
+            <div class="cap-preview-label">▣ SUPERVISOR TOPOLOGY</div>
+            <div class="cap-preview-title">PatientCareHub · v3.2</div>
+            <div class="cap-preview-desc">A supervisor composed from three library specialists.</div>
+            <div class="mock-panel">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0">
+                <div style="background:var(--teal-700);color:#fff;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px">PatientCareHub · Supervisor</div>
+                <svg width="240" height="40" viewBox="0 0 240 40"><path d="M120 0v8M120 8L40 32M120 8L120 32M120 8L200 32" stroke="var(--teal-500)" stroke-width="1.5" fill="none"/></svg>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Prescription</div>
+                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Billing</div>
+                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Enrollment</div>
+                </div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:14px">
+              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Library version trail</span><span style="font-family:'SF Mono',monospace;font-size:12px;color:var(--teal-700)">v1 → v2 → v3.2</span></div>
+              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Forked from</span><span style="font-family:'SF Mono',monospace;font-size:12px;color:var(--ink-700)">CareTriage · v2.1</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 2 — Policy as Code -->
+          <div class="cap-preview-stage" data-stage="2">
+            <div class="cap-preview-label">⛨ POLICY DECISION</div>
+            <div class="cap-preview-title">Response intercepted</div>
+            <div class="cap-preview-desc">PII detected and redacted before egress. Audit row written.</div>
+            <div class="mock-panel">
+              <div style="font-size:13px;color:var(--ink-700);line-height:1.55">"Patient <span style="background:#FBE0DD;color:#9C2B23;padding:1px 6px;border-radius:4px;font-weight:600">[REDACTED-NAME]</span> with MRN <span style="background:#FBE0DD;color:#9C2B23;padding:1px 6px;border-radius:4px;font-weight:600">[REDACTED-ID]</span> is eligible for refill on <span style="color:var(--ink-900);font-weight:600">2026-05-22</span>."</div>
+            </div>
+            <div class="mock-panel" style="margin-top:14px">
+              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">phi-redaction.rego</span></span><span class="mock-pill green">PASS</span></div>
+              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">model-allowlist.rego</span></span><span class="mock-pill green">PASS</span></div>
+              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">data-residency.rego</span></span><span class="mock-pill green">EU-WEST-1</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 3 — FinOps -->
+          <div class="cap-preview-stage" data-stage="3">
+            <div class="cap-preview-label">$ FINOPS COMMAND CENTER</div>
+            <div class="cap-preview-title">May 2026 · this month</div>
+            <div class="cap-preview-desc">Unit economics for every agent run.</div>
+            <div class="mock-kpi">
+              <div class="mock-kpi-card"><div class="mock-kpi-label">Spend</div><div class="mock-kpi-value">$48.2K</div><div class="mock-kpi-delta">↓ 22% vs Apr</div></div>
+              <div class="mock-kpi-card"><div class="mock-kpi-label">Saved</div><div class="mock-kpi-value">$612K</div><div class="mock-kpi-delta">↑ Tier-fallback</div></div>
+            </div>
+            <div class="mock-panel">
+              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:8px">Daily token spend</div>
+              <div class="mock-chart">
+                <div class="mock-chart-bar" style="height:30%"></div>
+                <div class="mock-chart-bar" style="height:55%"></div>
+                <div class="mock-chart-bar" style="height:42%"></div>
+                <div class="mock-chart-bar" style="height:68%"></div>
+                <div class="mock-chart-bar" style="height:80%"></div>
+                <div class="mock-chart-bar" style="height:62%"></div>
+                <div class="mock-chart-bar" style="height:48%"></div>
+                <div class="mock-chart-bar" style="height:35%"></div>
+                <div class="mock-chart-bar" style="height:50%"></div>
+                <div class="mock-chart-bar" style="height:72%;opacity:1"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview 4 — HITL -->
+          <div class="cap-preview-stage" data-stage="4">
+            <div class="cap-preview-label">⏱ APPROVAL QUEUE · 3 PENDING</div>
+            <div class="cap-preview-title">Awaiting clinical reviewer</div>
+            <div class="cap-preview-desc">Step Functions held the workflow open. SLA: 12 minutes remaining.</div>
+            <div class="mock-panel">
+              <div style="font-size:13px;font-weight:600;color:var(--ink-900);margin-bottom:6px">Refill request — controlled substance</div>
+              <div style="font-size:12.5px;color:var(--ink-500);line-height:1.5;margin-bottom:12px">Agent recommends 30-day refill. Pattern matches <span style="color:var(--teal-700);font-weight:600">PolicyRule-Sched-IV</span> requiring SME sign-off.</div>
+              <div style="display:flex;gap:8px">
+                <div style="background:var(--teal-700);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Approve</div>
+                <div style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink-700);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Deny</div>
+                <div style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink-700);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Edit & approve</div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">2 more in queue</span><span class="mock-pill amber">SLA 23m</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 5 — Multi-Cloud -->
+          <div class="cap-preview-stage" data-stage="5">
+            <div class="cap-preview-label">⌬ AGENTCORE + MULTI-CLOUD</div>
+            <div class="cap-preview-title">One control plane, every runtime</div>
+            <div class="cap-preview-desc">Bedrock primary. Azure & OpenAI as MCP-wrapped tools.</div>
+            <div class="mock-panel">
+              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:10px">Connected runtimes</div>
+              <div class="mock-conn-grid">
+                <div class="mock-conn bedrock">Bedrock<br>AgentCore</div>
+                <div class="mock-conn azure">Azure AI<br>Foundry</div>
+                <div class="mock-conn aws">OpenAI<br>Assistants</div>
+                <div class="mock-conn">Copilot<br>Studio</div>
+                <div class="mock-conn">Vertex AI<br>Agents</div>
+                <div class="mock-conn">Custom MCP</div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">DR posture</span><span class="mock-pill green">Active-Passive · 2 regions</span></div>
+              <div class="mock-row"><span style="font-size:13px">RTO / RPO</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">15 min / 5 min</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== METRICS BAND ============== -->
+<section class="metrics">
+  <div class="container">
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-value">9-stage</div><div class="metric-label">Guided provisioning, no prompt engineering</div></div>
+      <div class="metric"><div class="metric-value">$2.4M</div><div class="metric-label">Avg annual savings vs build-from-scratch</div></div>
+      <div class="metric"><div class="metric-value">98.6%</div><div class="metric-label">Policy compliance across audited deployments</div></div>
+      <div class="metric"><div class="metric-value">&lt; 1 hr</div><div class="metric-label">From business intent to deployable agent</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== INDUSTRIES ============== -->
+<section class="industries" id="industries">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Industries we serve</div>
+      <h2 class="sec-title">Built for the regulated enterprise — <span class="accent">tuned to your vertical.</span></h2>
+      <p class="sec-sub">Pre-built agent packs ship with the right guardrails, knowledge bases, eval datasets, and HITL policies for your industry's compliance posture.</p>
+    </div>
+
+    <div class="ind-grid">
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M13 4v18M4 13h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="13" cy="13" r="10" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Life Sciences & Healthcare</span>
+          <h3>Patient Services, PV & Medical Information</h3>
+          <p>Triage refills, draft adverse-event narratives, answer medical inquiries — with GxP-aligned audit, PHI redaction, and clinical SME approvals built in.</p>
+          <div class="ind-uses">
+            <span class="ind-use">Patient Care Hub</span>
+            <span class="ind-use">PV Triage</span>
+            <span class="ind-use">Medical Information</span>
+            <span class="ind-use">Clinical Ops Q&A</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 22h20M5 22V11M9 22V11M13 22V11M17 22V11M21 22V11M2 11l11-7 11 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Financial Services</span>
+          <h3>KYC, Risk Ops & Audit Modernization</h3>
+          <p>Automate KYC narrative drafting, exception triage, and audit workpaper generation with policy-as-code at every step and full SOX-grade lineage.</p>
+          <div class="ind-uses">
+            <span class="ind-use">KYC Drafter</span>
+            <span class="ind-use">Exception Triage</span>
+            <span class="ind-use">Audit Workpaper</span>
+            <span class="ind-use">AML Narrative</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><rect x="3" y="3" width="20" height="20" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 13h10M8 9h10M8 17h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Public Sector</span>
+          <h3>Citizen Services & Case Triage</h3>
+          <p>Route citizen inquiries, draft response letters, and surface case context — under data-sovereignty enforcement and full transparency obligations.</p>
+          <div class="ind-uses">
+            <span class="ind-use">Inquiry Router</span>
+            <span class="ind-use">Letter Drafter</span>
+            <span class="ind-use">Case Context</span>
+            <span class="ind-use">FOI Triage</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 21h20M6 21v-9M10 21v-9M14 21v-9M18 21v-9M5 12L13 5l8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Manufacturing & Energy</span>
+          <h3>Field Service & Operations Copilots</h3>
+          <p>Equip technicians with agentic copilots that reason over manuals, work orders, and IoT telemetry — with safety-critical approvals on every recommended action.</p>
+          <div class="ind-uses">
+            <span class="ind-use">Tech Copilot</span>
+            <span class="ind-use">Work-Order Assist</span>
+            <span class="ind-use">Outage Triage</span>
+            <span class="ind-use">Safety Reviewer</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============== HOW IT WORKS ============== -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">How it works</div>
+      <h2 class="sec-title">Four steps from business intent <span class="accent">to governed production.</span></h2>
+    </div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <h4>Describe</h4>
+        <p>Tell AutoEnthra what the agent should do — in plain language. The 9-stage flow extracts use case, persona, and tools.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <h4>Configure</h4>
+        <p>Wire connectors, pick collaborators from your library, and choose AgentCore primitives — Identity, Memory, Gateway, Built-in Tools.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <h4>Govern</h4>
+        <p>Apply policy-as-code, set FinOps budgets, define HITL gates, attach the eval dataset — all before the first deployment.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-num">04</div>
+        <h4>Deploy</h4>
+        <p>Generate a layered CloudFormation stack and ship to AWS in one click. Monitor cost, lineage, and policy decisions from day one.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== DIFFERENTIATORS ============== -->
+<section id="solutions">
+  <div class="container">
+    <div class="diff-grid">
+      <div class="diff-narrative">
+        <div class="sec-eyebrow" style="text-align:left;margin-bottom:14px">Why AutoEnthra</div>
+        <h2>The control plane <span class="accent">your AWS investment was missing.</span></h2>
+        <p>Other platforms make you choose: deep AWS Bedrock features, or generic multi-cloud reach, or governance-first audit. AutoEnthra delivers all three — without forcing a stack rewrite or vendor lock-in.</p>
+        <ul>
+          <li>Deep Bedrock + AgentCore native integration, not a thin wrapper</li>
+          <li>Policy-as-code at four hook points, not a single output filter</li>
+          <li>FinOps unit economics on every run, not aggregate billing dashboards</li>
+          <li>MCP adapter onboards Azure / OpenAI agents in days, not quarters</li>
+        </ul>
+        <a class="btn btn-primary" href="#" onclick="openModal();return false;">See it on your data</a>
+      </div>
+
+      <div class="diff-table">
+        <div class="diff-row head">
+          <div class="col-feature">Capability</div>
+          <div class="col-ae">AutoEnthra</div>
+          <div class="col-other">Build-in-house</div>
+          <div class="col-other">Generic frameworks</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Conversational provisioning</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">—</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Multi-agent supervisor</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">Months</div>
+          <div class="col-other">Partial</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Policy-as-code at runtime</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">DIY</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Per-run unit economics</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">Aggregate</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">HITL via Step Functions</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">DIY</div>
+          <div class="col-other">DIY</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Multi-cloud via MCP</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">DIY</div>
+          <div class="col-other">Partial</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== TESTIMONIAL ============== -->
+<section class="testimonial">
+  <div class="container">
+    <p class="test-quote">AutoEnthra is the first platform that made our compliance team a partner in agentic AI rather than a blocker. We went from a six-month approval cycle to a two-week deployment cadence — without giving up a single audit control.</p>
+    <div class="test-attr">
+      <div class="test-avatar">VR</div>
+      <div>
+        <div class="test-name">Vidya Ramesh</div>
+        <div class="test-role">VP Enterprise AI · Fortune 100 Life Sciences</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FINAL CTA ============== -->
+<section class="cta-band" id="resources">
+  <div class="container">
+    <div class="cta-card">
+      <div>
+        <h2>Ready to put agentic intelligence to work — without the governance debt?</h2>
+        <p>Book a 30-minute working session with an AutoEnthra architect. We'll map your highest-value use case to a deployable agent in real time.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">Book a demo
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a class="btn btn-secondary btn-lg" href="mailto:hello@autoenthra.com">Talk to an architect</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="assets/autoenthra-logo.png" alt="AutoEnthra">
+        <p>The agentic governance and orchestration platform for the regulated enterprise. Built for AWS Bedrock and AgentCore, extensible to any cloud.</p>
+        <div class="footer-social">
+          <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5h2v9H2V5zm1-3a1 1 0 100 2 1 1 0 000-2zm3 3h2v1.3c.4-.7 1.3-1.5 2.7-1.5 2.9 0 3.3 1.9 3.3 4.4V14h-2V9.4c0-1.1 0-2.6-1.5-2.6-1.6 0-1.8 1.2-1.8 2.5V14H6V5z"/></svg></a>
+          <a href="#" aria-label="X"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M12.2 2h2L9.7 7.1 15 14h-4.2L7.5 9.6 3.7 14H1.6l4.8-5.5L1 2h4.3l3 4 3.9-4z"/></svg></a>
+          <a href="#" aria-label="GitHub"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 00-2.2 13.6c.4.1.5-.1.5-.4v-1.5c-2 .4-2.4-.8-2.4-.8-.3-.8-.8-1.1-.8-1.1-.7-.4 0-.4 0-.4.7 0 1.1.7 1.1.7.6 1.1 1.7.8 2.1.6.1-.5.3-.8.5-1-1.6-.2-3.3-.8-3.3-3.6 0-.8.3-1.4.7-1.9-.1-.2-.3-.9.1-2 0 0 .6-.2 2 .7.6-.2 1.2-.2 1.8-.2.6 0 1.2.1 1.8.2 1.4-.9 2-.7 2-.7.4 1.1.2 1.8.1 2 .5.5.7 1.1.7 1.9 0 2.8-1.7 3.4-3.3 3.6.3.2.5.6.5 1.3v1.9c0 .2.1.4.5.4A7 7 0 008 1z"/></svg></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Platform</h5>
+        <ul>
+          <li><a href="#platform">Conversational provisioning</a></li>
+          <li><a href="#platform">Multi-agent orchestration</a></li>
+          <li><a href="#platform">Policy-as-code</a></li>
+          <li><a href="#platform">FinOps & unit economics</a></li>
+          <li><a href="#platform">AgentCore + multi-cloud</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Industries</h5>
+        <ul>
+          <li><a href="#industries">Life Sciences & Healthcare</a></li>
+          <li><a href="#industries">Financial Services</a></li>
+          <li><a href="#industries">Public Sector</a></li>
+          <li><a href="#industries">Manufacturing & Energy</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Reference architectures</a></li>
+          <li><a href="#">Customer stories</a></li>
+          <li><a href="#">Trust center</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Partners</a></li>
+          <li><a href="mailto:hello@autoenthra.com">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bot">
+      <div>© 2026 AutoEnthra Technologies, Inc. All rights reserved.</div>
+      <div class="footer-bot-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Security</a>
+        <a href="#">Status</a>
+        <a href="#">DPA</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ============== DEMO MODAL ============== -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <h3>Book a working demo</h3>
+    <p>Tell us about your highest-value agent use case. An AutoEnthra architect will reach out within one business day.</p>
+    <form onsubmit="submitDemo(event)">
+      <div class="field">
+        <label>Work email</label>
+        <input type="email" required placeholder="you@enterprise.com">
+      </div>
+      <div class="field">
+        <label>Company</label>
+        <input type="text" required placeholder="Acme Corp">
+      </div>
+      <div class="field">
+        <label>Industry</label>
+        <select required>
+          <option value="">Select industry</option>
+          <option>Life Sciences & Healthcare</option>
+          <option>Financial Services</option>
+          <option>Public Sector</option>
+          <option>Manufacturing & Energy</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>What would you like to automate?</label>
+        <textarea rows="3" placeholder="Briefly describe the use case…"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Request demo</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// Accordion
+const items = document.querySelectorAll('.cap-item');
+const stages = document.querySelectorAll('.cap-preview-stage');
+items.forEach(it => {
+  it.querySelector('.cap-item-head').addEventListener('click', () => {
+    const idx = it.dataset.cap;
+    items.forEach(x => x.classList.remove('open'));
+    it.classList.add('open');
+    stages.forEach(s => s.classList.toggle('active', s.dataset.stage === idx));
+  });
+});
+
+// Modal
+function openModal(){ document.getElementById('modal').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeModal(){ document.getElementById('modal').classList.remove('open'); document.body.style.overflow = ''; }
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function submitDemo(e){
+  e.preventDefault();
+  const m = document.querySelector('.modal');
+  m.innerHTML = '<div style="text-align:center;padding:24px 12px"><div style="width:60px;height:60px;border-radius:50%;background:#D6ECE7;color:#155F5A;display:flex;align-items:center;justify-content:center;margin:0 auto 18px"><svg width="30" height="30" viewBox="0 0 30 30" fill="none"><path d="M6 15l6 6 12-13" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3 style="font-family:Newsreader,serif;font-weight:600;font-size:24px;color:#0E1A1A;margin:0 0 8px">Thank you</h3><p style="color:#475856;margin:0 0 22px">We have received your request and will be in touch within one business day.</p><button class="btn btn-primary" onclick="closeModal();setTimeout(()=>location.reload(),300)">Close</button></div>';
+}
+</script>
+</body>
+</html>
