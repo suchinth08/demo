@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>AutoEnthra — Agentic Governance & Orchestration for the Enterprise</title>
-<meta name="description" content="AutoEnthra is the agentic governance and orchestration platform for regulated enterprises. Provision AWS Bedrock and multi-cloud agents in minutes — with FinOps, policy-as-code, and human-in-the-loop built in.">
+<title>AutoEnthra agentOS — The Operating System for Agentic AI</title>
+<meta name="description" content="AutoEnthra agentOS is the operating system for agentic AI: one control plane for FinOps, governance, identity, memory, and observability — across every agent runtime, every cloud, every business unit. Turn agent sprawl into a compounding enterprise capability.">
 <link rel="icon" type="image/png" href="assets/favicon.png">
 <link rel="apple-touch-icon" href="assets/favicon.png">
 <link rel="shortcut icon" type="image/png" href="assets/favicon.png">
@@ -66,8 +66,8 @@ img{max-width:100%;display:block}
 /* ---------- Layout ---------- */
 .container{max-width:1240px;margin:0 auto;padding:0 32px}
 .container-narrow{max-width:980px;margin:0 auto;padding:0 32px}
-section{padding:96px 0}
-@media (max-width:768px){section{padding:64px 0}.container,.container-narrow{padding:0 20px}}
+section{padding:72px 0}
+@media (max-width:768px){section{padding:48px 0}.container,.container-narrow{padding:0 20px}}
 
 /* ---------- Top bar ---------- */
 .topbar{
@@ -89,8 +89,22 @@ section{padding:96px 0}
   margin-right:auto;margin-left:0;
 }
 .brand img{height:56px;width:auto;object-fit:contain;display:block}
+.brand-os{
+  margin-left:10px;padding:5px 11px;
+  border-left:1.5px solid var(--border);
+  font-family:var(--bold-sans);font-weight:800;letter-spacing:.01em;
+  color:var(--teal-800);font-size:18px;line-height:1;
+  display:flex;align-items:center;
+}
+.brand-os::before{
+  content:"";display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--teal-500);margin-right:8px;
+  box-shadow:0 0 0 3px var(--teal-100);
+}
 @media (max-width:600px){
   .brand img{height:42px}
+  .brand-os{font-size:14px;padding:4px 8px;margin-left:6px}
+  .brand-os::before{width:5px;height:5px;margin-right:6px}
 }
 .nav{display:flex;align-items:center;gap:6px;flex:1;justify-content:center}
 .nav-item{
@@ -126,14 +140,14 @@ section{padding:96px 0}
 
 /* ---------- Hero ---------- */
 .hero{
-  padding:96px 0 96px;
+  padding:32px 0 72px;
   background:
     radial-gradient(1200px 600px at 80% -10%,rgba(63,165,145,.10),transparent 60%),
     radial-gradient(900px 500px at 0% 30%,rgba(233,115,56,.04),transparent 55%),
     var(--bg);
   position:relative;overflow:visible;
 }
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:center}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:64px;align-items:start}
 .eyebrow{
   display:inline-flex;align-items:center;gap:8px;
   background:var(--teal-50);
@@ -225,8 +239,8 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   border-radius:14px;box-shadow:var(--shadow-lg);
   padding:14px 18px;display:flex;align-items:center;gap:12px;
 }
-.hero-float-1{top:-56px;right:-8px;animation:float1 6s ease-in-out infinite;z-index:3}
-.hero-float-2{bottom:-24px;left:-32px;animation:float2 7s ease-in-out infinite;z-index:3}
+.hero-float-1{top:-28px;right:-8px;animation:float1 6s ease-in-out infinite;z-index:3}
+.hero-float-2{bottom:-20px;left:-32px;animation:float2 7s ease-in-out infinite;z-index:3}
 .hero-float-icon{
   width:36px;height:36px;border-radius:10px;
   display:flex;align-items:center;justify-content:center;
@@ -246,7 +260,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 
 /* ---------- Trust band ---------- */
 .trustband{
-  padding:42px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  padding:32px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
   background:#fff;
 }
 .trust-label{
@@ -255,18 +269,38 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   color:var(--ink-400);margin-bottom:24px;
 }
 .trust-logos{
-  display:grid;grid-template-columns:repeat(6,1fr);gap:32px;align-items:center;
-  opacity:.7;
+  display:grid;grid-template-columns:repeat(6,1fr);gap:40px;align-items:center;
 }
 .trust-logo{
-  font-family:var(--serif);font-weight:600;font-size:18px;
-  color:var(--ink-300);text-align:center;
-  letter-spacing:.02em;
+  display:flex;align-items:center;justify-content:center;
+  height:64px;
 }
-@media (max-width:768px){.trust-logos{grid-template-columns:repeat(3,1fr);gap:24px}}
+.trust-logo img{
+  max-height:38px;max-width:100%;width:auto;object-fit:contain;
+}
+.trust-logo:nth-child(1) img,
+.trust-logo:nth-child(2) img,
+.trust-logo:nth-child(3) img{
+  max-height:58px;
+}
+.trust-disclaimer{
+  margin-top:22px;text-align:center;
+  font-size:10px;color:var(--ink-300);line-height:1.5;
+  max-width:760px;margin-left:auto;margin-right:auto;
+  letter-spacing:.01em;
+}
+@media (max-width:768px){
+  .trust-logos{grid-template-columns:repeat(3,1fr);gap:28px}
+  .trust-logo{height:54px}
+  .trust-logo img{max-height:32px}
+  .trust-logo:nth-child(1) img,
+  .trust-logo:nth-child(2) img,
+  .trust-logo:nth-child(3) img{max-height:48px}
+  .trust-disclaimer{font-size:9.5px;margin-top:18px;padding:0 12px}
+}
 
 /* ---------- Section headers ---------- */
-.sec-head{text-align:center;max-width:740px;margin:0 auto 56px}
+.sec-head{text-align:center;max-width:740px;margin:0 auto 40px}
 .sec-eyebrow{
   font-family:var(--bold-sans);
   font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;
@@ -301,6 +335,148 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 }
 .problem-card p{margin:0;color:var(--ink-500);font-size:15px;line-height:1.55}
 @media (max-width:768px){.problem-grid{grid-template-columns:1fr}}
+
+/* ---------- CEO Operating Picture ---------- */
+.picture{background:#fff;position:relative;overflow:hidden}
+.picture::before{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(900px 500px at 90% 0%,rgba(63,165,145,.08),transparent 60%),
+    radial-gradient(700px 400px at 0% 100%,rgba(233,115,56,.05),transparent 60%);
+  pointer-events:none;
+}
+.picture .container{position:relative}
+.pic-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.pic-card{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:28px 26px;transition:all .25s ease;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;gap:10px;
+}
+.pic-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--border-strong)}
+.pic-card::before{
+  content:"";position:absolute;left:0;top:0;height:3px;width:48px;
+  background:linear-gradient(90deg,var(--teal-700),var(--teal-500));
+  border-radius:0 0 3px 0;
+}
+.pic-eyebrow{
+  font-family:var(--bold-sans);font-size:11px;font-weight:800;
+  color:var(--teal-700);text-transform:uppercase;letter-spacing:.12em;
+  margin-top:4px;
+}
+.pic-headline{
+  font-family:var(--serif);font-weight:600;
+  font-size:34px;line-height:1.05;letter-spacing:-.02em;
+  color:var(--ink-900);
+}
+.pic-headline .delta{
+  font-family:var(--bold-sans);font-size:14px;font-weight:700;color:var(--teal-700);
+  margin-left:8px;vertical-align:middle;
+}
+.pic-headline .delta.warn{color:var(--orange-700)}
+.pic-title{
+  font-family:var(--bold-sans);font-weight:800;font-size:17px;
+  color:var(--ink-900);letter-spacing:-.005em;
+  margin-top:4px;
+}
+.pic-desc{font-size:13.5px;color:var(--ink-500);line-height:1.55;margin:0}
+.pic-meter{
+  height:6px;background:var(--bg-soft);border-radius:3px;overflow:hidden;margin-top:8px;
+}
+.pic-meter-fill{height:100%;background:linear-gradient(90deg,var(--teal-600),var(--teal-500));border-radius:3px}
+@media (max-width:1024px){.pic-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:540px){.pic-grid{grid-template-columns:1fr}}
+
+/* ---------- Code ↔ Agent plane ---------- */
+.plane{background:var(--bg-warm);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.plane-grid{display:grid;grid-template-columns:1fr 1.1fr;gap:56px;align-items:center}
+.plane-copy h2{
+  font-family:var(--serif);font-weight:600;font-size:clamp(30px,3.6vw,42px);
+  line-height:1.15;letter-spacing:-.015em;color:var(--ink-900);margin:0 0 18px;
+}
+.plane-copy h2 .accent{color:var(--teal-700);font-style:italic;font-weight:500}
+.plane-copy p{font-size:16.5px;color:var(--ink-500);line-height:1.6;margin:0 0 20px}
+.plane-points{list-style:none;margin:0 0 28px;padding:0;display:flex;flex-direction:column;gap:14px}
+.plane-points li{
+  display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start;
+  font-size:15px;line-height:1.5;color:var(--ink-700);
+}
+.plane-points li strong{color:var(--ink-900);font-weight:700}
+.plane-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--teal-100);color:var(--teal-800);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.plane-diagram{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:32px;box-shadow:var(--shadow-md);position:relative;
+}
+.plane-row{
+  display:grid;grid-template-columns:1fr auto 1fr;gap:18px;align-items:center;
+  padding:14px 0;
+}
+.plane-row + .plane-row{border-top:1px dashed var(--border)}
+.plane-box{
+  background:var(--bg-soft);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  font-family:var(--bold-sans);font-weight:700;font-size:13.5px;
+  color:var(--ink-900);text-align:center;
+}
+.plane-box.code{background:#FFF4E5;color:#7A4400;border-color:#F4D7AC}
+.plane-box.agent{background:var(--teal-50);color:var(--teal-800);border-color:var(--teal-100)}
+.plane-arrow{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--teal-600);font-size:18px;
+}
+.plane-label{
+  font-size:11px;color:var(--ink-400);text-align:center;
+  text-transform:uppercase;letter-spacing:.08em;font-weight:700;
+  margin-top:2px;
+}
+@media (max-width:960px){
+  .plane-grid{grid-template-columns:1fr;gap:36px}
+}
+
+/* ---------- Scale Model (Core / Packs / Verticals) ---------- */
+.scale{background:#fff}
+.scale-stack{
+  display:flex;flex-direction:column;gap:18px;max-width:1080px;margin:0 auto;
+}
+.scale-layer{
+  background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:28px 32px;display:grid;grid-template-columns:220px 1fr;gap:32px;align-items:center;
+  transition:all .25s ease;position:relative;overflow:hidden;
+}
+.scale-layer:hover{box-shadow:var(--shadow-md);border-color:var(--border-strong)}
+.scale-layer.vertical{background:linear-gradient(135deg,var(--teal-50),#fff)}
+.scale-layer.domain{background:var(--bg-warm)}
+.scale-layer.core{background:linear-gradient(135deg,var(--teal-800),var(--teal-700));color:#fff;border-color:var(--teal-700)}
+.scale-layer.core .scale-name,.scale-layer.core .scale-desc{color:#fff}
+.scale-layer.core .scale-tag{background:rgba(255,255,255,.16);color:#fff;border-color:rgba(255,255,255,.2)}
+.scale-meta{display:flex;flex-direction:column;gap:8px}
+.scale-tier{
+  font-family:var(--bold-sans);font-size:11.5px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.14em;color:var(--teal-700);
+}
+.scale-layer.core .scale-tier{color:var(--teal-300)}
+.scale-layer.domain .scale-tier{color:var(--orange-700)}
+.scale-name{
+  font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.1;
+  color:var(--ink-900);letter-spacing:-.012em;
+}
+.scale-desc{font-size:13.5px;color:var(--ink-500);line-height:1.5;margin-top:2px}
+.scale-tags{display:flex;flex-wrap:wrap;gap:8px}
+.scale-tag{
+  background:#fff;border:1px solid var(--border);
+  padding:7px 13px;border-radius:999px;
+  font-size:12.5px;font-weight:600;color:var(--ink-700);
+  font-family:var(--bold-sans);
+}
+.scale-arrow{
+  display:flex;justify-content:center;color:var(--teal-300);margin:-4px 0;
+}
+@media (max-width:768px){
+  .scale-layer{grid-template-columns:1fr;gap:14px;padding:24px}
+}
 
 /* ---------- Capabilities accordion (Refill Health style) ---------- */
 .caps-grid{
@@ -449,7 +625,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 }
 
 /* ---------- Metrics band ---------- */
-.metrics{background:linear-gradient(180deg,#fff,var(--teal-50));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:64px 0}
+.metrics{background:linear-gradient(180deg,#fff,var(--teal-50));border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:48px 0}
 .metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:32px}
 .metric{text-align:center}
 .metric-value{
@@ -591,7 +767,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 .test-role{font-size:14px;color:var(--teal-300);margin-top:2px}
 
 /* ---------- Final CTA ---------- */
-.cta-band{background:#fff;padding:96px 0}
+.cta-band{background:#fff;padding:72px 0}
 .cta-card{
   background:linear-gradient(135deg,var(--teal-800) 0%,var(--teal-700) 60%,var(--teal-600) 100%);
   color:#fff;border-radius:28px;padding:64px 56px;
@@ -628,8 +804,8 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 }
 
 /* ---------- Footer ---------- */
-.footer{background:#0A2A28;color:#9BAAA8;padding:72px 0 36px}
-.footer-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:48px;margin-bottom:56px}
+.footer{background:#0A2A28;color:#9BAAA8;padding:56px 0 32px}
+.footer-grid{display:grid;grid-template-columns:1.4fr repeat(4,1fr);gap:40px;margin-bottom:40px}
 .footer-brand img{height:42px;width:auto;filter:brightness(0) invert(1);margin-bottom:18px}
 .footer-brand p{font-size:14px;color:#9BAAA8;margin:0 0 22px;line-height:1.55;max-width:300px}
 .footer-social{display:flex;gap:10px}
@@ -704,13 +880,15 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   <div class="container topbar-inner">
     <a class="brand" href="#top">
       <img src="assets/autoenthra-logo.png" alt="AutoEnthra">
+      <span class="brand-os">agentOS</span>
     </a>
     <nav class="nav">
-      <a class="nav-item" href="#platform">Platform <svg class="caret" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
-      <a class="nav-item" href="#solutions">Solutions <svg class="caret" viewBox="0 0 10 10"><path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+      <a class="nav-item" href="#why">The opportunity</a>
+      <a class="nav-item" href="#picture">Business value</a>
+      <a class="nav-item" href="#platform">Platform</a>
+      <a class="nav-item" href="#plane">Code ↔ Agent</a>
+      <a class="nav-item" href="#scale">Scale</a>
       <a class="nav-item" href="#industries">Industries</a>
-      <a class="nav-item" href="#how">How it works</a>
-      <a class="nav-item" href="#resources">Resources</a>
     </nav>
     <div class="nav-actions">
       <a class="btn btn-primary" href="#" onclick="openModal();return false;">Book a demo</a>
@@ -724,19 +902,19 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 <section class="hero">
   <div class="container hero-grid">
     <div class="hero-copy">
-      <div class="eyebrow"><span class="dot"></span>Agentic Governance & Orchestration Platform</div>
-      <h1 class="hero-title">From scattered AI experiments to <span class="accent">governed agentic operations</span> at enterprise scale.</h1>
-      <p class="hero-sub">AutoEnthra lets non-technical teams provision, govern, and scale AWS Bedrock and multi-cloud agents in minutes — with FinOps, policy-as-code, and human-in-the-loop built in from the first deployment.</p>
+      <div class="eyebrow"><span class="dot"></span>agentOS · The Operating System for Agentic AI</div>
+      <h1 class="hero-title">One operating system for <span class="accent">every agent.</span> Every cloud. Every business outcome.</h1>
+      <p class="hero-sub"><strong>AutoEnthra agentOS</strong> is the unified control plane for FinOps, governance, identity, memory, evals, and observability — across Bedrock, Foundry, Vertex, Copilot Studio, and any custom runtime. Ten platform capabilities, one substrate, real business value: faster delivery, lower cost per outcome, audit-ready by default.</p>
       <div class="hero-cta">
-        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">Book a demo
+        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">See agentOS in action
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-        <a class="btn btn-secondary btn-lg" href="#platform">Explore the platform</a>
+        <a class="btn btn-secondary btn-lg" href="#platform">Explore the 10 capabilities</a>
       </div>
       <div class="hero-meta">
-        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> SOC 2 / HIPAA / GxP-ready</span>
-        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> AWS Bedrock & AgentCore native</span>
-        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> EU AI Act-aligned</span>
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> AI P&amp;L per agent &amp; BU</span>
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> EU AI Act · SOX · HIPAA · DORA · ISO 42001</span>
+        <span class="hero-meta-item"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Runtime-agnostic · MCP-native</span>
       </div>
     </div>
 
@@ -744,7 +922,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
       <div class="hero-card">
         <div class="hero-card-bar">
           <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-          <span class="url">app.autoenthra.com / provision</span>
+          <span class="url">app.autoenthra.com / agentos / provision</span>
         </div>
         <div class="hero-card-body">
           <div class="cmd-stage-rail">
@@ -760,16 +938,16 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
           </div>
           <div class="cmd-msg">
             <div class="cmd-avatar user">SC</div>
-            <div class="cmd-bubble you">I want a <strong>Patient Care Hub</strong> agent that triages prescription, billing, and enrollment questions across our channels.</div>
+            <div class="cmd-bubble you">Provision a <strong>Claims Resolution agent</strong>, route through fraud scoring, hold high-value claims for review, and report unit cost per resolved claim.</div>
           </div>
           <div class="cmd-msg">
             <div class="cmd-avatar">AE</div>
             <div class="cmd-bubble">
-              Got it. I'll set you up as a <strong>Supervisor agent</strong> with three specialists from your library. Connecting <strong>Salesforce Service Cloud</strong>, <strong>SAP</strong>, and <strong>Postgres</strong> via MCP. Approvals will route to clinical SMEs through Step Functions.
+              Provisioned <strong>ClaimsResolver v1</strong> on Bedrock with FraudScore (XGBoost) and SAP claims API as MCP tools. HITL gate on claims &gt; $25K via Step Functions. Live unit-economics dashboard ready. Expected <strong>$0.18 / resolved claim</strong>.
               <div>
-                <span class="cmd-card-pill">PrescriptionSpecialist</span>
-                <span class="cmd-card-pill">BillingSpecialist</span>
-                <span class="cmd-card-pill">EnrollmentSpecialist</span>
+                <span class="cmd-card-pill">Hybrid orchestration</span>
+                <span class="cmd-card-pill">FinOps</span>
+                <span class="cmd-card-pill">HITL</span>
               </div>
             </div>
           </div>
@@ -780,8 +958,8 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>
-          <div class="hero-float-label">Policy compliance</div>
-          <div class="hero-float-value">98.6%</div>
+          <div class="hero-float-label">Audit-ready agents</div>
+          <div class="hero-float-value">100%</div>
         </div>
       </div>
       <div class="hero-floating hero-float-2">
@@ -789,8 +967,8 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 3v12M12 6H7.5a2 2 0 100 4h3a2 2 0 110 4H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>
-          <div class="hero-float-label">Cost saved / quarter</div>
-          <div class="hero-float-value">$612K</div>
+          <div class="hero-float-label">Cost per outcome</div>
+          <div class="hero-float-value">↓ 64%</div>
         </div>
       </div>
     </div>
@@ -800,48 +978,95 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 <!-- ============== TRUST BAND ============== -->
 <div class="trustband">
   <div class="container">
-    <div class="trust-label">Trusted by enterprise teams across regulated industries</div>
+    <div class="trust-label">The operating system powering enterprise agentic AI programs</div>
     <div class="trust-logos">
-      <div class="trust-logo">PHARMA·CO</div>
-      <div class="trust-logo">FINSERV</div>
-      <div class="trust-logo">CARE·HEALTH</div>
-      <div class="trust-logo">UNION BANK</div>
-      <div class="trust-logo">MERIDIAN</div>
-      <div class="trust-logo">NORTHWIND</div>
+      <div class="trust-logo"><img src="assets/novartis-logo.png" alt="Novartis"></div>
+      <div class="trust-logo"><img src="assets/hsbcbank-logo.png" alt="HSBC"></div>
+      <div class="trust-logo"><img src="assets/mayoclinic-logo.png" alt="Mayo Clinic"></div>
+      <div class="trust-logo"><img src="assets/paypal-logo.png" alt="PayPal"></div>
+      <div class="trust-logo"><img src="assets/3M-logo.png" alt="3M"></div>
+      <div class="trust-logo"><img src="assets/gm-logo.png" alt="General Motors"></div>
     </div>
+    <p class="trust-disclaimer">Company names and logos are shown for illustrative purposes. All trademarks, service marks, and trade names are the property of their respective owners.</p>
   </div>
 </div>
 
 <!-- ============== PROBLEM ============== -->
-<section class="problem" id="problem">
+<section class="problem" id="why">
   <div class="container">
     <div class="sec-head">
-      <div class="sec-eyebrow">The enterprise AI gap</div>
-      <h2 class="sec-title">Most agentic projects stall <span class="accent">before they reach production.</span></h2>
-      <p class="sec-sub">Pilot velocity is high. Production velocity is not. The gap isn't model quality — it's governance, cost, and trust.</p>
+      <div class="sec-eyebrow">The opportunity</div>
+      <h2 class="sec-title">Agents are everywhere. <span class="accent">Value isn't — yet.</span></h2>
+      <p class="sec-sub">Most enterprises run dozens of agents across Copilot, Agentforce, Bedrock, internal builds. The opportunity isn't more agents — it's an operating system that lets them <strong>share identity, memory, policy and cost</strong> so every agent compounds into measurable business value.</p>
     </div>
     <div class="problem-grid">
       <div class="problem-card">
         <div class="problem-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l9 4v5c0 5-4 9-9 10-5-1-9-5-9-10V6l9-4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 11l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M16 7H8.5a2.5 2.5 0 100 5h5a2.5 2.5 0 110 5H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3>Shadow AI is everywhere</h3>
-        <p>Teams stand up agents in isolated notebooks. Security has no inventory, IT has no controls, and the same connector secret lives in twelve repos.</p>
+        <h3>Spend without economics</h3>
+        <p>Token bills are aggregate. The business needs cost-per-resolved-ticket, cost-per-claim, ROI per use case. agentOS attributes every action to an outcome, an agent, and a business unit — so AI spend becomes AI investment.</p>
       </div>
       <div class="problem-card">
         <div class="problem-icon">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 7h16M3 11h16M3 15h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="17" cy="15" r="3" stroke="currentColor" stroke-width="1.7"/></svg>
         </div>
-        <h3>Compliance can't keep up</h3>
-        <p>EU AI Act, HIPAA, GxP, SOC 2 — auditors ask for lineage, redaction, and approval trails that production agents simply don't produce.</p>
+        <h3>Governance behind delivery</h3>
+        <p>EU AI Act, DORA, SOX, HIPAA, ISO 42001 ask for lineage, redaction, risk-tiering, decision provenance. agentOS produces that evidence by default — so compliance moves at the same pace as the business.</p>
       </div>
       <div class="problem-card">
         <div class="problem-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 3v16M16 7H8.5a2.5 2.5 0 100 5h5a2.5 2.5 0 110 5H6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 2l9 4v5c0 5-4 9-9 10-5-1-9-5-9-10V6l9-4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 11l2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <h3>Costs spiral 10–100×</h3>
-        <p>Multi-agent flows blow past single-shot budgets. Without per-run unit economics and model-tier fallbacks, finance pulls the plug.</p>
+        <h3>Wins stay stranded</h3>
+        <p>A tool one team builds rarely reaches another. Prompts, evals, knowledge, connectors stay siloed. agentOS turns every win into a shared, governed asset — so the next BU starts from yesterday's best, not from zero.</p>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== BUSINESS VALUE ============== -->
+<section class="picture" id="picture">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">Business value agentOS creates</div>
+      <h2 class="sec-title">Four outcomes the platform produces <span class="accent">by default.</span></h2>
+      <p class="sec-sub">Every capability in agentOS — FinOps, governance, orchestration, evals, semantic layer — converges on outcomes your business can measure. No bespoke dashboards. No fire drills. Just the value the platform creates from day one.</p>
+    </div>
+    <div class="pic-grid">
+
+      <div class="pic-card">
+        <div class="pic-eyebrow">Lower cost per outcome</div>
+        <div class="pic-headline">3.4×<span class="delta">ROI</span></div>
+        <div class="pic-title">FinOps capability → measurable economics</div>
+        <p class="pic-desc">Per-resolved-ticket, per-approved-claim, per-qualified-lead — attributed by agent and business unit. Tier-fallback routing and prompt-caching compound the savings every quarter.</p>
+        <div class="pic-meter"><div class="pic-meter-fill" style="width:78%"></div></div>
+      </div>
+
+      <div class="pic-card">
+        <div class="pic-eyebrow">Compliance at delivery speed</div>
+        <div class="pic-headline">100%<span class="delta">coverage</span></div>
+        <div class="pic-title">Governance capability → audit-ready agents</div>
+        <p class="pic-desc">EU AI Act, DORA, SOX, HIPAA, ISO 42001 controls pre-mapped. Risk-tier classification per agent. Decision lineage immutable. Regulatory work happens once, not per project.</p>
+        <div class="pic-meter"><div class="pic-meter-fill" style="width:100%"></div></div>
+      </div>
+
+      <div class="pic-card">
+        <div class="pic-eyebrow">Faster time to value</div>
+        <div class="pic-headline">&lt; 1 hr<span class="delta">intent→live</span></div>
+        <div class="pic-title">Conversational provisioning → ship in hours</div>
+        <p class="pic-desc">Business intent becomes a governed, deployable agent through a 9-stage guided flow. Policy, FinOps and audit attached on day one — no rebuilds for compliance later.</p>
+        <div class="pic-meter"><div class="pic-meter-fill" style="width:92%"></div></div>
+      </div>
+
+      <div class="pic-card">
+        <div class="pic-eyebrow">Productivity that compounds</div>
+        <div class="pic-headline">+38%<span class="delta">capacity</span></div>
+        <div class="pic-title">Hybrid orchestration + HITL → augmented teams</div>
+        <p class="pic-desc">Agents handle the repeatable; humans stay in the decisions that matter. Quantified hours returned per role, with self-learning loops improving every agent every week.</p>
+        <div class="pic-meter"><div class="pic-meter-fill" style="width:64%"></div></div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -850,9 +1075,9 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 <section id="platform">
   <div class="container">
     <div class="sec-head">
-      <div class="sec-eyebrow">The platform</div>
-      <h2 class="sec-title">One control plane <span class="accent">for every agent in your enterprise.</span></h2>
-      <p class="sec-sub">From conversational provisioning to live human-in-the-loop, AutoEnthra is the layer that makes agentic AI safe to ship — across AWS Bedrock, AgentCore, and any cloud you already run.</p>
+      <div class="sec-eyebrow">The agentOS platform</div>
+      <h2 class="sec-title">Ten capabilities. One operating system. <span class="accent">Every agent governed.</span></h2>
+      <p class="sec-sub">FinOps and Governance lead the platform — because every business outcome ultimately depends on them. Underneath sit eight more capabilities that together form the agentOS reference architecture: orchestration, the code ↔ agent plane, semantic intelligence, memory, evals, HITL, and federation across every cloud and runtime.</p>
     </div>
 
     <div class="caps-grid">
@@ -860,90 +1085,152 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 
         <div class="cap-item open" data-cap="0">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">01</span>Conversational Provisioning</div>
+            <div class="cap-item-title"><span class="cap-num">01</span>Enterprise FinOps &amp; AI P&amp;L</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>A 9-stage guided flow turns business intent into a production-ready agent specification. No prompt engineering, no YAML hand-rolling — non-technical owners ship in under an hour.</p>
+            <p>FinOps built for agents, not just tokens. Per-outcome unit economics (cost-per-resolved-ticket, cost-per-approved-claim), per-BU chargeback, intelligent model routing, hard budget controls. Turns agent spend into measurable AI investment.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Use case → Persona → Model → Knowledge → Tools → Guardrails → Memory → Enterprise → Ready</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Live preview chat the moment the spec is complete</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Single-click CloudFormation export</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Unit economics per agent, use case and business unit</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Opus → Sonnet → Haiku tier-fallback with prompt-cache savings</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Showback / chargeback, carbon-per-token, ESG reporting</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Budget guardrails and kill-switches at every layer</li>
             </ul>
           </div></div>
         </div>
 
         <div class="cap-item" data-cap="1">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">02</span>Multi-Agent Orchestration</div>
+            <div class="cap-item-title"><span class="cap-num">02</span>Governance, Risk &amp; Audit by Default</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>Compose supervisor and specialist agents from a versioned library. Route work, share memory, and recover failures across teams of agents — with full lineage on every hop.</p>
+            <p>Policy-as-code at four hook points (publish, invoke, tool-call, response). Pre-mapped to EU AI Act, DORA, SOX, HIPAA, ISO 42001, NIST AI RMF, GDPR. Risk-tier classification per agent. Auditors get a self-serve portal — not a six-week fire drill.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Library-driven collaborator picker</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Fork-from-version with full conversational history preserved</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Supervisor patterns: SUPERVISOR, ROUTER, CONSENSUS</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> OPA / Cedar policies, immutable WORM audit log</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Auto-generated model cards, system cards, risk register</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> PII / PHI / PCI redaction at every I/O boundary</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Decision lineage queryable by auditors and reviewers in seconds</li>
             </ul>
           </div></div>
         </div>
 
         <div class="cap-item" data-cap="2">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">03</span>Policy-as-Code Governance</div>
+            <div class="cap-item-title"><span class="cap-num">03</span>Conversational Provisioning</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>OPA / Cedar policies evaluated at four hook points: publish, invoke, tool-call, and response. Block disallowed models, enforce data residency, redact PII / PHI before it leaves the boundary.</p>
+            <p>A 9-stage guided flow turns business intent into a production-ready agent — with guardrails, FinOps, and audit attached on day one. Non-technical owners ship in under an hour. No prompt engineering. No YAML.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Approved-model registry per tenant and data class</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Real-time PII / PHI detection with deterministic redaction</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Tenant isolation and connector allowlists by data class</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Use case → Persona → Model → Knowledge → Tools → Guardrails → Memory → Enterprise → Ready</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Live preview chat the moment the spec is complete</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> One-click deploy with layered CloudFormation / Terraform export</li>
             </ul>
           </div></div>
         </div>
 
         <div class="cap-item" data-cap="3">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">04</span>FinOps & Unit Economics</div>
+            <div class="cap-item-title"><span class="cap-num">04</span>Multi-Agent &amp; Hybrid Orchestration</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>Every action is logged with token cost, latency, and policy decision. Set per-team budgets, fall back across model tiers when thresholds hit, chargeback to cost centers — and prove ROI.</p>
+            <p>Supervisor, router, consensus, and swarm patterns — composed visually or in code. Hybrid plans mix agents with classical ML models, APIs, and RPA. Durable execution survives crashes, retries, and multi-day workflows.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Per-agent / per-tenant budgets with smart throttling</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Opus → Sonnet → Haiku tiered fallback</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Native tag propagation to AWS Cost Explorer</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Versioned library — fork-from-history, full lineage per hop</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Infinite-loop detection — step / token / cost budgets, semantic cycle break</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Plan-validator catches hallucinated steps before they execute</li>
             </ul>
           </div></div>
         </div>
 
         <div class="cap-item" data-cap="4">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">05</span>Live Human-in-the-Loop</div>
+            <div class="cap-item-title"><span class="cap-num">05</span>Code ↔ Agent Plane</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>Agents emit approval requests as first-class events. Step Functions wait-for-token holds the workflow open while the right human approves, denies, or edits — without manual orchestration code.</p>
+            <p>Agents are first-class citizens of your software lifecycle, not a parallel universe. Call agents from any service. Wrap any code as an MCP tool. Version prompts in git. Run evals in CI like unit tests. Ship agents through the same pipelines you already trust.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Pending-approval tray with full reasoning context</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Routed to roles, escalated on SLA breach</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Every decision audited to the lineage table</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Typed SDKs — TypeScript, Python, Java, .NET, Go</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Any microservice / RPA bot / ML model wrapped as MCP, zero rewrites</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Eval-as-code blocks merges that regress production agents</li>
             </ul>
           </div></div>
         </div>
 
         <div class="cap-item" data-cap="5">
           <div class="cap-item-head">
-            <div class="cap-item-title"><span class="cap-num">06</span>AgentCore-Native, Multi-Cloud Ready</div>
+            <div class="cap-item-title"><span class="cap-num">06</span>Semantic Intelligence Layer</div>
             <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           </div>
           <div class="cap-item-body"><div class="cap-item-inner">
-            <p>First-class support for AWS Bedrock AgentCore — Identity, Memory, Observability, Gateway, Built-in Tools — plus an MCP adapter that lets you wrap Azure AI Foundry, OpenAI Assistants, or any REST API as a callable tool.</p>
+            <p>A shared enterprise ontology every agent reasons against — so "high-value customer" means the same thing in Sales as in Risk. Industry overlays (FIBO, FHIR, ACORD, GS1) ship pre-loaded. Metric catalogue + business glossary keep agents consistent across BUs and clouds.</p>
             <ul class="cap-bullets">
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> AgentCore Identity (federated OAuth) and Memory (semantic + event)</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Gateway turns any API into MCP, instantly</li>
-              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Active-passive multi-region DR by design</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> One canonical definition of customer, product, account, policy</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Knowledge graph + hybrid retrieval (BM25 + vector + graph-RAG)</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Lineage on every retrieved fact — provenance you can defend</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="6">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">07</span>Memory, Context &amp; State Management</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Typed memory (episodic, semantic, procedural) with scopes per user, agent, team, and tenant. Right-to-be-forgotten built in. Context-window management with hierarchical summarization. Long-running agents checkpoint and resume safely.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Per-scope retention policies — GDPR-compliant by construction</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Context awareness: time, channel, user state, business calendar</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Idempotent saga &amp; compensation for safe recovery</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="7">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">08</span>Evals, Guardrails &amp; Self-Learning</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Offline golden sets + online shadow evals. Trajectory scoring (not just final answer). Drift detection, red-team harness, LLM-as-judge with calibration. Feedback loops auto-refine prompts and tool descriptions — without breaking production.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Hallucination, grounding, plan-quality scoring per run</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Prompt-injection &amp; jailbreak defence on every input</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> RLHF / distillation pipelines for compounding agent quality</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="8">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">09</span>Live Human-in-the-Loop &amp; Decision Support</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Risk-based escalation routes decisions to the right human with full reasoning context — Slack, Teams, email, mobile. Step Functions wait-for-token holds the workflow open. Counterfactuals and explainability included. Humans stay in the decisions that matter.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Pending-approval tray with reasoning, alternatives, recommended action</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Confidence-based escalation, SLA-driven routing</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Every decision audited — counterfactuals on demand</li>
+            </ul>
+          </div></div>
+        </div>
+
+        <div class="cap-item" data-cap="9">
+          <div class="cap-item-head">
+            <div class="cap-item-title"><span class="cap-num">10</span>Federation, Open Standards &amp; Multi-Cloud</div>
+            <div class="cap-toggle"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          </div>
+          <div class="cap-item-body"><div class="cap-item-inner">
+            <p>Bedrock, AgentCore, Azure AI Foundry, Vertex Agent Builder, Copilot Studio, Claude Agent SDK, OpenAI Assistants — every runtime under one identity, one policy, one cost book. MCP-native, A2A-ready, OTEL GenAI observable. No lock-in. Ever.</p>
+            <ul class="cap-bullets">
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Cross-cloud agent-to-agent invocation with federated identity</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Model gateway routes by cost, latency, residency, carbon</li>
+              <li><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 7l3 3 5-6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg> Active-passive multi-region DR by design — RTO 15m / RPO 5m</li>
             </ul>
           </div></div>
         </div>
@@ -953,11 +1240,58 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
       <div class="cap-preview">
         <div class="cap-preview-card" id="capPreview">
 
-          <!-- Preview 0 — Conversational Provisioning -->
+          <!-- Preview 0 — FinOps & AI P&L -->
           <div class="cap-preview-stage active" data-stage="0">
+            <div class="cap-preview-label">$ FINOPS · UNIT ECONOMICS</div>
+            <div class="cap-preview-title">Q1 2026 — Enterprise</div>
+            <div class="cap-preview-desc">Spend, savings and outcomes attributed by agent and business unit.</div>
+            <div class="mock-kpi">
+              <div class="mock-kpi-card"><div class="mock-kpi-label">Spend</div><div class="mock-kpi-value">$1.84M</div><div class="mock-kpi-delta">↓ 22% QoQ</div></div>
+              <div class="mock-kpi-card"><div class="mock-kpi-label">Outcomes</div><div class="mock-kpi-value">$6.2M</div><div class="mock-kpi-delta">3.4× ROI</div></div>
+            </div>
+            <div class="mock-panel">
+              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:8px">Daily spend · Opus→Sonnet→Haiku routing</div>
+              <div class="mock-chart">
+                <div class="mock-chart-bar" style="height:30%"></div>
+                <div class="mock-chart-bar" style="height:55%"></div>
+                <div class="mock-chart-bar" style="height:42%"></div>
+                <div class="mock-chart-bar" style="height:68%"></div>
+                <div class="mock-chart-bar" style="height:80%"></div>
+                <div class="mock-chart-bar" style="height:62%"></div>
+                <div class="mock-chart-bar" style="height:48%"></div>
+                <div class="mock-chart-bar" style="height:35%"></div>
+                <div class="mock-chart-bar" style="height:50%"></div>
+                <div class="mock-chart-bar" style="height:72%;opacity:1"></div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">Cost / resolved ticket</span><span style="font-size:13px;color:var(--teal-700);font-weight:700">$0.18 <span style="color:var(--ink-400);font-weight:500">↓ 64%</span></span></div>
+              <div class="mock-row"><span style="font-size:13px">Kill-switch budget</span><span class="mock-pill green">68% headroom</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 1 — Governance & Audit -->
+          <div class="cap-preview-stage" data-stage="1">
+            <div class="cap-preview-label">⛨ AUDIT POSTURE · LIVE</div>
+            <div class="cap-preview-title">Regulator-ready by default</div>
+            <div class="cap-preview-desc">Risk-tiered. Decision lineage. Self-serve auditor portal.</div>
+            <div class="mock-panel">
+              <div class="mock-row"><span style="font-size:13px">EU AI Act risk tier</span><span class="mock-pill green">Limited · 138 agents</span></div>
+              <div class="mock-row"><span style="font-size:13px">EU AI Act risk tier</span><span class="mock-pill amber">High · 9 agents</span></div>
+              <div class="mock-row"><span style="font-size:13px">DORA · operational resilience</span><span class="mock-pill green">PASS</span></div>
+              <div class="mock-row"><span style="font-size:13px">SOX · change controls</span><span class="mock-pill green">PASS</span></div>
+              <div class="mock-row"><span style="font-size:13px">ISO 42001 · AI management</span><span class="mock-pill green">PASS</span></div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div style="font-size:13px;color:var(--ink-700);line-height:1.55">Response intercepted: "Patient <span style="background:#FBE0DD;color:#9C2B23;padding:1px 6px;border-radius:4px;font-weight:600">[REDACTED]</span> eligible <span style="color:var(--ink-900);font-weight:600">2026-05-22</span>."</div>
+            </div>
+          </div>
+
+          <!-- Preview 2 — Conversational Provisioning -->
+          <div class="cap-preview-stage" data-stage="2">
             <div class="cap-preview-label">⌘ PROVISIONING SESSION</div>
-            <div class="cap-preview-title">Stage 5 of 9 — Tools & Connectors</div>
-            <div class="cap-preview-desc">A natural conversation, instrumented from the first turn.</div>
+            <div class="cap-preview-title">Stage 5 of 9 — Tools &amp; Connectors</div>
+            <div class="cap-preview-desc">Business intent → governed agent in under an hour.</div>
             <div class="mock-panel">
               <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">Salesforce Service Cloud</span><span class="mock-pill green">Connected</span></div>
               <div class="mock-row"><span style="color:var(--ink-700);font-weight:600">SAP S/4HANA</span><span class="mock-pill green">Connected</span></div>
@@ -974,71 +1308,109 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
             </div>
           </div>
 
-          <!-- Preview 1 — Multi-Agent -->
-          <div class="cap-preview-stage" data-stage="1">
-            <div class="cap-preview-label">▣ SUPERVISOR TOPOLOGY</div>
-            <div class="cap-preview-title">PatientCareHub · v3.2</div>
-            <div class="cap-preview-desc">A supervisor composed from three library specialists.</div>
+          <!-- Preview 3 — Multi-Agent & Hybrid Orchestration -->
+          <div class="cap-preview-stage" data-stage="3">
+            <div class="cap-preview-label">▣ HYBRID ORCHESTRATION</div>
+            <div class="cap-preview-title">Agents + ML + APIs + RPA, one plan</div>
+            <div class="cap-preview-desc">Supervisor composed from library specialists, classical models and bots.</div>
             <div class="mock-panel">
               <div style="display:flex;flex-direction:column;align-items:center;gap:14px;padding:8px 0">
-                <div style="background:var(--teal-700);color:#fff;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px">PatientCareHub · Supervisor</div>
-                <svg width="240" height="40" viewBox="0 0 240 40"><path d="M120 0v8M120 8L40 32M120 8L120 32M120 8L200 32" stroke="var(--teal-500)" stroke-width="1.5" fill="none"/></svg>
-                <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Prescription</div>
-                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Billing</div>
-                  <div style="background:var(--teal-50);color:var(--teal-800);padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;border:1px solid var(--teal-100)">Enrollment</div>
+                <div style="background:var(--teal-700);color:#fff;padding:10px 18px;border-radius:10px;font-weight:600;font-size:13px">ClaimsResolution · Supervisor</div>
+                <svg width="260" height="40" viewBox="0 0 260 40"><path d="M130 0v8M130 8L20 32M130 8L90 32M130 8L170 32M130 8L240 32" stroke="var(--teal-500)" stroke-width="1.5" fill="none"/></svg>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+                  <div style="background:var(--teal-50);color:var(--teal-800);padding:6px 11px;border-radius:8px;font-size:11.5px;font-weight:600;border:1px solid var(--teal-100)">FraudAgent</div>
+                  <div style="background:#FFF4E5;color:#7A4400;padding:6px 11px;border-radius:8px;font-size:11.5px;font-weight:600;border:1px solid #F4D7AC">XGBoost · scoring</div>
+                  <div style="background:#E5F0F8;color:#1B4F7C;padding:6px 11px;border-radius:8px;font-size:11.5px;font-weight:600;border:1px solid #C8DEED">SAP API</div>
+                  <div style="background:var(--orange-100);color:var(--orange-700);padding:6px 11px;border-radius:8px;font-size:11.5px;font-weight:600;border:1px solid #F4D7AC">UiPath bot</div>
                 </div>
               </div>
             </div>
-            <div class="mock-panel" style="margin-top:14px">
-              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Library version trail</span><span style="font-family:'SF Mono',monospace;font-size:12px;color:var(--teal-700)">v1 → v2 → v3.2</span></div>
-              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Forked from</span><span style="font-family:'SF Mono',monospace;font-size:12px;color:var(--ink-700)">CareTriage · v2.1</span></div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Loop-guard</span><span class="mock-pill green">Step budget 8/24</span></div>
+              <div class="mock-row"><span style="font-size:13px;color:var(--ink-500)">Plan validator</span><span class="mock-pill green">No hallucinated tools</span></div>
             </div>
           </div>
 
-          <!-- Preview 2 — Policy as Code -->
-          <div class="cap-preview-stage" data-stage="2">
-            <div class="cap-preview-label">⛨ POLICY DECISION</div>
-            <div class="cap-preview-title">Response intercepted</div>
-            <div class="cap-preview-desc">PII detected and redacted before egress. Audit row written.</div>
-            <div class="mock-panel">
-              <div style="font-size:13px;color:var(--ink-700);line-height:1.55">"Patient <span style="background:#FBE0DD;color:#9C2B23;padding:1px 6px;border-radius:4px;font-weight:600">[REDACTED-NAME]</span> with MRN <span style="background:#FBE0DD;color:#9C2B23;padding:1px 6px;border-radius:4px;font-weight:600">[REDACTED-ID]</span> is eligible for refill on <span style="color:var(--ink-900);font-weight:600">2026-05-22</span>."</div>
-            </div>
-            <div class="mock-panel" style="margin-top:14px">
-              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">phi-redaction.rego</span></span><span class="mock-pill green">PASS</span></div>
-              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">model-allowlist.rego</span></span><span class="mock-pill green">PASS</span></div>
-              <div class="mock-row"><span style="font-size:13px">policy: <span style="font-family:'SF Mono',monospace;color:var(--teal-700)">data-residency.rego</span></span><span class="mock-pill green">EU-WEST-1</span></div>
-            </div>
-          </div>
-
-          <!-- Preview 3 — FinOps -->
-          <div class="cap-preview-stage" data-stage="3">
-            <div class="cap-preview-label">$ FINOPS COMMAND CENTER</div>
-            <div class="cap-preview-title">May 2026 · this month</div>
-            <div class="cap-preview-desc">Unit economics for every agent run.</div>
-            <div class="mock-kpi">
-              <div class="mock-kpi-card"><div class="mock-kpi-label">Spend</div><div class="mock-kpi-value">$48.2K</div><div class="mock-kpi-delta">↓ 22% vs Apr</div></div>
-              <div class="mock-kpi-card"><div class="mock-kpi-label">Saved</div><div class="mock-kpi-value">$612K</div><div class="mock-kpi-delta">↑ Tier-fallback</div></div>
-            </div>
-            <div class="mock-panel">
-              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:8px">Daily token spend</div>
-              <div class="mock-chart">
-                <div class="mock-chart-bar" style="height:30%"></div>
-                <div class="mock-chart-bar" style="height:55%"></div>
-                <div class="mock-chart-bar" style="height:42%"></div>
-                <div class="mock-chart-bar" style="height:68%"></div>
-                <div class="mock-chart-bar" style="height:80%"></div>
-                <div class="mock-chart-bar" style="height:62%"></div>
-                <div class="mock-chart-bar" style="height:48%"></div>
-                <div class="mock-chart-bar" style="height:35%"></div>
-                <div class="mock-chart-bar" style="height:50%"></div>
-                <div class="mock-chart-bar" style="height:72%;opacity:1"></div>
+          <!-- Preview 4 — Code ↔ Agent Plane -->
+          <div class="cap-preview-stage" data-stage="4">
+            <div class="cap-preview-label">⟷ CODE ↔ AGENT PLANE</div>
+            <div class="cap-preview-title">First-class in the SDLC</div>
+            <div class="cap-preview-desc">Same artifact: function, workflow step, or agent.</div>
+            <div class="mock-panel" style="background:#0E1A1A;border-color:#0E1A1A">
+              <div style="font-family:'SF Mono',Menlo,monospace;font-size:12px;line-height:1.7;color:#8FCFC1">
+                <span style="color:#FFBE2F">import</span> <span style="color:#fff">{ agents }</span> <span style="color:#FFBE2F">from</span> <span style="color:#E97338">'@autoenthra/sdk'</span>;<br>
+                <br>
+                <span style="color:#FFBE2F">const</span> <span style="color:#fff">claim</span> = <span style="color:#FFBE2F">await</span> <span style="color:#fff">agents</span>.<span style="color:#3FA591">claimsResolver</span>({<br>
+                &nbsp;&nbsp;<span style="color:#fff">policyId</span>, <span style="color:#fff">claimDocs</span>,<br>
+                &nbsp;&nbsp;<span style="color:#fff">budget</span>: <span style="color:#E97338">'$0.40'</span>, <span style="color:#6B7C7A">// hard cap</span><br>
+                });
               </div>
             </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">CI eval gate</span><span class="mock-pill green">187/189 passed</span></div>
+              <div class="mock-row"><span style="font-size:13px">Git-versioned prompt</span><span style="font-family:'SF Mono',monospace;font-size:11.5px;color:var(--teal-700)">v3.2 → main</span></div>
+            </div>
           </div>
 
-          <!-- Preview 4 — HITL -->
-          <div class="cap-preview-stage" data-stage="4">
+          <!-- Preview 5 — Semantic Intelligence -->
+          <div class="cap-preview-stage" data-stage="5">
+            <div class="cap-preview-label">◈ SEMANTIC INTELLIGENCE LAYER</div>
+            <div class="cap-preview-title">One enterprise ontology</div>
+            <div class="cap-preview-desc">Every agent reasons against the same business meaning.</div>
+            <div class="mock-panel">
+              <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:10px">Canonical entities · in use</div>
+              <div class="mock-conn-grid">
+                <div class="mock-conn bedrock">Customer</div>
+                <div class="mock-conn bedrock">Policy</div>
+                <div class="mock-conn bedrock">Claim</div>
+                <div class="mock-conn">Account</div>
+                <div class="mock-conn">Product</div>
+                <div class="mock-conn">Counterparty</div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">Industry overlay</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">FIBO · FHIR · ACORD</span></div>
+              <div class="mock-row"><span style="font-size:13px">Metric "ARR"</span><span class="mock-pill green">1 definition · 14 agents</span></div>
+              <div class="mock-row"><span style="font-size:13px">Retrieval</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">Hybrid · BM25 + vector + graph-RAG</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 6 — Memory, Context & State -->
+          <div class="cap-preview-stage" data-stage="6">
+            <div class="cap-preview-label">⟳ MEMORY &amp; STATE</div>
+            <div class="cap-preview-title">Typed memory, safe recovery</div>
+            <div class="cap-preview-desc">Episodic, semantic, procedural — scoped and policy-managed.</div>
+            <div class="mock-panel">
+              <div class="mock-row"><span style="font-size:13px">Short-term · session</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">8.2K tokens · auto-compact</span></div>
+              <div class="mock-row"><span style="font-size:13px">Episodic · user-scoped</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">120-day TTL</span></div>
+              <div class="mock-row"><span style="font-size:13px">Semantic · tenant-shared</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">No PII · governed</span></div>
+              <div class="mock-row"><span style="font-size:13px">Procedural · how-to</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">Auto-distilled from wins</span></div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">Right-to-be-forgotten</span><span class="mock-pill green">GDPR compliant</span></div>
+              <div class="mock-row"><span style="font-size:13px">Checkpoint &amp; resume</span><span class="mock-pill green">Saga · idempotent</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 7 — Evals, Guardrails & Self-Learning -->
+          <div class="cap-preview-stage" data-stage="7">
+            <div class="cap-preview-label">⌖ EVAL HARNESS · LIVE</div>
+            <div class="cap-preview-title">Quality that compounds</div>
+            <div class="cap-preview-desc">Trajectory scoring, drift detection, RLHF loop.</div>
+            <div class="mock-panel">
+              <div class="mock-row"><span style="font-size:13px">Golden-set pass rate</span><span style="font-size:13px;color:var(--teal-700);font-weight:700">98.4%</span></div>
+              <div class="mock-row"><span style="font-size:13px">Hallucination score</span><span style="font-size:13px;color:var(--teal-700);font-weight:700">0.6%</span></div>
+              <div class="mock-row"><span style="font-size:13px">Plan-quality (LLM-judge)</span><span style="font-size:13px;color:var(--teal-700);font-weight:700">9.2/10</span></div>
+              <div class="mock-row"><span style="font-size:13px">Drift · 7-day window</span><span class="mock-pill green">Within band</span></div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px">
+              <div class="mock-row"><span style="font-size:13px">Red-team probes</span><span class="mock-pill green">312 / 312 blocked</span></div>
+              <div class="mock-row"><span style="font-size:13px">RLHF loop</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">14 prompt refinements · gated</span></div>
+            </div>
+          </div>
+
+          <!-- Preview 8 — HITL -->
+          <div class="cap-preview-stage" data-stage="8">
             <div class="cap-preview-label">⏱ APPROVAL QUEUE · 3 PENDING</div>
             <div class="cap-preview-title">Awaiting clinical reviewer</div>
             <div class="cap-preview-desc">Step Functions held the workflow open. SLA: 12 minutes remaining.</div>
@@ -1048,7 +1420,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
               <div style="display:flex;gap:8px">
                 <div style="background:var(--teal-700);color:#fff;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Approve</div>
                 <div style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink-700);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Deny</div>
-                <div style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink-700);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Edit & approve</div>
+                <div style="background:#fff;border:1.5px solid var(--border-strong);color:var(--ink-700);padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600">Edit &amp; approve</div>
               </div>
             </div>
             <div class="mock-panel" style="margin-top:12px">
@@ -1056,11 +1428,11 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
             </div>
           </div>
 
-          <!-- Preview 5 — Multi-Cloud -->
-          <div class="cap-preview-stage" data-stage="5">
-            <div class="cap-preview-label">⌬ AGENTCORE + MULTI-CLOUD</div>
+          <!-- Preview 9 — Federation & Multi-Cloud -->
+          <div class="cap-preview-stage" data-stage="9">
+            <div class="cap-preview-label">⌬ FEDERATION · OPEN STANDARDS</div>
             <div class="cap-preview-title">One control plane, every runtime</div>
-            <div class="cap-preview-desc">Bedrock primary. Azure & OpenAI as MCP-wrapped tools.</div>
+            <div class="cap-preview-desc">MCP-native, A2A-ready, OTEL GenAI observable. No lock-in.</div>
             <div class="mock-panel">
               <div style="font-size:12px;color:var(--ink-400);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:10px">Connected runtimes</div>
               <div class="mock-conn-grid">
@@ -1075,6 +1447,7 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
             <div class="mock-panel" style="margin-top:12px">
               <div class="mock-row"><span style="font-size:13px">DR posture</span><span class="mock-pill green">Active-Passive · 2 regions</span></div>
               <div class="mock-row"><span style="font-size:13px">RTO / RPO</span><span style="font-size:12px;color:var(--ink-700);font-weight:600">15 min / 5 min</span></div>
+              <div class="mock-row"><span style="font-size:13px">Cross-cloud A2A</span><span class="mock-pill green">Federated identity</span></div>
             </div>
           </div>
 
@@ -1084,14 +1457,157 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   </div>
 </section>
 
+<!-- ============== CODE ↔ AGENT PLANE ============== -->
+<section class="plane" id="plane">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">The Code ↔ Agent plane</div>
+      <h2 class="sec-title">Agents and your software, <span class="accent">one operating fabric.</span></h2>
+      <p class="sec-sub">Most platforms treat agents as a separate world — a separate stack, a separate team, a separate budget. AutoEnthra agentOS makes agents part of the software your business already runs on, so every new agent extends a system you already trust.</p>
+    </div>
+    <div class="plane-grid">
+      <div class="plane-copy">
+        <ul class="plane-points">
+          <li>
+            <span class="plane-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5 4l-3 4 3 4M11 4l3 4-3 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><strong>Plug into what you already have.</strong> Your existing systems — ERP, CRM, billing, claims, data platforms — instantly become capabilities your agents can use. No rebuilds. No parallel stack. No waiting on integrations.</span>
+          </li>
+          <li>
+            <span class="plane-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span><strong>Move at the speed of your engineering org.</strong> Agents ship through the same pipelines, the same reviews, the same governance your software already passes through — so adoption isn't blocked by a second toolchain.</span>
+          </li>
+          <li>
+            <span class="plane-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="currentColor" stroke-width="2"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <span><strong>Build once, deliver everywhere.</strong> The same agent powers a customer chat, an internal workflow, and a back-office service. Reuse compounds across the enterprise — cost per use drops every quarter.</span>
+          </li>
+          <li>
+            <span class="plane-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 4h10v8H3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 7h10" stroke="currentColor" stroke-width="2"/></svg></span>
+            <span><strong>Engineering that scales itself.</strong> Agents accelerate the function that builds your business — drafting changes, reviewing work, generating tests, triaging incidents. The platform that runs the business also helps build it.</span>
+          </li>
+          <li>
+            <span class="plane-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 11h10M3 8h7M3 5h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <span><strong>Software discipline, agent velocity.</strong> Every change is a reviewable, rollback-able artifact. You get AI speed with the same trust, audit and control you expect from your most regulated systems.</span>
+          </li>
+        </ul>
+        <a class="btn btn-primary" href="#" onclick="openModal();return false;">See it in your environment</a>
+      </div>
+      <div class="plane-diagram">
+        <div class="plane-row">
+          <div class="plane-box code">Your business systems</div>
+          <div class="plane-arrow">⟶</div>
+          <div class="plane-box agent">agentOS agent</div>
+        </div>
+        <div class="plane-label">Existing capabilities · instantly usable</div>
+
+        <div class="plane-row">
+          <div class="plane-box agent">agentOS agent</div>
+          <div class="plane-arrow">⟶</div>
+          <div class="plane-box code">Your operations</div>
+        </div>
+        <div class="plane-label">No rewrites · no parallel stack</div>
+
+        <div class="plane-row">
+          <div class="plane-box code">Engineering practices</div>
+          <div class="plane-arrow">⟷</div>
+          <div class="plane-box agent">Agent artifacts</div>
+        </div>
+        <div class="plane-label">Versioned · reviewed · governed like any release</div>
+
+        <div class="plane-row">
+          <div class="plane-box agent">One agent</div>
+          <div class="plane-arrow">⟶</div>
+          <div class="plane-box code">Customer · Workflow · Service</div>
+        </div>
+        <div class="plane-label">Build once · deliver everywhere</div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ============== METRICS BAND ============== -->
 <section class="metrics">
   <div class="container">
     <div class="metrics-grid">
-      <div class="metric"><div class="metric-value">9-stage</div><div class="metric-label">Guided provisioning, no prompt engineering</div></div>
-      <div class="metric"><div class="metric-value">$2.4M</div><div class="metric-label">Avg annual savings vs build-from-scratch</div></div>
-      <div class="metric"><div class="metric-value">98.6%</div><div class="metric-label">Policy compliance across audited deployments</div></div>
-      <div class="metric"><div class="metric-value">&lt; 1 hr</div><div class="metric-label">From business intent to deployable agent</div></div>
+      <div class="metric"><div class="metric-value">3.4×</div><div class="metric-label">ROI on AI spend across deployed agents</div></div>
+      <div class="metric"><div class="metric-value">↓ 64%</div><div class="metric-label">Cost per outcome vs single-model baseline</div></div>
+      <div class="metric"><div class="metric-value">100%</div><div class="metric-label">Audit-ready agents · EU AI Act · DORA · SOX</div></div>
+      <div class="metric"><div class="metric-value">12×</div><div class="metric-label">Faster from business intent to governed deploy</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== SCALE MODEL ============== -->
+<section class="scale" id="scale">
+  <div class="container">
+    <div class="sec-head">
+      <div class="sec-eyebrow">How agentOS scales</div>
+      <h2 class="sec-title">One operating system. <span class="accent">Every BU. Every vertical.</span></h2>
+      <p class="sec-sub">The same control plane runs Patient Care in Pharma, KYC in Banking, Citizen Services in Government, and Field Ops in Energy. Every BU inherits the same identity, policy, FinOps and audit posture — and every win compounds across the enterprise.</p>
+    </div>
+
+    <div class="scale-stack">
+
+      <div class="scale-layer vertical">
+        <div class="scale-meta">
+          <div class="scale-tier">Layer 3 · Vertical overlays</div>
+          <div class="scale-name">Industry packs</div>
+          <div class="scale-desc">Pre-built agents, knowledge graphs, eval sets and regulatory maps for your sector.</div>
+        </div>
+        <div class="scale-tags">
+          <span class="scale-tag">Banking · FIBO</span>
+          <span class="scale-tag">Insurance · ACORD</span>
+          <span class="scale-tag">Pharma · FHIR · GxP</span>
+          <span class="scale-tag">Healthcare · HL7</span>
+          <span class="scale-tag">Public Sector · NIEM</span>
+          <span class="scale-tag">Retail · GS1</span>
+          <span class="scale-tag">Telco · TM Forum</span>
+          <span class="scale-tag">Energy · OSDU</span>
+          <span class="scale-tag">Manufacturing</span>
+        </div>
+      </div>
+
+      <div class="scale-arrow"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M5 12l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+      <div class="scale-layer domain">
+        <div class="scale-meta">
+          <div class="scale-tier">Layer 2 · Domain packs</div>
+          <div class="scale-name">Cross-vertical functions</div>
+          <div class="scale-desc">Accelerators every enterprise needs — sharing the same semantic core, governed identically.</div>
+        </div>
+        <div class="scale-tags">
+          <span class="scale-tag">Customer Ops</span>
+          <span class="scale-tag">Finance &amp; FP&amp;A</span>
+          <span class="scale-tag">HR &amp; People</span>
+          <span class="scale-tag">Legal &amp; Contracts</span>
+          <span class="scale-tag">Supply Chain</span>
+          <span class="scale-tag">IT &amp; SecOps</span>
+          <span class="scale-tag">R&amp;D · Engineering</span>
+          <span class="scale-tag">Sales &amp; Marketing</span>
+          <span class="scale-tag">Procurement</span>
+        </div>
+      </div>
+
+      <div class="scale-arrow"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 4v14M5 12l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+
+      <div class="scale-layer core">
+        <div class="scale-meta">
+          <div class="scale-tier">Layer 1 · agentOS core</div>
+          <div class="scale-name">The operating system</div>
+          <div class="scale-desc">Runtime, identity, memory, policy, FinOps, observability, semantic layer — one substrate for every cloud and every model.</div>
+        </div>
+        <div class="scale-tags">
+          <span class="scale-tag">Unified runtime</span>
+          <span class="scale-tag">Enterprise identity</span>
+          <span class="scale-tag">Policy-as-code</span>
+          <span class="scale-tag">AI P&amp;L · FinOps</span>
+          <span class="scale-tag">Semantic intelligence</span>
+          <span class="scale-tag">Memory · state</span>
+          <span class="scale-tag">Evals · self-learning</span>
+          <span class="scale-tag">OTEL GenAI · MCP · A2A</span>
+          <span class="scale-tag">Multi-cloud DR</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
@@ -1163,14 +1679,48 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
           <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 21h20M6 21v-9M10 21v-9M14 21v-9M18 21v-9M5 12L13 5l8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div>
-          <span class="ind-tag">Manufacturing & Energy</span>
-          <h3>Field Service & Operations Copilots</h3>
+          <span class="ind-tag">Manufacturing &amp; Energy</span>
+          <h3>Field Service &amp; Operations Copilots</h3>
           <p>Equip technicians with agentic copilots that reason over manuals, work orders, and IoT telemetry — with safety-critical approvals on every recommended action.</p>
           <div class="ind-uses">
             <span class="ind-use">Tech Copilot</span>
             <span class="ind-use">Work-Order Assist</span>
             <span class="ind-use">Outage Triage</span>
             <span class="ind-use">Safety Reviewer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 7h20l-2 11a3 3 0 01-3 2H8a3 3 0 01-3-2L3 7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 7V5a5 5 0 0110 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Retail &amp; Consumer</span>
+          <h3>Merchandising, Service &amp; Personalization</h3>
+          <p>Personalize at scale, resolve service tickets in one touch, optimize assortment and pricing — with brand-safety guardrails and per-channel cost discipline.</p>
+          <div class="ind-uses">
+            <span class="ind-use">Conversational Commerce</span>
+            <span class="ind-use">Returns Triage</span>
+            <span class="ind-use">Assortment Agent</span>
+            <span class="ind-use">Pricing Copilot</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ind-card">
+        <div class="ind-icon">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none"><path d="M3 13c0-6 4-10 10-10s10 4 10 10M7 13c0-3 3-6 6-6s6 3 6 6M11 13a2 2 0 014 0M13 17v6M9 23h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <span class="ind-tag">Telco &amp; Insurance</span>
+          <h3>Customer Care, Claims &amp; Underwriting</h3>
+          <p>Triage care, draft claim narratives, automate underwriting — with consent-tracked memory, fraud detection, and ACORD / TM Forum ontology built in.</p>
+          <div class="ind-uses">
+            <span class="ind-use">Care Resolver</span>
+            <span class="ind-use">Claims Adjudicator</span>
+            <span class="ind-use">Underwriting Copilot</span>
+            <span class="ind-use">Fraud Sentinel</span>
           </div>
         </div>
       </div>
@@ -1216,14 +1766,15 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   <div class="container">
     <div class="diff-grid">
       <div class="diff-narrative">
-        <div class="sec-eyebrow" style="text-align:left;margin-bottom:14px">Why AutoEnthra</div>
-        <h2>The control plane <span class="accent">your AWS investment was missing.</span></h2>
-        <p>Other platforms make you choose: deep AWS Bedrock features, or generic multi-cloud reach, or governance-first audit. AutoEnthra delivers all three — without forcing a stack rewrite or vendor lock-in.</p>
+        <div class="sec-eyebrow" style="text-align:left;margin-bottom:14px">Why AutoEnthra agentOS</div>
+        <h2>An operating system, <span class="accent">not another AI feature.</span></h2>
+        <p>Most platforms ship an AI feature. agentOS ships the <strong>operating system underneath every agent</strong> — the layer that turns scattered initiatives into a single, governed, value-producing capability. Same identity. Same policy. Same memory. Same cost book. Same audit posture. Same evolution.</p>
         <ul>
-          <li>Deep Bedrock + AgentCore native integration, not a thin wrapper</li>
-          <li>Policy-as-code at four hook points, not a single output filter</li>
-          <li>FinOps unit economics on every run, not aggregate billing dashboards</li>
-          <li>MCP adapter onboards Azure / OpenAI agents in days, not quarters</li>
+          <li><strong>Unit economics per agent and BU</strong> — not aggregate token bills</li>
+          <li><strong>Audit-ready by default</strong> — EU AI Act, DORA, SOX, HIPAA, ISO 42001 pre-mapped</li>
+          <li><strong>Code ↔ Agent plane</strong> — agents native to your SDLC, not a parallel universe</li>
+          <li><strong>Semantic intelligence layer</strong> — one shared definition of every business entity</li>
+          <li><strong>Open standards · no lock-in</strong> — MCP, A2A, OTEL GenAI, model-portable</li>
         </ul>
         <a class="btn btn-primary" href="#" onclick="openModal();return false;">See it on your data</a>
       </div>
@@ -1231,9 +1782,39 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
       <div class="diff-table">
         <div class="diff-row head">
           <div class="col-feature">Capability</div>
-          <div class="col-ae">AutoEnthra</div>
+          <div class="col-ae">agentOS</div>
           <div class="col-other">Build-in-house</div>
           <div class="col-other">Generic frameworks</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">AI P&amp;L by agent &amp; BU</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">Aggregate</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Regulatory pre-mapping</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">Manual</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Policy-as-code · 4 hook points</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">DIY</div>
+          <div class="col-other">Output only</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Code ↔ Agent SDLC plane</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">DIY</div>
+          <div class="col-other">—</div>
+        </div>
+        <div class="diff-row">
+          <div class="col-feature">Semantic intelligence layer</div>
+          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="col-other">—</div>
+          <div class="col-other">—</div>
         </div>
         <div class="diff-row">
           <div class="col-feature">Conversational provisioning</div>
@@ -1242,31 +1823,19 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
           <div class="col-other">—</div>
         </div>
         <div class="diff-row">
-          <div class="col-feature">Multi-agent supervisor</div>
+          <div class="col-feature">Hybrid orchestration (agent+ML+RPA)</div>
           <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="col-other">Months</div>
           <div class="col-other">Partial</div>
         </div>
         <div class="diff-row">
-          <div class="col-feature">Policy-as-code at runtime</div>
-          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="col-other">DIY</div>
-          <div class="col-other">—</div>
-        </div>
-        <div class="diff-row">
-          <div class="col-feature">Per-run unit economics</div>
-          <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-          <div class="col-other">Aggregate</div>
-          <div class="col-other">—</div>
-        </div>
-        <div class="diff-row">
-          <div class="col-feature">HITL via Step Functions</div>
+          <div class="col-feature">Live HITL via Step Functions</div>
           <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="col-other">DIY</div>
           <div class="col-other">DIY</div>
         </div>
         <div class="diff-row">
-          <div class="col-feature">Multi-cloud via MCP</div>
+          <div class="col-feature">Federation · cross-cloud A2A</div>
           <div class="col-ae"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 9l4 4 8-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
           <div class="col-other">DIY</div>
           <div class="col-other">Partial</div>
@@ -1279,12 +1848,12 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
 <!-- ============== TESTIMONIAL ============== -->
 <section class="testimonial">
   <div class="container">
-    <p class="test-quote">AutoEnthra is the first platform that made our compliance team a partner in agentic AI rather than a blocker. We went from a six-month approval cycle to a two-week deployment cadence — without giving up a single audit control.</p>
+    <p class="test-quote">agentOS gave us a single substrate for every agent across our cloud estate — with unit economics, audit lineage, and a shared semantic layer working from day one. We measure AI in business outcomes now, not token counts. That changes what the platform is allowed to do for us.</p>
     <div class="test-attr">
-      <div class="test-avatar">VR</div>
+      <div class="test-avatar">MD</div>
       <div>
-        <div class="test-name">Vidya Ramesh</div>
-        <div class="test-role">VP Enterprise AI · Fortune 100 Life Sciences</div>
+        <div class="test-name">Marcus Delacroix</div>
+        <div class="test-role">Head of Enterprise AI · Fortune 100 Financial Services</div>
       </div>
     </div>
   </div>
@@ -1295,11 +1864,11 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   <div class="container">
     <div class="cta-card">
       <div>
-        <h2>Ready to put agentic intelligence to work — without the governance debt?</h2>
-        <p>Book a 30-minute working session with an AutoEnthra architect. We'll map your highest-value use case to a deployable agent in real time.</p>
+        <h2>See agentOS running on your business.</h2>
+        <p>Bring us a real use case — claims, KYC, patient triage, IT ops, citizen services. We'll show agentOS provisioning it conversationally, with FinOps, governance, and the full platform working from the first minute. Measurable value, in your environment.</p>
       </div>
       <div class="cta-actions">
-        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">Book a demo
+        <a class="btn btn-primary btn-lg" href="#" onclick="openModal();return false;">Book a working session
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7h8m0 0L7.5 3.5M11 7L7.5 10.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a class="btn btn-secondary btn-lg" href="mailto:hello@autoenthra.com">Talk to an architect</a>
@@ -1313,8 +1882,8 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="assets/autoenthra-logo.png" alt="AutoEnthra">
-        <p>The agentic governance and orchestration platform for the regulated enterprise. Built for AWS Bedrock and AgentCore, extensible to any cloud.</p>
+        <img src="assets/autoenthra-logo.png" alt="AutoEnthra agentOS">
+        <p><strong style="color:#fff">AutoEnthra agentOS</strong> — the operating system for agentic AI. One control plane for FinOps, governance, identity, memory, and observability across every agent runtime, every cloud, every business unit.</p>
         <div class="footer-social">
           <a href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 5h2v9H2V5zm1-3a1 1 0 100 2 1 1 0 000-2zm3 3h2v1.3c.4-.7 1.3-1.5 2.7-1.5 2.9 0 3.3 1.9 3.3 4.4V14h-2V9.4c0-1.1 0-2.6-1.5-2.6-1.6 0-1.8 1.2-1.8 2.5V14H6V5z"/></svg></a>
           <a href="#" aria-label="X"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M12.2 2h2L9.7 7.1 15 14h-4.2L7.5 9.6 3.7 14H1.6l4.8-5.5L1 2h4.3l3 4 3.9-4z"/></svg></a>
@@ -1322,47 +1891,53 @@ h1.hero-title .accent{color:var(--teal-700);font-style:italic;font-weight:500}
         </div>
       </div>
       <div class="footer-col">
-        <h5>Platform</h5>
+        <h5>agentOS Platform</h5>
         <ul>
-          <li><a href="#platform">Conversational provisioning</a></li>
-          <li><a href="#platform">Multi-agent orchestration</a></li>
-          <li><a href="#platform">Policy-as-code</a></li>
-          <li><a href="#platform">FinOps & unit economics</a></li>
-          <li><a href="#platform">AgentCore + multi-cloud</a></li>
+          <li><a href="#platform">Enterprise FinOps &amp; AI P&amp;L</a></li>
+          <li><a href="#platform">Governance, Risk &amp; Audit</a></li>
+          <li><a href="#platform">Conversational Provisioning</a></li>
+          <li><a href="#platform">Multi-Agent &amp; Hybrid Orchestration</a></li>
+          <li><a href="#plane">Code ↔ Agent Plane</a></li>
+          <li><a href="#platform">Semantic Intelligence Layer</a></li>
+          <li><a href="#platform">Memory, Context &amp; State</a></li>
+          <li><a href="#platform">Evals &amp; Self-Learning</a></li>
+          <li><a href="#platform">Human-in-the-Loop</a></li>
+          <li><a href="#platform">Federation &amp; Open Standards</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Business value</h5>
+        <ul>
+          <li><a href="#picture">Lower cost per outcome</a></li>
+          <li><a href="#picture">Compliance at delivery speed</a></li>
+          <li><a href="#picture">Faster time to value</a></li>
+          <li><a href="#picture">Productivity that compounds</a></li>
+          <li><a href="#scale">How agentOS scales</a></li>
         </ul>
       </div>
       <div class="footer-col">
         <h5>Industries</h5>
         <ul>
-          <li><a href="#industries">Life Sciences & Healthcare</a></li>
+          <li><a href="#industries">Life Sciences &amp; Healthcare</a></li>
           <li><a href="#industries">Financial Services</a></li>
           <li><a href="#industries">Public Sector</a></li>
-          <li><a href="#industries">Manufacturing & Energy</a></li>
+          <li><a href="#industries">Manufacturing &amp; Energy</a></li>
+          <li><a href="#industries">Retail · Telco · Insurance</a></li>
         </ul>
       </div>
       <div class="footer-col">
-        <h5>Resources</h5>
+        <h5>Trust &amp; Company</h5>
         <ul>
-          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Trust center</a></li>
+          <li><a href="#">EU AI Act readiness</a></li>
           <li><a href="#">Reference architectures</a></li>
           <li><a href="#">Customer stories</a></li>
-          <li><a href="#">Trust center</a></li>
-          <li><a href="#">Blog</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Company</h5>
-        <ul>
-          <li><a href="#">About</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Press</a></li>
-          <li><a href="#">Partners</a></li>
           <li><a href="mailto:hello@autoenthra.com">Contact</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bot">
-      <div>© 2026 AutoEnthra Technologies, Inc. All rights reserved.</div>
+      <div>© 2026 AutoEnthra Technologies, Inc. agentOS™ is a trademark of AutoEnthra Technologies. All rights reserved.</div>
       <div class="footer-bot-links">
         <a href="#">Privacy</a>
         <a href="#">Terms</a>
