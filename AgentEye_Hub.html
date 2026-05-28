@@ -1,0 +1,3697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentEye Hub · Conversational Agent Provisioning</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     CLAUDE PALETTE — anchored on claude.ai chat surface
+     ───────────────────────────────────────────────────────────── */
+  :root {
+    --bg:           #FAF9F5;   /* claude chat cream */
+    --bg-elev:      #FFFFFE;
+    --bg-soft:      #F0EEE6;   /* user-bubble cream */
+    --bg-hover:     #ECEAE0;
+    --border:       #E5E2D8;
+    --border-soft:  #EFEDE3;
+    --text:         #181818;
+    --text-2:       #3D3929;
+    --text-3:       #6B6857;
+    --text-4:       #97937D;
+    --accent:       #C96442;   /* claude coral */
+    --accent-deep:  #A8492C;
+    --accent-soft:  #F5E5DC;
+    --accent-faint: #FBF3EE;
+    --success:      #14803C;
+    --success-bg:   #E7F4EB;
+    --warn:         #A65A0F;
+    --warn-bg:      #FBEFD8;
+    --risk:         #B42318;
+    --risk-bg:      #FCEBE9;
+    --info:         #155EEF;
+    --info-bg:      #EBF1FE;
+    --shadow-sm:    0 1px 2px rgba(60, 50, 30, 0.05);
+    --shadow-md:    0 1px 3px rgba(60, 50, 30, 0.07), 0 1px 2px rgba(60, 50, 30, 0.04);
+    --shadow-lg:    0 8px 28px rgba(60, 50, 30, 0.08), 0 2px 6px rgba(60, 50, 30, 0.05);
+    --topbar-h:     56px;
+    --tabs-h:       44px;
+    --serif: 'Source Serif 4', 'Tiempos Text', Georgia, serif;
+    --sans:  'Inter', -apple-system, 'Segoe UI', sans-serif;
+    --mono:  'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  .serif { font-family: var(--serif); }
+  .mono  { font-family: var(--mono); }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(120,110,80,0.18); border-radius: 8px; border: 2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(120,110,80,0.32); }
+
+  /* ═══ TOPBAR ═══ */
+  .topbar {
+    height: var(--topbar-h);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px;
+    position: sticky; top: 0; z-index: 30;
+  }
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand-logo {
+    height: 38px; width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    display: block;
+  }
+  .brand-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 24px;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    line-height: 1;
+    border-left: 1px solid var(--border);
+    padding-left: 16px;
+  }
+
+  .topbar-meta {
+    display: flex; align-items: center; gap: 18px;
+    font-size: 12px; color: var(--text-3);
+  }
+  .topbar-meta .mi { display: inline-flex; align-items: center; gap: 6px; }
+  .topbar-meta .mi strong { color: var(--text); font-weight: 600; }
+  .topbar-meta .key-btn {
+    padding: 5px 11px; border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev); color: var(--text-2);
+    font-size: 11.5px; font-weight: 500;
+    font-family: var(--mono);
+    cursor: pointer; transition: all 0.14s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .topbar-meta .key-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .topbar-meta .key-btn.set { background: var(--accent-faint); border-color: var(--accent-soft); color: var(--accent-deep); }
+
+  /* ═══ TABS ═══ */
+  .tabs {
+    height: var(--tabs-h);
+    display: flex; align-items: stretch;
+    padding: 0 28px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: var(--topbar-h); z-index: 25;
+  }
+  .tab {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 22px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-2);
+    cursor: pointer; border: none; background: transparent;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.12s, border-color 0.12s;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab .tcount {
+    font-size: 10.5px; font-weight: 500;
+    padding: 2px 7px; border-radius: 100px;
+    background: var(--bg-soft); color: var(--text-3);
+    font-family: var(--mono);
+  }
+  .tab.active .tcount { background: var(--accent-soft); color: var(--accent-deep); }
+  .tab.locked { color: var(--text-4); cursor: not-allowed; }
+  .tab.locked:hover { color: var(--text-4); }
+  .tab.locked .tcount { background: transparent; color: var(--text-4); border: 1px solid var(--border); }
+  .tab.unlocked .tcount { background: var(--success-bg); color: var(--success); border: 1px solid #C8E6D5; }
+
+  /* ═══ MAIN ═══ */
+  .main {
+    max-width: 1320px;
+    margin: 0 auto;
+    padding: 28px 28px 56px;
+  }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fade 0.18s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ═══ HOME — WELCOME BANNER ═══ */
+  .welcome {
+    background: linear-gradient(180deg, var(--bg-elev) 0%, var(--bg) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 36px 36px 32px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .welcome::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -10%;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, var(--accent-soft) 0%, transparent 70%);
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  .welcome h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: 36px;
+    letter-spacing: -0.025em;
+    line-height: 1.15;
+    color: var(--text);
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .welcome h1 em { font-style: italic; color: var(--accent-deep); font-weight: 500; }
+  .welcome p {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--text-2);
+    max-width: 680px;
+    position: relative;
+  }
+  .welcome p strong { font-weight: 600; color: var(--text); }
+
+  /* ═══ HOME — MEGA CARDS ═══ */
+  .mega-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  .mega-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 22px 18px;
+    cursor: pointer;
+    transition: all 0.18s;
+    display: flex; flex-direction: column; gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mega-card:hover {
+    border-color: var(--accent-soft);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .mega-card .mc-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--accent-faint);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--accent-deep);
+    flex-shrink: 0;
+  }
+  .mega-card .mc-icon svg { width: 22px; height: 22px; stroke-width: 1.6; }
+  .mega-card .mc-title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 19px;
+    letter-spacing: -0.015em;
+    color: var(--text);
+  }
+  .mega-card .mc-sub {
+    font-size: 12px;
+    color: var(--text-3);
+    font-weight: 500;
+    margin-top: -8px;
+  }
+  .mega-card .mc-body {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--text-2);
+    line-height: 1.55;
+  }
+  .mega-card .mc-foot {
+    margin-top: auto;
+    padding-top: 8px;
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 500; color: var(--accent);
+    font-family: var(--mono);
+  }
+  .mega-card.disabled { opacity: 0.55; cursor: not-allowed; }
+  .mega-card.disabled:hover { transform: none; box-shadow: none; border-color: var(--border); }
+
+  /* ═══ SECTION HEADERS ═══ */
+  .sec-h {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--text-3);
+    margin: 28px 0 12px;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+
+  /* ═══ STAT STRIP ═══ */
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .stat .l { font-size: 11px; color: var(--text-3); font-weight: 500; letter-spacing: 0.02em; }
+  .stat .v {
+    font-family: var(--serif);
+    font-size: 26px; font-weight: 600;
+    color: var(--text); margin-top: 4px; line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .stat .d { font-size: 11.5px; color: var(--text-3); margin-top: 6px; }
+
+  /* ═══ PROVISION — 2-COL LAYOUT ═══ */
+  .prov-shell {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 14px;
+    height: calc(100vh - var(--topbar-h) - var(--tabs-h) - 56px);
+    min-height: 600px;
+  }
+  @media (max-width: 1100px) {
+    .prov-shell { grid-template-columns: 1fr; height: auto; }
+  }
+
+  .prov-chat, .prov-side {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+
+  /* ═══ STAGE RAIL ═══ */
+  .stage-rail {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; gap: 0;
+    background: linear-gradient(180deg, var(--bg-elev), var(--bg));
+    flex-shrink: 0;
+    overflow-x: auto;
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--tabs-h));
+    z-index: 12;
+  }
+  .stage-step {
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+    flex: 1;
+    min-width: 0;
+  }
+  .stage-step .s-dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600;
+    font-family: var(--mono);
+    flex-shrink: 0;
+    transition: all 0.25s;
+  }
+  .stage-step.done .s-dot { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .stage-step.active .s-dot {
+    background: var(--accent-faint); border-color: var(--accent); color: var(--accent-deep);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+  }
+  .stage-step .s-lbl {
+    font-size: 10.5px; color: var(--text-3); font-weight: 500;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .stage-step.active .s-lbl { color: var(--accent-deep); font-weight: 600; }
+  .stage-step.done .s-lbl { color: var(--text-2); }
+  .stage-step .s-bar {
+    flex: 1; height: 1.5px; min-width: 14px;
+    background: var(--border);
+    margin: 0 4px;
+    transition: background 0.25s;
+  }
+  .stage-step.done .s-bar { background: var(--accent); }
+
+  /* ═══ CHAT MESSAGES ═══ */
+  .chat-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px 16px;
+    min-height: 0;
+  }
+  .msg {
+    margin-bottom: 22px;
+    display: flex; flex-direction: column;
+    animation: fadeUp 0.25s ease;
+  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .msg-role {
+    font-size: 10.5px; color: var(--text-4); font-weight: 600;
+    letter-spacing: 0.07em; text-transform: uppercase;
+    font-family: var(--mono);
+    margin-bottom: 6px;
+  }
+  .msg-bubble {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  .msg.user .msg-role { color: var(--accent-deep); }
+  .msg.user .msg-bubble {
+    align-self: flex-end;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 16px 16px 4px 16px;
+    padding: 12px 18px;
+    max-width: 78%;
+    color: var(--text);
+    font-size: 15.5px;
+  }
+  .msg.user { align-items: flex-end; }
+  .msg.assistant .msg-bubble { padding: 0; }
+  .msg.assistant .msg-bubble strong { color: var(--text); font-weight: 600; }
+
+  /* ═══ TYPING INDICATOR ═══ */
+  .typing {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 10px 0;
+  }
+  .typing span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.4;
+    animation: typing 1.2s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing { 0%, 100% { opacity: 0.3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-3px); } }
+
+  /* ═══ CHAT INPUT ═══ */
+  .chat-input-wrap {
+    padding: 14px 22px 22px;
+    border-top: 1px solid var(--border-soft);
+    background: var(--bg-elev);
+    flex-shrink: 0;
+  }
+  .chat-input {
+    display: flex; align-items: flex-end; gap: 10px;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    transition: border-color 0.15s;
+  }
+  .chat-input:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .chat-input textarea {
+    flex: 1;
+    background: transparent;
+    border: none; outline: none;
+    color: var(--text);
+    font-family: var(--serif);
+    font-size: 15.5px;
+    line-height: 1.55;
+    resize: none;
+    max-height: 160px;
+    min-height: 22px;
+  }
+  .chat-input textarea::placeholder { color: var(--text-4); font-style: italic; }
+  .chat-send {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: var(--accent);
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .chat-send:disabled { background: var(--bg-soft); color: var(--text-4); cursor: not-allowed; }
+  .chat-send:not(:disabled):hover { background: var(--accent-deep); transform: translateY(-1px); }
+  .chat-hint {
+    margin-top: 8px;
+    font-size: 11px; color: var(--text-4);
+    text-align: center;
+    font-family: var(--mono);
+  }
+
+  /* ═══ SIDE PANEL — CONFIG ═══ */
+  .side-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-soft);
+    flex-shrink: 0;
+    background: var(--bg);
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--tabs-h));
+    z-index: 12;
+  }
+  .side-tab {
+    flex: 1;
+    padding: 11px 14px;
+    border: none; background: transparent;
+    font-size: 12px; font-weight: 500;
+    color: var(--text-3);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.14s;
+  }
+  .side-tab:hover { color: var(--text); }
+  .side-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .side-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+  }
+  .side-empty {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-4);
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.6;
+    font-style: italic;
+  }
+  .side-empty .se-icon { font-size: 28px; margin-bottom: 12px; opacity: 0.5; }
+
+  .cfg-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+  }
+  .cfg-card .cl {
+    font-size: 10px; color: var(--text-3);
+    font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-family: var(--mono);
+  }
+  .cfg-card .cv {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.5;
+    word-break: break-word;
+  }
+  .cfg-card.list .cv { font-family: var(--sans); font-size: 13px; }
+  .cfg-card.list ul { list-style: none; padding: 0; margin: 0; }
+  .cfg-card.list li {
+    padding: 4px 0;
+    font-size: 13px;
+    color: var(--text-2);
+    font-family: var(--sans);
+  }
+  .cfg-card.list li::before { content: '·  '; color: var(--accent); font-weight: 700; }
+
+  /* badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 100px;
+    font-size: 10.5px; font-weight: 500;
+    background: var(--bg-soft); color: var(--text-2);
+    border: 1px solid var(--border);
+    margin-right: 5px; margin-top: 4px;
+    font-family: var(--mono);
+    letter-spacing: 0.02em;
+  }
+  .badge.coral { background: var(--accent-faint); color: var(--accent-deep); border-color: var(--accent-soft); }
+  .badge.green { background: var(--success-bg); color: var(--success); border-color: #C8E6D5; }
+  .badge.amber { background: var(--warn-bg); color: var(--warn); border-color: #F2D9AE; }
+
+  /* ═══ DEPLOY — YAML VIEW ═══ */
+  .yaml-shell {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .yaml-head {
+    padding: 12px 18px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .yaml-head .yt {
+    font-family: var(--mono);
+    font-size: 11.5px; color: var(--text-2);
+    font-weight: 500; letter-spacing: 0.04em;
+  }
+  .copy-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    color: var(--text-2);
+    font-size: 11.5px; font-weight: 500;
+    font-family: var(--mono);
+    cursor: pointer;
+    transition: all 0.14s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.ok { background: var(--success-bg); color: var(--success); border-color: #C8E6D5; }
+  .yaml-body {
+    padding: 22px;
+    max-height: 70vh;
+    overflow: auto;
+    background: #FCFBF7;
+  }
+  .yaml-body pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .yaml-body .y-cmt { color: #9B916A; }
+  .yaml-body .y-key { color: #6B4F1F; font-weight: 500; }
+  .yaml-body .y-top { color: var(--accent-deep); font-weight: 600; }
+  .yaml-body .y-aws { color: #14803C; }
+  .yaml-body .y-ref { color: #155EEF; }
+
+  /* ═══ CONNECTORS ═══ */
+  .conn-shell {
+    display: grid;
+    grid-template-columns: 1fr 460px;
+    gap: 16px;
+    align-items: start;
+  }
+  @media (max-width: 1180px) { .conn-shell { grid-template-columns: 1fr; } }
+
+  .conn-list { display: flex; flex-direction: column; gap: 12px; }
+  .conn-empty {
+    background: var(--bg-elev);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 56px 24px;
+    text-align: center;
+    color: var(--text-3);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .conn-empty .ce-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.45; }
+
+  .conn-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .conn-card:hover { border-color: var(--accent-soft); }
+  .conn-card.open  { box-shadow: var(--shadow-md); border-color: var(--accent-soft); }
+  .conn-card.configured { border-left: 3px solid var(--success); }
+  .conn-card.partial    { border-left: 3px solid var(--warn); }
+  .conn-card.untouched  { border-left: 3px solid var(--border); }
+
+  .conn-head {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .conn-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--accent-faint);
+    color: var(--accent-deep);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--serif); font-weight: 600; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .conn-head .ch-meta { flex: 1; min-width: 0; }
+  .conn-head .ch-name {
+    font-family: var(--serif);
+    font-size: 16px; font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .conn-head .ch-sub {
+    font-size: 12px; color: var(--text-3);
+    margin-top: 2px;
+  }
+  .conn-head .ch-status {
+    font-size: 10.5px; font-weight: 600;
+    padding: 3px 9px; border-radius: 100px;
+    font-family: var(--mono); letter-spacing: 0.04em;
+    background: var(--bg-soft); color: var(--text-3);
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .conn-head .ch-status.configured { background: var(--success-bg); color: var(--success); border-color: #C8E6D5; }
+  .conn-head .ch-status.partial    { background: var(--warn-bg); color: var(--warn); border-color: #F2D9AE; }
+  .conn-head .ch-chevron {
+    color: var(--text-4);
+    font-size: 12px;
+    transition: transform 0.18s;
+    flex-shrink: 0;
+  }
+  .conn-card.open .ch-chevron { transform: rotate(90deg); color: var(--accent); }
+
+  .conn-body {
+    display: none;
+    padding: 4px 18px 18px;
+    border-top: 1px solid var(--border-soft);
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg-elev) 100%);
+  }
+  .conn-card.open .conn-body { display: block; }
+
+  .conn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 16px;
+    margin-top: 14px;
+  }
+  .conn-grid .full { grid-column: 1 / -1; }
+  .field { display: flex; flex-direction: column; gap: 5px; }
+  .field label {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-3); letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .field label .req { color: var(--accent); }
+  .field label .secret-tag {
+    padding: 1px 6px; border-radius: 4px;
+    background: var(--warn-bg); color: var(--warn);
+    border: 1px solid #F2D9AE;
+    font-size: 9.5px; letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-elev);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: var(--mono);
+    transition: border-color 0.14s, box-shadow 0.14s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field textarea { resize: vertical; min-height: 60px; font-family: var(--mono); }
+  .field .hint {
+    font-size: 11.5px; color: var(--text-3);
+    line-height: 1.5;
+    font-family: var(--sans);
+    font-style: italic;
+  }
+
+  .conn-actions {
+    display: flex; gap: 8px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-soft);
+    align-items: center;
+  }
+  .conn-actions .spacer { flex: 1; }
+  .btn-sm {
+    padding: 6px 14px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    color: var(--text-2);
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.14s;
+  }
+  .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-sm.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn-sm.danger:hover { border-color: var(--risk); color: var(--risk); }
+
+  .conn-side {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--tabs-h) + 16px);
+  }
+  .conn-side-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--bg);
+  }
+  .conn-side-content {
+    max-height: 70vh;
+    overflow: auto;
+    padding: 0;
+  }
+  .conn-side-content pre {
+    padding: 18px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+  }
+
+  /* ═══ LIBRARY ═══ */
+  .lib-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .lib-title {
+    font-family: var(--serif);
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .lib-sub {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--text-3);
+    max-width: 720px;
+    line-height: 1.55;
+  }
+  .lib-search {
+    width: 320px; max-width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elev);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13.5px;
+    transition: border-color 0.14s, box-shadow 0.14s;
+  }
+  .lib-search:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  .lib-meta-bar {
+    display: flex; align-items: center; gap: 18px;
+    padding: 10px 0 18px;
+    border-top: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 22px;
+    font-size: 11.5px; color: var(--text-3); letter-spacing: 0.02em;
+  }
+  .lib-meta-bar .mono { font-family: var(--mono); }
+
+  .lib-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 14px;
+  }
+  .lib-empty {
+    grid-column: 1 / -1;
+    background: var(--bg-elev);
+    border: 1px dashed var(--border);
+    border-radius: 12px;
+    padding: 56px 24px;
+    text-align: center;
+    color: var(--text-3);
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .lib-empty .ce-icon { font-size: 30px; margin-bottom: 10px; opacity: 0.45; }
+
+  .lib-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px 14px;
+    display: flex; flex-direction: column;
+    gap: 8px;
+    transition: all 0.18s;
+    cursor: pointer;
+  }
+  .lib-card:hover {
+    border-color: var(--accent-soft);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .lib-card-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px;
+  }
+  .lib-card-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: -0.015em;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .lib-version {
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 600;
+    padding: 3px 9px; border-radius: 100px;
+    background: var(--accent-faint);
+    color: var(--accent-deep);
+    border: 1px solid var(--accent-soft);
+    flex-shrink: 0;
+  }
+  .lib-usecase {
+    font-family: var(--serif);
+    font-size: 13.5px;
+    color: var(--text-2);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .lib-gist {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--text-2);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .lib-card-foot {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-soft);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--text-3);
+    flex-wrap: wrap;
+  }
+  .lib-card-foot .lib-pill {
+    padding: 2px 7px; border-radius: 4px;
+    background: var(--bg-soft); color: var(--text-2);
+    border: 1px solid var(--border);
+  }
+  .lib-card-foot .spacer { flex: 1; }
+
+  /* Library detail modal — wider/taller than the standard one */
+  .modal-wide  { width: 540px; }
+  .modal-xl    {
+    width: 96vw;
+    max-width: 1280px;
+    height: 90vh;
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    padding: 22px 28px 24px;
+  }
+  .lib-detail-head {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 16px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 0;
+  }
+  .lib-detail-head h2 { margin-bottom: 4px; }
+  .lib-detail-sub { font-family: var(--serif); font-size: 14px; color: var(--text-3); font-style: italic; line-height: 1.5; }
+  .lib-detail-tabs {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border-soft);
+    margin: 0 -28px;
+    padding: 0 28px;
+    flex-shrink: 0;
+  }
+  .lib-detail-body {
+    flex: 1; min-height: 0;
+    overflow: auto;
+    padding: 22px 4px 4px;
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text);
+    max-width: 920px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .lib-detail-body pre {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    color: var(--text-2);
+    white-space: pre-wrap;
+    word-break: break-word;
+    margin: 0;
+  }
+  .lib-detail-body h1, .lib-detail-body h2, .lib-detail-body h3, .lib-detail-body h4 {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.015em;
+    margin: 18px 0 8px;
+  }
+  .lib-detail-body h1 { font-size: 22px; }
+  .lib-detail-body h2 { font-size: 18px; }
+  .lib-detail-body h3 { font-size: 16px; }
+  .lib-detail-body h4 { font-size: 14px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; font-family: var(--mono); margin-top: 22px; }
+  .lib-detail-body strong { font-weight: 600; color: var(--text); }
+  .lib-detail-body code { background: var(--bg-soft); padding: 1px 6px; border-radius: 4px; font-family: var(--mono); font-size: 0.86em; color: var(--accent-deep); }
+  .lib-detail-body ul { margin: 8px 0 14px 20px; }
+  .lib-detail-body li { margin-bottom: 4px; }
+  .lib-detail-body hr { border: none; border-top: 1px solid var(--border-soft); margin: 16px 0; }
+  .lib-detail-body em { color: var(--text-3); font-style: italic; }
+
+  /* ═══ AGENTCORE TOGGLE SWITCH ═══ */
+  .ac-toggle {
+    position: relative;
+    width: 36px; height: 20px;
+    background: var(--bg-soft);
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .ac-toggle::after {
+    content: '';
+    position: absolute;
+    top: 1px; left: 1px;
+    width: 14px; height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(60,50,30,0.18);
+    transition: transform 0.18s;
+  }
+  .ac-toggle.on { background: var(--accent); border-color: var(--accent); }
+  .ac-toggle.on::after { transform: translateX(16px); }
+  .conn-card.ac-disabled { opacity: 0.55; }
+  .conn-card.ac-disabled .conn-body { display: none; }
+
+  /* ═══ APPROVALS TRAY (Test tab) ═══ */
+  .approvals-tray {
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--border-soft);
+    background: linear-gradient(180deg, var(--warn-bg) 0%, var(--bg-elev) 100%);
+    padding: 12px 18px 14px;
+    position: sticky;
+    top: calc(var(--topbar-h) + var(--tabs-h));
+    z-index: 11;
+  }
+  .at-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .at-header .at-title { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--warn); letter-spacing: 0.05em; text-transform: uppercase; }
+  .at-header .at-count {
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    padding: 2px 9px; border-radius: 100px;
+    background: var(--warn); color: #fff;
+  }
+  .at-header .spacer { flex: 1; }
+  .at-header .at-mode { font-family: var(--mono); font-size: 11px; color: var(--warn); font-style: italic; }
+  .at-list { display: flex; gap: 10px; flex-wrap: wrap; }
+  .at-card {
+    background: var(--bg-elev);
+    border: 1.5px solid #F2D9AE;
+    border-radius: 10px;
+    padding: 10px 12px;
+    flex: 1 1 280px;
+    min-width: 260px;
+    display: flex; flex-direction: column; gap: 6px;
+    transition: all 0.18s;
+  }
+  .at-card.approved { border-color: #C8E6D5; background: var(--success-bg); }
+  .at-card.denied   { border-color: #F5C9C5; background: var(--risk-bg); }
+  .at-card .at-action {
+    font-family: var(--serif);
+    font-weight: 600; font-size: 14px;
+    color: var(--text);
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+  }
+  .at-card .at-reason {
+    font-family: var(--serif);
+    font-size: 12.5px;
+    color: var(--text-2);
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .at-card .at-actions {
+    display: flex; gap: 6px;
+    margin-top: 6px;
+  }
+  .at-card .at-actions .btn-sm { flex: 1; padding: 5px 10px; font-size: 11.5px; }
+  .at-card .at-status {
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--success);
+  }
+  .at-card.denied .at-status { color: var(--risk); }
+
+  /* ═══ MODE STRIP (supervisor / specialist) ═══ */
+  .side-mode {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .mode-pill {
+    font-family: var(--mono);
+    font-size: 10.5px; font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--accent-faint);
+    color: var(--accent-deep);
+    border: 1px solid var(--accent-soft);
+  }
+  .mode-pill.supervisor { background: var(--success-bg); color: var(--success); border-color: #C8E6D5; }
+
+  /* Collaborator chip in overview */
+  .collab-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border-radius: 8px;
+    background: var(--accent-faint); color: var(--accent-deep);
+    border: 1px solid var(--accent-soft);
+    font-size: 12px; font-weight: 500;
+    margin: 2px 4px 2px 0;
+    font-family: var(--sans);
+  }
+  .collab-chip .v {
+    font-family: var(--mono);
+    font-size: 10px;
+    background: rgba(168, 73, 44, 0.12);
+    padding: 1px 5px; border-radius: 4px;
+  }
+  .collab-chip .x {
+    cursor: pointer;
+    color: var(--accent-deep); opacity: 0.55;
+    margin-left: 2px; font-size: 14px; line-height: 1;
+  }
+  .collab-chip .x:hover { opacity: 1; color: var(--risk); }
+
+  /* Collaborator picker grid (in modal) */
+  .collab-card {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-elev);
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.14s;
+  }
+  .collab-card:hover { border-color: var(--accent-soft); }
+  .collab-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-faint);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .collab-card .cc-check {
+    width: 20px; height: 20px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg);
+    color: #fff;
+    font-size: 13px; font-weight: 700;
+    line-height: 1;
+  }
+  .collab-card.selected .cc-check { background: var(--accent); border-color: var(--accent); }
+  .collab-card .cc-body { flex: 1; min-width: 0; }
+  .collab-card .cc-name {
+    font-family: var(--serif);
+    font-size: 16px; font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.015em;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .collab-card .cc-version { font-family: var(--mono); font-size: 10.5px; color: var(--accent-deep); background: var(--accent-faint); padding: 2px 7px; border-radius: 100px; border: 1px solid var(--accent-soft); }
+  .collab-card .cc-usecase { font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--text-2); margin-top: 3px; }
+  .collab-card .cc-gist { font-family: var(--serif); font-size: 13px; color: var(--text-3); margin-top: 6px; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+  /* ═══ TOAST ═══ */
+  .toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--text);
+    color: var(--bg);
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    z-index: 200;
+    max-width: 380px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.success { background: var(--success); }
+  .toast.error   { background: var(--risk); }
+
+  /* ═══ MODAL ═══ */
+  .modal-bg {
+    position: fixed; inset: 0;
+    background: rgba(35, 28, 18, 0.4);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    animation: fade 0.18s;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 28px 24px;
+    width: 460px;
+    max-width: 92vw;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h2 {
+    font-family: var(--serif);
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .modal p {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--text-2);
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+  .modal p a { color: var(--accent-deep); }
+  .modal label {
+    display: block;
+    font-size: 11px; font-weight: 600;
+    color: var(--text-3); letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: var(--mono);
+  }
+  .modal input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    transition: border-color 0.15s;
+  }
+  .modal input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .modal-actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+    margin-top: 18px;
+  }
+  .btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-2);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.14s;
+  }
+  .btn:hover { background: var(--bg-soft); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .btn.primary:hover { background: var(--accent-deep); border-color: var(--accent-deep); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ═══ MARKDOWN-ish in messages ═══ */
+  .msg-bubble code {
+    background: var(--bg-soft);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 0.88em;
+    color: var(--accent-deep);
+  }
+
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
+
+</style>
+</head>
+<body>
+
+<!-- ═════ TOPBAR ═════ -->
+<header class="topbar">
+  <div class="brand">
+    <img class="brand-logo" src="/assets/accenture_full_logo1.png?v=2" alt="Accenture">
+    <span class="brand-name">AgentEye</span>
+  </div>
+  <div class="topbar-meta">
+    <span class="mi mono" id="header-clock">--:--:--</span>
+  </div>
+</header>
+
+<!-- ═════ TABS ═════ -->
+<nav class="tabs">
+  <button class="tab active" data-panel="home">Home</button>
+  <button class="tab" data-panel="library">Library <span class="tcount" id="tab-library-count">0</span></button>
+  <button class="tab" data-panel="provision">Provision Agent</button>
+  <button class="tab" data-panel="config">Configuration</button>
+  <button class="tab locked" data-panel="connectors" id="tab-connectors">Connectors <span class="tcount" id="tab-connectors-count">0</span></button>
+  <button class="tab" data-panel="agentcore" id="tab-agentcore">AgentCore <span class="tcount" id="tab-agentcore-count">0</span></button>
+  <button class="tab" data-panel="memory" id="tab-memory">Memory <span class="tcount" id="tab-memory-count">0</span></button>
+  <button class="tab" data-panel="deploy">Deploy</button>
+  <button class="tab locked" data-panel="test" id="tab-test">Test Agent <span class="tcount" id="tab-test-state">locked</span></button>
+</nav>
+
+<main class="main">
+
+  <!-- ─────── HOME ─────── -->
+  <div class="panel active" id="panel-home">
+    <div class="welcome">
+      <h1>Provision agents <em>through conversation,</em><br>not configuration.</h1>
+      <p>AgentEye turns the <strong>AWS Bedrock agent setup</strong> into a guided dialogue. Describe the problem in plain language &mdash; AgentEye asks the right questions and builds a deployable CloudFormation template behind the scenes. Built for non-technical teams across the Novartis IT delivery estate.</p>
+    </div>
+
+    <div class="mega-row">
+      <div class="mega-card" data-jump="provision">
+        <div class="mc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12c0 4.97-4.03 9-9 9-1.6 0-3.1-.42-4.4-1.15L3 21l1.18-4.42A8.96 8.96 0 0 1 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div>
+          <div class="mc-title">Start a conversation</div>
+          <div class="mc-sub">Describe your use case</div>
+        </div>
+        <div class="mc-body">Walk through use case, persona, model, knowledge sources, tools, guardrails and memory &mdash; one question at a time. No AWS jargon required.</div>
+        <div class="mc-foot">→ Provision Agent</div>
+      </div>
+
+      <div class="mega-card" data-jump="config">
+        <div class="mc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="mc-title">Watch the config build</div>
+          <div class="mc-sub">Live structured output</div>
+        </div>
+        <div class="mc-body">As you answer, the agent name, foundation model, knowledge bases, action groups, MCP connectors and guardrails populate in real time.</div>
+        <div class="mc-foot">→ Configuration</div>
+      </div>
+
+      <div class="mega-card" data-jump="deploy">
+        <div class="mc-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" stroke-linejoin="round"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg>
+        </div>
+        <div>
+          <div class="mc-title">Ship the YAML</div>
+          <div class="mc-sub">CloudFormation, ready to apply</div>
+        </div>
+        <div class="mc-body">Production-grade template &mdash; agent, alias, knowledge bases, Lambda stubs, guardrails and MCP connector hints &mdash; copied with one click.</div>
+        <div class="mc-foot">→ Deploy</div>
+      </div>
+    </div>
+
+    <div class="sec-h"><span>At a glance</span></div>
+    <div class="stat-row">
+      <div class="stat"><div class="l">Stages guided</div><div class="v">8</div><div class="d">Use case → Memory</div></div>
+      <div class="stat"><div class="l">Foundation models</div><div class="v">12+</div><div class="d">Claude · Nova · Llama</div></div>
+      <div class="stat"><div class="l">MCP connectors</div><div class="v">20+</div><div class="d">SAP · Salesforce · Jira · …</div></div>
+      <div class="stat"><div class="l">Time to deploy</div><div class="v">~15<span style="font-size:14px; font-weight:500; color:var(--text-3)"> min</span></div><div class="d">Conversation to <code>cloudformation deploy</code></div></div>
+    </div>
+  </div>
+
+  <!-- ─────── LIBRARY ─────── -->
+  <div class="panel" id="panel-library">
+    <div class="lib-head">
+      <div>
+        <h1 class="lib-title">Agent Library</h1>
+        <div class="lib-sub">A versioned, Git-backed record of every agent provisioned through AgentEye. Fork from any version to start a new conversation seeded with that prior context.</div>
+      </div>
+      <input class="lib-search" id="lib-search" placeholder="Search by name, use case, model…">
+    </div>
+    <div class="lib-meta-bar">
+      <span id="lib-count-meta" class="mono">— versions</span>
+      <span id="lib-git-meta" class="mono"></span>
+    </div>
+    <div class="lib-grid" id="lib-grid"></div>
+  </div>
+
+  <!-- ─────── PROVISION ─────── -->
+  <div class="panel" id="panel-provision">
+    <div class="prov-shell">
+      <!-- Chat -->
+      <div class="prov-chat">
+        <div class="stage-rail" id="stage-rail"></div>
+        <div class="chat-scroll" id="chat-scroll">
+          <div class="msg assistant">
+            <div class="msg-role">AgentEye</div>
+            <div class="msg-bubble">Hello — I'm here to help you provision an AWS Bedrock agent. We'll go through it together, one question at a time, in plain language.
+
+To begin: <strong>what business problem do you want this agent to solve, and who would use it?</strong></div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="chat-input">
+            <textarea id="chat-input" rows="1" placeholder="Describe your use case in plain language..."></textarea>
+            <button class="chat-send" id="chat-send" disabled>↑</button>
+          </div>
+          <div class="chat-hint">Enter to send · Shift+Enter for newline · context retained across turns</div>
+        </div>
+      </div>
+
+      <!-- Side -->
+      <div class="prov-side">
+        <div class="side-tabs">
+          <button class="side-tab active" data-side="overview">Overview</button>
+          <button class="side-tab" data-side="details">Details</button>
+        </div>
+        <div class="side-mode" id="side-mode" style="display:none;">
+          <span class="mode-pill" id="mode-pill">Specialist</span>
+          <button class="btn-sm" id="pick-collab-btn" style="display:none;">⇆ Pick from Library</button>
+        </div>
+        <div class="side-content" id="side-content">
+          <div class="side-empty">
+            <div class="se-icon">◉</div>
+            Your agent's profile will appear here as the conversation progresses.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── CONFIG ─────── -->
+  <div class="panel" id="panel-config">
+    <div class="sec-h"><span>Agent configuration</span><span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500" id="cfg-stage-meta">Stage: USE_CASE</span></div>
+    <div id="full-config"></div>
+  </div>
+
+  <!-- ─────── CONNECTORS ─────── -->
+  <div class="panel" id="panel-connectors">
+    <div class="sec-h">
+      <span>Connector configuration</span>
+      <span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500" id="connectors-meta">— locked until at least one connector or action group is captured</span>
+    </div>
+
+    <div class="conn-shell">
+      <div class="conn-list" id="conn-list"></div>
+      <div class="conn-side">
+        <div class="conn-side-tabs">
+          <button class="side-tab active" data-conn-side="yaml">Patched YAML</button>
+          <button class="side-tab" data-conn-side="secrets">Secrets manifest</button>
+          <button class="side-tab" data-conn-side="env">.env preview</button>
+        </div>
+        <div class="conn-side-content" id="conn-side-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── AGENTCORE ─────── -->
+  <div class="panel" id="panel-agentcore">
+    <div class="sec-h">
+      <span>AgentCore runtime configuration</span>
+      <span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500" id="agentcore-meta">Optional layer · enable the capabilities you need</span>
+    </div>
+    <div class="conn-shell">
+      <div class="conn-list" id="ac-list"></div>
+      <div class="conn-side">
+        <div class="conn-side-tabs">
+          <button class="side-tab active" data-ac-side="yaml">AgentCoreConfig YAML</button>
+          <button class="side-tab" data-ac-side="iam">IAM hints</button>
+        </div>
+        <div class="conn-side-content" id="ac-side-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── MEMORY ─────── -->
+  <div class="panel" id="panel-memory">
+    <div class="sec-h">
+      <span>Cognitive memory architecture</span>
+      <span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500" id="memory-meta">Working · Semantic · Procedural · Episodic — enable the tiers your agent needs</span>
+    </div>
+    <div class="conn-shell">
+      <div class="conn-list" id="mem-list"></div>
+      <div class="conn-side">
+        <div class="conn-side-tabs">
+          <button class="side-tab active" data-mem-side="protocol">Memory protocol</button>
+          <button class="side-tab" data-mem-side="yaml">CognitiveMemory YAML</button>
+          <button class="side-tab" data-mem-side="iam">IAM hints</button>
+          <button class="side-tab" data-mem-side="vault">Vault scaffold</button>
+        </div>
+        <div class="conn-side-content" id="mem-side-content"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── DEPLOY ─────── -->
+  <div class="panel" id="panel-deploy">
+    <div class="sec-h"><span>CloudFormation template</span><span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500">aws cloudformation deploy</span></div>
+    <div class="yaml-shell">
+      <div class="yaml-head">
+        <span class="yt" id="yaml-name"># agent.yaml — not yet generated</span>
+        <span style="display:flex; gap:6px;">
+          <button class="copy-btn" id="publish-yaml" title="Publish this version to the Library" disabled>⊕ Publish to Library</button>
+          <button class="copy-btn" id="download-yaml" title="Download as .yaml">↓ Download</button>
+          <button class="copy-btn" id="copy-yaml">Copy</button>
+        </span>
+      </div>
+      <div class="yaml-body"><pre id="yaml-body"># Your CloudFormation template will appear here once provisioning is complete.
+# Start a conversation under "Provision Agent" to begin.</pre></div>
+    </div>
+  </div>
+
+  <!-- ─────── TEST AGENT ─────── -->
+  <div class="panel" id="panel-test">
+    <div class="sec-h">
+      <span>Agent preview</span>
+      <span style="font-family:var(--mono); font-size:11px; color:var(--text-4); font-weight:500" id="test-meta">Simulated · knowledge & tools are not invoked</span>
+    </div>
+
+    <div class="prov-shell" style="grid-template-columns: 1fr;">
+      <div class="prov-chat" id="test-shell">
+        <div class="approvals-tray" id="approvals-tray" style="display:none;">
+          <div class="at-header">
+            <span class="at-title">⏸ Pending approvals</span>
+            <span class="at-count" id="at-count">0</span>
+            <span class="spacer"></span>
+            <span class="at-mode" id="at-mode"></span>
+          </div>
+          <div class="at-list" id="at-list"></div>
+        </div>
+        <div class="chat-scroll" id="test-scroll">
+          <div class="msg assistant">
+            <div class="msg-role" id="test-agent-name">AgentEye Preview</div>
+            <div class="msg-bubble" id="test-greeting">Complete the provisioning conversation to unlock this preview. Once your agent is fully configured, you'll be able to chat with it here using its system instruction.</div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="chat-input">
+            <textarea id="test-input" rows="1" placeholder="Provision an agent first to start chatting..." disabled></textarea>
+            <button class="chat-send" id="test-send" disabled>↑</button>
+          </div>
+          <div class="chat-hint">Preview uses the live agent instruction · knowledge bases & action groups are simulated</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═════ PUBLISH MODAL ═════ -->
+<div class="modal-bg" id="publish-modal">
+  <div class="modal modal-wide">
+    <h2>Publish to Library</h2>
+    <p>This will write a versioned bundle (transcript, config, YAML, connector wiring, gist) into <code>library/</code>. The gist is auto-generated by Claude.</p>
+    <label>Author</label>
+    <input type="text" id="publish-author" placeholder="Your Name &lt;your.email@accenture.com&gt;">
+    <label style="margin-top:14px;">Commit message</label>
+    <input type="text" id="publish-msg" placeholder="What changed in this version?">
+    <div class="modal-actions">
+      <button class="btn" id="publish-cancel">Cancel</button>
+      <button class="btn primary" id="publish-confirm">Publish</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═════ LIBRARY DETAIL MODAL ═════ -->
+<div class="modal-bg" id="lib-detail-modal">
+  <div class="modal modal-xl">
+    <div class="lib-detail-head">
+      <div>
+        <h2 id="lib-detail-title">—</h2>
+        <div class="lib-detail-sub" id="lib-detail-sub">—</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="lib-detail-close">Close</button>
+        <button class="btn primary" id="lib-detail-fork">⑂ Fork from this version</button>
+      </div>
+    </div>
+    <div class="lib-detail-tabs">
+      <button class="side-tab active" data-detail-tab="gist">Gist</button>
+      <button class="side-tab" data-detail-tab="config">Config (md)</button>
+      <button class="side-tab" data-detail-tab="transcript">Transcript</button>
+      <button class="side-tab" data-detail-tab="connectors">Connectors</button>
+    </div>
+    <div class="lib-detail-body" id="lib-detail-body"></div>
+  </div>
+</div>
+
+<!-- ═════ COLLABORATOR PICKER MODAL ═════ -->
+<div class="modal-bg" id="collab-modal">
+  <div class="modal modal-xl">
+    <div class="lib-detail-head">
+      <div>
+        <h2>Pick collaborator agents</h2>
+        <div class="lib-detail-sub">Select specialists from your Library that this supervisor will route to. The agent's instruction will gain explicit routing rules at the COMPLETE stage.</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="collab-cancel">Cancel</button>
+        <button class="btn primary" id="collab-confirm">Add <span id="collab-count">0</span> collaborators</button>
+      </div>
+    </div>
+    <div class="lib-detail-body" id="collab-grid"></div>
+  </div>
+</div>
+
+<!-- ═════ TOAST ═════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═════════════════════════════════════════════════════════════════════
+// AGENT EYE — single-page app
+// ═════════════════════════════════════════════════════════════════════
+
+// AgentEye talks to a local Node bridge (server.js) which spawns
+// `claude -p` per turn. The system prompt lives in server.js — the browser
+// only sends user messages and a session id.
+const STAGES = ["USE_CASE","PERSONA","MODEL","KNOWLEDGE","TOOLS","GUARDRAILS","MEMORY","ENTERPRISE","COMPLETE"];
+const STAGE_LABELS = ["Use case","Persona","Model","Knowledge","Tools","Guardrails","Memory","Enterprise","Ready"];
+
+// ───── State ─────
+const state = {
+  sessionId: null,      // claude session id, returned by the bridge
+  display: [            // for UI render
+    { role:'assistant', content:"Hello — I'm here to help you provision an AWS Bedrock agent. We'll go through it together, one question at a time, in plain language.\n\nTo begin: **what business problem do you want this agent to solve, and who would use it?**" }
+  ],
+  stage: 'USE_CASE',
+  agent: {
+    name: null, description: null, useCase: null, targetUsers: null,
+    agentMode: null,                 // "specialist" | "supervisor"
+    foundationModel: null, instruction: null,
+    knowledgeBases: [], actionGroups: [], mcpConnectors: [],
+    collaborators: [],               // [{slug, version, agentName, useCase, routingRule}]
+    guardrails: null, memory: null,
+    enterprise: null,                // {network, encryption, approvals, observability, tags, dr, quotas}
+    agentCore: null,                 // {identity:{enabled,...}, memory:{enabled,...}, observability:{enabled,...}}
+  },
+  busy: false,
+  ready: false,
+  sideTab: 'overview',
+  bridgeOk: false,
+  forkMode: false,
+  priorAgent: null,    // when forkMode, send /fork-chat with this attached
+  forkOrigin: null,    // {slug, version} for display
+};
+
+// ───── DOM ─────
+const $ = id => document.getElementById(id);
+const tabs = document.querySelectorAll('.tab');
+const panels = { home: $('panel-home'), library: $('panel-library'), provision: $('panel-provision'), config: $('panel-config'), connectors: $('panel-connectors'), agentcore: $('panel-agentcore'), memory: $('panel-memory'), deploy: $('panel-deploy'), test: $('panel-test') };
+
+// ───── Tab routing ─────
+tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
+document.querySelectorAll('[data-jump]').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.jump)));
+function switchTab(name) {
+  if (name === 'test' && !state.ready) return;   // locked until COMPLETE
+  if (name === 'connectors' && !connectorsAvailable()) return;
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+  Object.entries(panels).forEach(([k, el]) => el.classList.toggle('active', k === name));
+  if (name === 'config') renderFullConfig();
+  if (name === 'deploy') renderYAML();
+  if (name === 'connectors') { renderConnectors(); renderConnSide(); }
+  if (name === 'agentcore')  { renderAgentCore(); renderAgentCoreSide(); }
+  if (name === 'memory')     { renderMemory(); renderMemorySide(); }
+  if (name === 'library')    { loadLibrary(); }
+  if (name === 'provision') setTimeout(() => $('chat-input').focus(), 80);
+  if (name === 'test')      setTimeout(() => $('test-input').focus(), 80);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ───── Clock ─────
+function tickClock() {
+  const d = new Date();
+  $('header-clock').textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
+setInterval(tickClock, 1000); tickClock();
+
+// ───── Bridge health (silent — checked on each send) ─────
+async function pingBridge() {
+  try {
+    const r = await fetch('/health', { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    state.bridgeOk = !!d.ok;
+  } catch (e) {
+    state.bridgeOk = false;
+  }
+}
+pingBridge();
+setInterval(pingBridge, 15000);
+
+// ───── Stage rail ─────
+function renderStageRail() {
+  const idx = STAGES.indexOf(state.stage);
+  const rail = $('stage-rail');
+  rail.innerHTML = '';
+  STAGES.forEach((s, i) => {
+    const step = document.createElement('div');
+    step.className = 'stage-step ' + (i < idx ? 'done' : i === idx ? 'active' : '');
+    step.innerHTML = `
+      <div class="s-dot">${i < idx ? '✓' : i + 1}</div>
+      <div class="s-lbl">${STAGE_LABELS[i]}</div>
+      ${i < STAGES.length - 1 ? '<div class="s-bar"></div>' : ''}
+    `;
+    rail.appendChild(step);
+  });
+  $('cfg-stage-meta').textContent = `Stage: ${state.stage}`;
+}
+renderStageRail();
+
+// ───── Chat rendering ─────
+function md(s) {
+  // very small subset: **bold** and `code`
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>');
+}
+function renderChat() {
+  const c = $('chat-scroll');
+  c.innerHTML = state.display.map(m => `
+    <div class="msg ${m.role}">
+      <div class="msg-role">${m.role === 'user' ? 'You' : 'AgentEye'}</div>
+      <div class="msg-bubble">${md(m.content)}</div>
+    </div>
+  `).join('') + (state.busy ? `
+    <div class="msg assistant">
+      <div class="msg-role">AgentEye</div>
+      <div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+    </div>` : '');
+  c.scrollTop = c.scrollHeight;
+}
+renderChat();
+
+// ───── Side panel ─────
+document.querySelectorAll('.side-tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.side-tab').forEach(x => x.classList.toggle('active', x === t));
+  state.sideTab = t.dataset.side;
+  renderSide();
+}));
+function hasAnyConfig() {
+  const a = state.agent;
+  return a.name || a.useCase || a.foundationModel || a.agentMode || a.knowledgeBases.length || a.actionGroups.length || a.mcpConnectors.length || (a.collaborators && a.collaborators.length) || a.guardrails || a.memory || a.enterprise;
+}
+
+function refreshModeStrip() {
+  const strip = $('side-mode');
+  const pill  = $('mode-pill');
+  const btn   = $('pick-collab-btn');
+  const a = state.agent;
+  if (!a.agentMode) { strip.style.display = 'none'; return; }
+  strip.style.display = 'flex';
+  pill.textContent = a.agentMode === 'supervisor' ? 'Supervisor' : 'Specialist';
+  pill.className = 'mode-pill' + (a.agentMode === 'supervisor' ? ' supervisor' : '');
+  btn.style.display = a.agentMode === 'supervisor' ? '' : 'none';
+}
+function renderSide() {
+  refreshModeStrip();
+  const el = $('side-content');
+  if (!hasAnyConfig()) {
+    el.innerHTML = `<div class="side-empty"><div class="se-icon">◉</div>Your agent's profile will appear here as the conversation progresses.</div>`;
+    return;
+  }
+  const a = state.agent;
+  const isSup = a.agentMode === 'supervisor';
+  if (state.sideTab === 'overview') {
+    const cards = [
+      a.name && card('Agent name', a.name),
+      a.useCase && card('Use case', a.useCase),
+      a.targetUsers && card('Target users', a.targetUsers),
+      a.foundationModel && card('Foundation model', a.foundationModel.replace(/^anthropic\./, '').replace(/:0$/, '')),
+    ].filter(Boolean).join('');
+    const counts = `
+      <div class="cfg-card">
+        <div class="cl">Components</div>
+        <div class="cv">
+          ${isSup ? `<span class="badge coral">${(a.collaborators||[]).length} collaborators</span>` : `<span class="badge coral">${a.knowledgeBases.length} knowledge</span>`}
+          <span class="badge coral">${a.actionGroups.length} action groups</span>
+          ${!isSup ? `<span class="badge coral">${a.mcpConnectors.length} MCP</span>` : ''}
+          ${a.guardrails ? '<span class="badge green">guardrails on</span>' : ''}
+          ${a.memory ? '<span class="badge green">memory on</span>' : ''}
+        </div>
+      </div>`;
+    const collabBlock = (isSup && a.collaborators?.length)
+      ? `<div class="cfg-card"><div class="cl">Team (${a.collaborators.length})</div><div class="cv">${a.collaborators.map((c, i) => `
+            <span class="collab-chip">${esc(c.agentName || c.slug)}<span class="v">${esc(c.version || '')}</span><span class="x" data-collab-rm="${i}">×</span></span>`).join('')}</div></div>`
+      : '';
+    el.innerHTML = cards + counts + collabBlock;
+    el.querySelectorAll('[data-collab-rm]').forEach(x => x.addEventListener('click', e => {
+      e.stopPropagation();
+      const i = parseInt(e.currentTarget.dataset.collabRm, 10);
+      a.collaborators.splice(i, 1);
+      renderSide();
+    }));
+  } else {
+    const parts = [];
+    if (a.instruction) parts.push(card('Agent instruction', a.instruction.length > 320 ? a.instruction.slice(0, 320) + '…' : a.instruction));
+    if (a.knowledgeBases.length) parts.push(listCard('Knowledge bases', a.knowledgeBases.map(k => `${k.name}${k.description ? ' — ' + k.description : ''}`)));
+    if (a.actionGroups.length) parts.push(listCard('Action groups', a.actionGroups.map(g => `${g.name}${g.description ? ' — ' + g.description : ''}`)));
+    if (a.mcpConnectors.length) parts.push(listCard('MCP connectors', a.mcpConnectors.map(c => `${c.name} (${c.type})`)));
+    if (a.guardrails) {
+      const g = a.guardrails;
+      const tags = [];
+      if (g.contentFiltering) tags.push('<span class="badge amber">content filter</span>');
+      if (g.piiHandling && g.piiHandling !== 'NONE') tags.push(`<span class="badge amber">PII: ${g.piiHandling}</span>`);
+      if (g.topics && g.topics.length) g.topics.forEach(t => tags.push(`<span class="badge amber">block: ${t}</span>`));
+      parts.push(`<div class="cfg-card"><div class="cl">Guardrails</div><div class="cv">${tags.join('') || '—'}</div></div>`);
+    }
+    if (a.memory) {
+      const tags = [];
+      if (a.memory.sessionSummary) tags.push('<span class="badge green">session summary</span>');
+      if (a.memory.storageDays) tags.push(`<span class="badge green">${a.memory.storageDays}d retention</span>`);
+      parts.push(`<div class="cfg-card"><div class="cl">Memory</div><div class="cv">${tags.join('') || '—'}</div></div>`);
+    }
+    if (a.enterprise) {
+      const e = a.enterprise;
+      const tags = [];
+      if (e.network && e.network.mode)            tags.push(`<span class="badge ${e.network.mode === 'public' ? 'amber' : 'green'}">${e.network.mode}</span>`);
+      if (e.encryption && e.encryption.mode)      tags.push(`<span class="badge green">${e.encryption.mode === 'customer-managed' ? 'CMK encryption' : 'AWS-managed encryption'}</span>`);
+      if (e.approvals && e.approvals.mode && e.approvals.mode !== 'none') tags.push(`<span class="badge amber">HITL: ${e.approvals.mode}</span>`);
+      if (e.observability) {
+        if (e.observability.cloudwatchLogs)        tags.push('<span class="badge green">CW logs</span>');
+        if (e.observability.xrayTracing)           tags.push('<span class="badge green">X-Ray</span>');
+      }
+      if (e.dr && e.dr.posture)                   tags.push(`<span class="badge green">DR: ${e.dr.posture}</span>`);
+      if (e.quotas && e.quotas.perAgentRpm)       tags.push(`<span class="badge amber">${e.quotas.perAgentRpm} RPM cap</span>`);
+      if (e.tags && Object.keys(e.tags).length)   tags.push(`<span class="badge coral">${Object.keys(e.tags).length} tag${Object.keys(e.tags).length === 1 ? '' : 's'}</span>`);
+      parts.push(`<div class="cfg-card"><div class="cl">Enterprise</div><div class="cv">${tags.join('') || '—'}</div></div>`);
+    }
+    el.innerHTML = parts.join('') || `<div class="side-empty"><div class="se-icon">◉</div>Keep going — details fill in as we discuss knowledge, tools, guardrails, memory and enterprise hardening.</div>`;
+  }
+}
+function card(label, value) {
+  return `<div class="cfg-card"><div class="cl">${label}</div><div class="cv">${md(value)}</div></div>`;
+}
+function listCard(label, items) {
+  return `<div class="cfg-card list"><div class="cl">${label}</div><div class="cv"><ul>${items.map(i => `<li>${md(i)}</li>`).join('')}</ul></div></div>`;
+}
+renderSide();
+
+// ───── Full config tab ─────
+function renderFullConfig() {
+  const a = state.agent;
+  if (!hasAnyConfig()) {
+    $('full-config').innerHTML = `
+      <div style="text-align:center; padding:64px 20px; background:var(--bg-elev); border:1px solid var(--border); border-radius:12px; font-family:var(--serif); color:var(--text-3); font-size:16px; line-height:1.7;">
+        <div style="font-size:40px; margin-bottom:14px; opacity:0.4;">◉</div>
+        Configuration appears here once you start the conversation.<br>
+        Head to <strong style="color:var(--accent-deep);">Provision Agent</strong> to begin.
+      </div>`;
+    return;
+  }
+  const rows = [];
+  if (a.name) rows.push(['Agent name', a.name]);
+  if (a.description) rows.push(['Description', a.description]);
+  if (a.useCase) rows.push(['Use case', a.useCase]);
+  if (a.targetUsers) rows.push(['Target users', a.targetUsers]);
+  if (a.foundationModel) rows.push(['Foundation model', a.foundationModel]);
+  if (a.instruction) rows.push(['Agent instruction', a.instruction]);
+
+  const sections = rows.map(([l, v]) => `
+    <div class="cfg-card" style="margin-bottom:12px;">
+      <div class="cl">${l}</div>
+      <div class="cv" style="font-size:15px; line-height:1.65;">${md(v)}</div>
+    </div>`).join('');
+
+  let comps = '';
+  if (a.knowledgeBases.length) comps += listCard('Knowledge bases', a.knowledgeBases.map(k => `${k.name}${k.description ? ' — ' + k.description : ''}`));
+  if (a.actionGroups.length) comps += listCard('Action groups', a.actionGroups.map(g => `${g.name}${g.description ? ' — ' + g.description : ''}`));
+  if (a.mcpConnectors.length) comps += listCard('MCP connectors', a.mcpConnectors.map(c => `${c.name} (${c.type})`));
+
+  $('full-config').innerHTML = `
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+      <div>${sections}</div>
+      <div>${comps || `<div class="cfg-card"><div class="cl">Components</div><div class="cv" style="color:var(--text-4); font-style:italic;">Knowledge sources, tools and connectors will appear here as they're added.</div></div>`}</div>
+    </div>
+  `;
+}
+
+// ───── YAML generator ─────
+function generateYAML(cfg) {
+  if (!cfg.name) return `# Your CloudFormation YAML will appear here\n# as you provision your agent through the conversation.`;
+  const stackId = cfg.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+  const resId   = cfg.name.replace(/[^a-zA-Z0-9]/g, '');
+  const model   = cfg.foundationModel || 'anthropic.claude-sonnet-4-20250514-v1:0';
+  const instr   = (cfg.instruction || 'You are a helpful AI assistant.').split('\n').map(l => `        ${l}`).join('\n');
+
+  let y = `# ════════════════════════════════════════════════════════════
+# AWS Bedrock Agent · CloudFormation Template
+# Agent : ${cfg.name}
+# Model : ${model}
+#
+# Deploy
+#   aws cloudformation deploy \\
+#     --template-file agent.yaml \\
+#     --stack-name ${stackId}-stack \\
+#     --capabilities CAPABILITY_IAM \\
+#     --parameter-overrides AgentRoleArn=arn:aws:iam::ACCOUNT_ID:role/ROLE_NAME
+# ════════════════════════════════════════════════════════════
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Bedrock Agent: ${cfg.description || cfg.useCase || cfg.name}'
+
+Parameters:
+  AgentRoleArn:
+    Type: String
+    Description: IAM Role ARN — needs bedrock:* and lambda:InvokeFunction
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues: [development, staging, production]
+
+Resources:
+
+  # ── Agent ─────────────────────────────────────────────────────────────────
+  ${resId}Agent:
+    Type: AWS::Bedrock::Agent
+    Properties:
+      AgentName: !Sub '\${Environment}-${resId}'
+      Description: >-
+        ${cfg.description || cfg.useCase || 'AI-powered agent'}
+      Instruction: |
+${instr}
+      FoundationModel: ${model}
+      IdleSessionTTLInSeconds: 1800
+      AgentResourceRoleArn: !Ref AgentRoleArn
+      AutoPrepare: true
+`;
+  if (cfg.knowledgeBases && cfg.knowledgeBases.length) {
+    y += `      KnowledgeBases:\n`;
+    cfg.knowledgeBases.forEach(kb => {
+      const kbId = kb.name.replace(/[^a-zA-Z0-9]/g, '');
+      y += `        - KnowledgeBaseId: !Ref KB${kbId}\n          Description: ${kb.description || kb.name}\n          KnowledgeBaseState: ENABLED\n`;
+    });
+  }
+  if (cfg.actionGroups && cfg.actionGroups.length) {
+    y += `      ActionGroups:\n`;
+    cfg.actionGroups.forEach(ag => {
+      const agId = ag.name.replace(/[^a-zA-Z0-9]/g, '');
+      y += `        - ActionGroupName: ${agId}\n          Description: ${ag.description || ag.name}\n          ActionGroupState: ENABLED\n          ActionGroupExecutor:\n            Lambda: !GetAtt ${agId}Function.Arn\n`;
+    });
+  }
+  if (cfg.guardrails) y += `      GuardrailConfiguration:\n        GuardrailIdentifier: !Ref ${resId}Guardrail\n        GuardrailVersion: DRAFT\n`;
+  if (cfg.memory && cfg.memory.sessionSummary) y += `      MemoryConfiguration:\n        EnabledMemoryTypes:\n          - SESSION_SUMMARY\n        StorageDays: ${cfg.memory.storageDays || 30}\n`;
+
+  y += `\n  # ── Agent Alias ───────────────────────────────────────────────────────────\n  ${resId}AgentAlias:\n    Type: AWS::Bedrock::AgentAlias\n    DependsOn: ${resId}Agent\n    Properties:\n      AgentId: !GetAtt ${resId}Agent.AgentId\n      AgentAliasName: !Sub '\${Environment}-alias'\n      Description: !Sub 'Alias — \${Environment}'\n`;
+
+  if (cfg.knowledgeBases && cfg.knowledgeBases.length) {
+    y += `\n  # ── Knowledge Bases ────────────────────────────────────────────────────────\n`;
+    cfg.knowledgeBases.forEach(kb => {
+      const kbId = kb.name.replace(/[^a-zA-Z0-9]/g, '');
+      y += `  KB${kbId}:\n    Type: AWS::Bedrock::KnowledgeBase\n    Properties:\n      Name: !Sub '\${Environment}-${kb.name.toLowerCase().replace(/\s+/g,'-')}'\n      Description: ${kb.description || kb.name}\n      RoleArn: !Ref AgentRoleArn\n      KnowledgeBaseConfiguration:\n        Type: VECTOR\n        VectorKnowledgeBaseConfiguration:\n          EmbeddingModelArn: arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-embed-text-v2:0\n\n`;
+    });
+  }
+  if (cfg.guardrails) {
+    y += `  # ── Guardrails ─────────────────────────────────────────────────────────────\n  ${resId}Guardrail:\n    Type: AWS::Bedrock::Guardrail\n    Properties:\n      Name: !Sub '\${Environment}-${resId.toLowerCase()}-guardrail'\n      BlockedInputMessaging: "I cannot process that type of request."\n      BlockedOutputsMessaging: "I cannot provide that information."\n`;
+    if (cfg.guardrails.contentFiltering) y += `      ContentPolicyConfig:\n        FiltersConfig:\n          - { Type: VIOLENCE, InputStrength: HIGH, OutputStrength: HIGH }\n          - { Type: HATE, InputStrength: HIGH, OutputStrength: HIGH }\n          - { Type: SEXUAL, InputStrength: HIGH, OutputStrength: HIGH }\n          - { Type: MISCONDUCT, InputStrength: HIGH, OutputStrength: HIGH }\n`;
+    if (cfg.guardrails.piiHandling && cfg.guardrails.piiHandling !== 'NONE') y += `      SensitiveInformationPolicyConfig:\n        PiiEntitiesConfig:\n          - { Type: EMAIL, Action: ${cfg.guardrails.piiHandling} }\n          - { Type: PHONE, Action: ${cfg.guardrails.piiHandling} }\n          - { Type: NAME, Action: ${cfg.guardrails.piiHandling} }\n`;
+    y += `\n`;
+  }
+  if (cfg.actionGroups && cfg.actionGroups.length) {
+    y += `  # ── Lambda Stubs ───────────────────────────────────────────────────────────\n`;
+    cfg.actionGroups.forEach(ag => {
+      const agId = ag.name.replace(/[^a-zA-Z0-9]/g, '');
+      y += `  ${agId}Function:\n    Type: AWS::Lambda::Function\n    Properties:\n      FunctionName: !Sub '\${Environment}-${agId.toLowerCase()}'\n      Description: ${ag.description || ag.name}\n      Runtime: python3.12\n      Handler: index.handler\n      Role: !Ref AgentRoleArn\n      Timeout: 30\n      Code:\n        ZipFile: |\n          import json\n          def handler(event, context):\n              # TODO: Implement ${ag.description || ag.name}\n              return {"response": {"actionGroup": event.get("actionGroup"), "function": event.get("function"), "functionResponse": {"responseBody": {"TEXT": {"body": "Success"}}}}}\n\n`;
+    });
+  }
+
+  y += `Outputs:\n  AgentId:\n    Value: !GetAtt ${resId}Agent.AgentId\n  AgentAliasId:\n    Value: !GetAtt ${resId}AgentAlias.AgentAliasId\n`;
+  return y;
+}
+
+function colorYAML(line) {
+  const escaped = line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (line.startsWith('#')) return `<span class="y-cmt">${escaped}</span>`;
+  if (/^(AWSTemplate|Description|Parameters|Resources|Outputs):/.test(line)) return `<span class="y-top">${escaped}</span>`;
+  let s = escaped;
+  s = s.replace(/(AWS::[A-Za-z:]+)/g, '<span class="y-aws">$1</span>');
+  s = s.replace(/(!Ref|!GetAtt|!Sub)/g, '<span class="y-ref">$1</span>');
+  s = s.replace(/^(\s*)([A-Za-z][A-Za-z0-9]*?):/g, '$1<span class="y-key">$2</span>:');
+  return s;
+}
+
+function renderYAML() {
+  const yaml = generateYAML(state.agent);
+  $('yaml-name').textContent = state.agent.name ? `# ${state.agent.name}.yaml` : '# agent.yaml — not yet generated';
+  $('yaml-body').innerHTML = yaml.split('\n').map(colorYAML).join('\n');
+}
+
+$('copy-yaml').addEventListener('click', async () => {
+  const yaml = generateYAML(state.agent);
+  try {
+    await navigator.clipboard.writeText(yaml);
+    const b = $('copy-yaml');
+    b.textContent = '✓ Copied'; b.classList.add('ok');
+    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1800);
+  } catch (e) {
+    alert('Copy failed — your browser blocked clipboard access.');
+  }
+});
+
+$('download-yaml').addEventListener('click', () => {
+  const yaml = generateYAML(state.agent);
+  const safeName = (state.agent.name || 'agent').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'agent';
+  const blob = new Blob([yaml], { type: 'text/yaml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `${safeName}.yaml`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 200);
+  const b = $('download-yaml');
+  b.textContent = '✓ Saved'; b.classList.add('ok');
+  setTimeout(() => { b.textContent = '↓ Download'; b.classList.remove('ok'); }, 1800);
+});
+
+// ───── Test panel ─────
+const testState = { sessionId: null, display: [], busy: false, approvals: [] };
+
+const APPROVAL_INSTRUCTION = `
+
+[APPROVAL POLICY ACTIVE — IMPORTANT]
+For every action that would create / update / delete records or otherwise change external state, do NOT execute it. Instead, on a single line, emit:
+[APPROVAL_NEEDED] action="<short imperative label, e.g. 'Create Jira ticket BILL-1234'>" | reason="<one sentence: why you need to do this>"
+You may emit multiple [APPROVAL_NEEDED] lines if you need multiple things. After emitting them, briefly tell the user in plain prose that you've requested approval and are waiting.
+When you receive a follow-up message containing "[APPROVAL GRANTED] action=..." you may proceed for that action. If you receive "[APPROVAL DENIED] action=..." politely inform the user the action was rejected and ask if they want to take a different path. Read-only lookups never require approval.`;
+
+function buildPreviewInstruction() {
+  let inst = state.agent.instruction || 'You are a helpful AI assistant.';
+  const mode = state.agent.enterprise && state.agent.enterprise.approvals && state.agent.enterprise.approvals.mode;
+  if (mode && mode !== 'none') {
+    inst += APPROVAL_INSTRUCTION + (mode === 'all-actions' ? '\n[NOTE: approval mode is "all-actions" — apply the policy to every external action including reads.]' : '\n[NOTE: approval mode is "writes-only" — apply only to writes.]');
+  }
+  return inst;
+}
+
+function parseApprovals(text) {
+  const found = [];
+  const re = /\[APPROVAL_NEEDED\]\s+action="([^"]+)"\s*\|\s*reason="([^"]+)"/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    found.push({ id: 'ap_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7), action: m[1], reason: m[2], status: 'pending' });
+  }
+  return found;
+}
+function stripApprovalTags(text) {
+  return text.replace(/\[APPROVAL_NEEDED\][^\n]*\n?/g, '').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function refreshApprovalsTray() {
+  const tray = $('approvals-tray');
+  const list = $('at-list');
+  const pending = testState.approvals.filter(a => a.status === 'pending');
+  const recent = testState.approvals.slice(-5).reverse();
+  const showItems = pending.length ? pending : recent;
+  if (!showItems.length) { tray.style.display = 'none'; return; }
+  tray.style.display = '';
+  $('at-count').textContent = pending.length;
+  const mode = state.agent.enterprise && state.agent.enterprise.approvals && state.agent.enterprise.approvals.mode;
+  $('at-mode').textContent = mode ? `Policy: ${mode}` : '';
+  list.innerHTML = showItems.map(a => `
+    <div class="at-card ${a.status}" data-ap="${a.id}">
+      <div class="at-action">${esc(a.action)}</div>
+      <div class="at-reason">${esc(a.reason)}</div>
+      ${a.status === 'pending' ? `
+        <div class="at-actions">
+          <button class="btn-sm danger" data-ap-deny="${a.id}">Deny</button>
+          <button class="btn-sm primary" data-ap-approve="${a.id}">Approve</button>
+        </div>` : `
+        <div class="at-status">${a.status === 'approved' ? '✓ approved' : '✗ denied'}${a.by ? ' · ' + esc(a.by) : ''}</div>`}
+    </div>`).join('');
+  list.querySelectorAll('[data-ap-approve]').forEach(b => b.addEventListener('click', e => decideApproval(e.currentTarget.dataset.apApprove, true)));
+  list.querySelectorAll('[data-ap-deny]').forEach(b => b.addEventListener('click', e => decideApproval(e.currentTarget.dataset.apDeny, false)));
+}
+
+function decideApproval(id, approved) {
+  const a = testState.approvals.find(x => x.id === id);
+  if (!a || a.status !== 'pending') return;
+  a.status = approved ? 'approved' : 'denied';
+  a.by = localStorage.getItem('agenteye:author') || 'reviewer';
+  refreshApprovalsTray();
+  // Send synthetic resume message via test pipeline
+  const text = approved
+    ? `[APPROVAL GRANTED] action="${a.action}" by="${a.by}". Please proceed.`
+    : `[APPROVAL DENIED] action="${a.action}" by="${a.by}". Inform the user politely and ask if they want a different approach.`;
+  if (testState.busy) { toast('Agent is busy — your decision is queued', 'success'); return; }
+  testInput.value = text;
+  sendTest();
+}
+
+function unlockTest() {
+  const tab = $('tab-test');
+  const stateBadge = $('tab-test-state');
+  if (state.ready) {
+    tab.classList.remove('locked'); tab.classList.add('unlocked');
+    stateBadge.textContent = 'ready';
+    $('test-input').disabled = false;
+    $('test-input').placeholder = `Talk to ${state.agent.name || 'your agent'}…`;
+    $('test-agent-name').textContent = state.agent.name || 'Your agent';
+    $('test-greeting').textContent = `Hi — I'm ${state.agent.name || 'your agent'}. ${state.agent.useCase ? 'I help with ' + state.agent.useCase.toLowerCase().replace(/\.$/, '') + '.' : ''} What would you like to ask?`;
+  } else {
+    tab.classList.add('locked'); tab.classList.remove('unlocked');
+    stateBadge.textContent = 'locked';
+    $('test-input').disabled = true;
+    $('test-send').disabled = true;
+  }
+}
+unlockTest();
+
+function renderTestChat() {
+  const c = $('test-scroll');
+  const head = !testState.display.length ? `
+    <div class="msg assistant">
+      <div class="msg-role">${state.agent.name || 'Your agent'}</div>
+      <div class="msg-bubble">${md($('test-greeting').textContent)}</div>
+    </div>` : '';
+  c.innerHTML = head + testState.display.map(m => `
+    <div class="msg ${m.role}">
+      <div class="msg-role">${m.role === 'user' ? 'You' : (state.agent.name || 'Agent')}</div>
+      <div class="msg-bubble">${md(m.content)}</div>
+    </div>
+  `).join('') + (testState.busy ? `
+    <div class="msg assistant">
+      <div class="msg-role">${state.agent.name || 'Agent'}</div>
+      <div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>
+    </div>` : '');
+  c.scrollTop = c.scrollHeight;
+}
+
+const testInput = $('test-input');
+const testSend  = $('test-send');
+testInput.addEventListener('input', () => {
+  testInput.style.height = 'auto';
+  testInput.style.height = Math.min(testInput.scrollHeight, 160) + 'px';
+  testSend.disabled = testState.busy || !testInput.value.trim() || !state.ready;
+});
+testInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!testSend.disabled) sendTest();
+  }
+});
+testSend.addEventListener('click', sendTest);
+
+async function sendTest() {
+  const text = testInput.value.trim();
+  if (!text || testState.busy || !state.ready) return;
+  if (!state.bridgeOk) {
+    testState.display.push({ role:'assistant', content:'The local bridge is offline. Start `node server.js` and try again.' });
+    renderTestChat();
+    return;
+  }
+
+  testInput.value = ''; testInput.style.height = 'auto'; testSend.disabled = true;
+  testState.display.push({ role: 'user', content: text });
+  testState.busy = true;
+  renderTestChat();
+
+  try {
+    const data = await callBridge('/preview', {
+      message: text,
+      sessionId: testState.sessionId,
+      instruction: buildPreviewInstruction(),
+      agentName: state.agent.name || null,
+    });
+    if (data.sessionId) testState.sessionId = data.sessionId;
+    const reply = data.message || '(empty response)';
+    const newApprovals = parseApprovals(reply);
+    if (newApprovals.length) testState.approvals.push(...newApprovals);
+    testState.display.push({ role: 'assistant', content: stripApprovalTags(reply) || (newApprovals.length ? `_(awaiting approval for ${newApprovals.length} action${newApprovals.length === 1 ? '' : 's'})_` : '(empty response)') });
+  } catch (err) {
+    testState.display.push({ role: 'assistant', content: `Bridge error: ${err.message}` });
+  } finally {
+    testState.busy = false;
+    renderTestChat();
+    refreshApprovalsTray();
+    testSend.disabled = !testInput.value.trim();
+  }
+}
+
+// ───── Bridge call ─────
+async function callBridge(endpoint, body) {
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) {
+    throw new Error(data.error || `Bridge HTTP ${res.status}`);
+  }
+  return data;
+}
+
+function parseAI(text) {
+  try {
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    const m = text.match(/\{[\s\S]*\}/);
+    if (m) { try { return JSON.parse(m[0]); } catch (e2) {} }
+    return { message: text, stage: null, agentConfig: null, readyToGenerate: false };
+  }
+}
+
+function mergeAgent(prev, next) {
+  if (!next) return prev;
+  const out = { ...prev };
+  Object.entries(next).forEach(([k, v]) => {
+    if (v === null || v === undefined) return;
+    if (Array.isArray(v)) { if (v.length > 0) out[k] = v; }
+    else if (typeof v === 'object') { out[k] = { ...(prev[k] || {}), ...v }; }
+    else { out[k] = v; }
+  });
+  return out;
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// CONNECTORS — schema-driven form for runtime wiring
+// ═════════════════════════════════════════════════════════════════════
+// Capture originals BEFORE we override below; generatePatchedYAML uses these.
+const _origGenerateYAML = generateYAML;
+const _origRenderYAML   = renderYAML;
+
+const CONNECTOR_SCHEMAS = {
+  salesforce: {
+    label: 'Salesforce CRM', icon: 'SF',
+    fields: [
+      { k:'instanceUrl',     l:'Instance URL',       t:'text',   req:true,  ph:'https://your-org.my.salesforce.com' },
+      { k:'apiVersion',      l:'API Version',        t:'text',   def:'v60.0' },
+      { k:'authType',        l:'Auth Method',        t:'select', opts:['OAuth 2.0 Client Credentials','OAuth 2.0 JWT Bearer','Connected App'] },
+      { k:'clientId',        l:'Client ID',          t:'text',   ph:'3MVG9...' },
+      { k:'clientSecretArn', l:'Client Secret',      t:'secret', req:true, ph:'arn:aws:secretsmanager:us-east-1:ACCOUNT:secret:salesforce/client-XXX' },
+      { k:'allowedObjects',  l:'Allowed Objects',    t:'text',   ph:'Account, Contact, Opportunity', hint:'Comma-separated SObject names the agent can read/write' },
+      { k:'readOnly',        l:'Read-only mode',     t:'select', opts:['Yes','No'], def:'Yes' },
+    ],
+  },
+  jira: {
+    label: 'Atlassian Jira', icon: 'JI',
+    fields: [
+      { k:'baseUrl',       l:'Base URL',         t:'text',   req:true, ph:'https://your-org.atlassian.net' },
+      { k:'projectKey',    l:'Project Key(s)',   t:'text',   ph:'PROJ, OPS', hint:'Comma-separated project keys' },
+      { k:'authType',      l:'Auth Method',      t:'select', opts:['API Token (Basic)','OAuth 2.0','PAT'] },
+      { k:'email',         l:'Service Account Email', t:'text', ph:'service-account@your-org.com' },
+      { k:'apiTokenArn',   l:'API Token',        t:'secret', req:true, ph:'arn:aws:secretsmanager:...:secret:jira/token-XXX' },
+      { k:'allowedActions',l:'Allowed Actions',  t:'select', opts:['Read only','Read + Comment','Read + Comment + Transition','Full (incl. create/edit)'], def:'Read + Comment' },
+    ],
+  },
+  confluence: {
+    label: 'Atlassian Confluence', icon: 'CF',
+    fields: [
+      { k:'baseUrl',     l:'Base URL',     t:'text',   req:true, ph:'https://your-org.atlassian.net/wiki' },
+      { k:'spaceKey',    l:'Space Key(s)', t:'text',   ph:'ENG, DOCS' },
+      { k:'email',       l:'Service Account Email', t:'text' },
+      { k:'apiTokenArn', l:'API Token',    t:'secret', req:true },
+      { k:'mode',        l:'Mode',         t:'select', opts:['Search only','Search + Read','Search + Read + Create'], def:'Search + Read' },
+    ],
+  },
+  slack: {
+    label: 'Slack', icon: 'SL',
+    fields: [
+      { k:'workspace',    l:'Workspace',         t:'text',   req:true, ph:'your-org.slack.com' },
+      { k:'botTokenArn',  l:'Bot Token',         t:'secret', req:true, ph:'arn:aws:secretsmanager:...:secret:slack/bot-XXX' },
+      { k:'allowedChannels', l:'Allowed Channels', t:'text', ph:'#support, #ops-bot', hint:'Channels the agent can read/post to' },
+      { k:'capabilities', l:'Capabilities',      t:'select', opts:['Read messages','Read + Post','Read + Post + DM users'], def:'Read + Post' },
+    ],
+  },
+  sap: {
+    label: 'SAP S/4HANA', icon: 'SP',
+    fields: [
+      { k:'gatewayUrl',  l:'Gateway URL',  t:'text',   req:true, ph:'https://sap-gw.your-org.com' },
+      { k:'sapClient',   l:'SAP Client',   t:'text',   def:'100' },
+      { k:'sapModule',   l:'Module',       t:'select', opts:['S/4HANA','ECC','Ariba','SuccessFactors'] },
+      { k:'authType',    l:'Auth Method',  t:'select', opts:['Basic','OAuth 2.0','SAML','x.509 Cert'] },
+      { k:'userArn',     l:'Service User', t:'secret', req:true },
+      { k:'passwordArn', l:'Password / Secret', t:'secret', req:true },
+      { k:'odataPaths',  l:'Allowed OData Paths', t:'textarea', ph:'/sap/opu/odata/sap/API_BUSINESS_PARTNER\n/sap/opu/odata/sap/API_SALES_ORDER_SRV', hint:'One path per line' },
+    ],
+  },
+  s3: {
+    label: 'AWS S3', icon: 'S3',
+    fields: [
+      { k:'bucketName', l:'Bucket Name', t:'text',   req:true, ph:'novartis-pmaas-docs' },
+      { k:'region',     l:'Region',      t:'text',   def:'us-east-1' },
+      { k:'prefix',     l:'Prefix',      t:'text',   ph:'agents/customer-support/' },
+      { k:'accessMode', l:'Access Mode', t:'select', opts:['Read only','Read + Write','Full (incl. delete)'], def:'Read only' },
+      { k:'iamRoleArn', l:'IAM Role ARN', t:'text',  req:true, ph:'arn:aws:iam::ACCOUNT:role/AgentS3Reader', hint:'Role assumed for S3 calls — separate from the agent execution role' },
+    ],
+  },
+  postgres: {
+    label: 'PostgreSQL', icon: 'PG',
+    fields: [
+      { k:'host',        l:'Host',         t:'text',   req:true, ph:'db.your-org.internal' },
+      { k:'port',        l:'Port',         t:'text',   def:'5432' },
+      { k:'database',    l:'Database',     t:'text',   req:true },
+      { k:'schemaName',  l:'Schema',       t:'text',   def:'public' },
+      { k:'sslMode',     l:'SSL Mode',     t:'select', opts:['require','verify-full','prefer','disable'], def:'require' },
+      { k:'userArn',     l:'Username',     t:'secret', req:true },
+      { k:'passwordArn', l:'Password',     t:'secret', req:true },
+      { k:'allowedTables', l:'Allowed Tables', t:'textarea', ph:'public.customers\npublic.orders', hint:'One per line. Empty = all in schema (not recommended)' },
+      { k:'readOnly',    l:'Read-only mode', t:'select', opts:['Yes','No'], def:'Yes' },
+    ],
+  },
+  rest: {
+    label: 'Custom REST API', icon: 'AP',
+    fields: [
+      { k:'baseUrl',     l:'Base URL',     t:'text', req:true, ph:'https://api.your-service.com/v1' },
+      { k:'authType',    l:'Auth Method',  t:'select', opts:['None','Bearer Token','API Key Header','Basic'] },
+      { k:'authHeader',  l:'Header Name',  t:'text', def:'Authorization', hint:'For "API Key Header" auth' },
+      { k:'secretArn',   l:'Secret',       t:'secret', ph:'arn:aws:secretsmanager:...' },
+      { k:'openApiUrl',  l:'OpenAPI Spec URL', t:'text', ph:'https://api.your-service.com/openapi.json', hint:'Optional — gives the agent typed knowledge of endpoints' },
+    ],
+  },
+};
+
+const ACTION_GROUP_SCHEMA = {
+  label: 'Action Group (Lambda)', icon: 'λ',
+  fields: [
+    { k:'runtime',       l:'Runtime',         t:'select', opts:['python3.12','python3.11','nodejs20.x','nodejs18.x','java21'], def:'python3.12' },
+    { k:'handler',       l:'Handler',         t:'text', def:'index.handler' },
+    { k:'memoryMB',      l:'Memory (MB)',     t:'select', opts:['256','512','1024','2048','4096'], def:'512' },
+    { k:'timeoutSec',    l:'Timeout (sec)',   t:'text', def:'30' },
+    { k:'existingArn',   l:'Reuse Existing Lambda ARN', t:'text', ph:'arn:aws:lambda:...:function:my-existing-fn', hint:'Leave blank to create a new Lambda from the YAML' },
+    { k:'envVars',       l:'Environment Variables', t:'textarea', ph:'LOG_LEVEL=info\nFEATURE_FLAGS=v2', hint:'One per line, KEY=VALUE. Use {{secret:arn}} for secret refs.' },
+  ],
+};
+
+// ─── Connector type detection from free-text ───────────────────────────────
+function detectConnectorType(name, declaredType) {
+  const s = ((declaredType || '') + ' ' + name).toLowerCase();
+  if (s.includes('salesforce') || s.includes('sfdc'))  return 'salesforce';
+  if (s.includes('jira'))                              return 'jira';
+  if (s.includes('confluence'))                        return 'confluence';
+  if (s.includes('slack'))                             return 'slack';
+  if (s.includes('sap'))                               return 'sap';
+  if (s.includes('s3') || s.includes('bucket'))        return 's3';
+  if (s.includes('postgres') || s.includes('postgresql') || s.includes('pg ')) return 'postgres';
+  return 'rest';
+}
+
+// ─── Connector value store (per agent, persisted) ──────────────────────────
+const CONN_STORE_KEY = 'agenteye:connectors';
+function loadConnStore() { try { return JSON.parse(localStorage.getItem(CONN_STORE_KEY) || '{}'); } catch { return {}; } }
+function saveConnStore(s) { localStorage.setItem(CONN_STORE_KEY, JSON.stringify(s)); }
+
+function agentKey() {
+  return (state.agent.name || 'unnamed-agent').replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
+}
+function connId(kind, idx, name) {
+  return `${kind}::${idx}::${(name || '').toLowerCase().replace(/\s+/g,'-')}`;
+}
+
+function getConnValues(id) {
+  const s = loadConnStore();
+  return (s[agentKey()] || {})[id] || {};
+}
+function setConnValues(id, vals) {
+  const s = loadConnStore();
+  if (!s[agentKey()]) s[agentKey()] = {};
+  s[agentKey()][id] = vals;
+  saveConnStore(s);
+}
+
+function connectorsAvailable() {
+  const a = state.agent;
+  return (a.mcpConnectors && a.mcpConnectors.length) || (a.actionGroups && a.actionGroups.length);
+}
+
+// Status: configured (all required filled) | partial | untouched
+function connStatus(schema, vals) {
+  const filled  = schema.fields.filter(f => (vals[f.k] || '').toString().trim().length > 0);
+  const reqd    = schema.fields.filter(f => f.req);
+  const reqdOk  = reqd.every(f => (vals[f.k] || '').toString().trim().length > 0);
+  if (reqdOk && filled.length >= schema.fields.length / 2) return 'configured';
+  if (filled.length === 0) return 'untouched';
+  return 'partial';
+}
+
+// ─── Render the Connectors tab ─────────────────────────────────────────────
+function refreshConnectorsTab() {
+  const tab = $('tab-connectors');
+  const count = ((state.agent.mcpConnectors || []).length) + ((state.agent.actionGroups || []).length);
+  $('tab-connectors-count').textContent = count;
+  if (count > 0) { tab.classList.remove('locked'); tab.classList.add('unlocked'); }
+  else            { tab.classList.add('locked');    tab.classList.remove('unlocked'); }
+  $('connectors-meta').textContent = count > 0
+    ? `${count} component${count > 1 ? 's' : ''} captured · fill in runtime wiring below`
+    : '— locked until at least one connector or action group is captured';
+  if (panels.connectors.classList.contains('active')) { renderConnectors(); renderConnSide(); }
+}
+
+function renderConnectors() {
+  const list = $('conn-list');
+  if (!connectorsAvailable()) {
+    list.innerHTML = `<div class="conn-empty"><div class="ce-icon">◉</div>Connectors and action groups appear here once the provisioning conversation captures them.<br>Head back to <strong style="color:var(--accent-deep);">Provision Agent</strong> and continue.</div>`;
+    return;
+  }
+  const parts = [];
+  (state.agent.mcpConnectors || []).forEach((mc, i) => {
+    const type = detectConnectorType(mc.name, mc.type);
+    const schema = CONNECTOR_SCHEMAS[type];
+    const id = connId('mcp', i, mc.name);
+    parts.push(renderConnCard({ id, kind:'MCP', source:mc, schemaKey:type, schema, displayName:mc.name, sub:`${schema.label} · ${mc.description || mc.type || 'MCP connector'}` }));
+  });
+  (state.agent.actionGroups || []).forEach((ag, i) => {
+    const id = connId('lambda', i, ag.name);
+    parts.push(renderConnCard({ id, kind:'Lambda', source:ag, schemaKey:'lambda', schema:ACTION_GROUP_SCHEMA, displayName:ag.name, sub:`Action Group · ${ag.description || 'Lambda function'}` }));
+  });
+  list.innerHTML = parts.join('');
+  // wire up clicks
+  list.querySelectorAll('.conn-head').forEach(h => h.addEventListener('click', () => h.closest('.conn-card').classList.toggle('open')));
+  list.querySelectorAll('[data-cn-save]').forEach(b => b.addEventListener('click', onConnSave));
+  list.querySelectorAll('[data-cn-clear]').forEach(b => b.addEventListener('click', onConnClear));
+  list.querySelectorAll('[data-cn-suggest]').forEach(b => b.addEventListener('click', onConnSuggest));
+}
+
+function renderConnCard({ id, kind, schemaKey, schema, displayName, sub }) {
+  const vals = getConnValues(id);
+  const status = connStatus(schema, vals);
+  const fields = schema.fields.map(f => {
+    const v = vals[f.k] != null ? vals[f.k] : (f.def || '');
+    const lbl = `<label>${f.l}${f.req ? ' <span class="req">*</span>' : ''}${f.t === 'secret' ? ' <span class="secret-tag">secret</span>' : ''}</label>`;
+    let input;
+    if (f.t === 'select') {
+      input = `<select data-k="${f.k}">${f.opts.map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+    } else if (f.t === 'textarea') {
+      input = `<textarea data-k="${f.k}" placeholder="${esc(f.ph || '')}">${esc(v)}</textarea>`;
+    } else if (f.t === 'secret') {
+      input = `<input data-k="${f.k}" type="text" value="${esc(v)}" placeholder="${esc(f.ph || 'arn:aws:secretsmanager:...')}" autocomplete="off">`;
+    } else {
+      input = `<input data-k="${f.k}" type="text" value="${esc(v)}" placeholder="${esc(f.ph || '')}">`;
+    }
+    return `<div class="field ${f.t === 'textarea' ? 'full' : ''}">${lbl}${input}${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}</div>`;
+  }).join('');
+
+  const statusLbl = status === 'configured' ? 'configured' : status === 'partial' ? 'incomplete' : 'pending';
+  return `
+    <div class="conn-card ${status}" data-id="${id}" data-schema="${schemaKey}">
+      <div class="conn-head">
+        <div class="conn-icon">${schema.icon}</div>
+        <div class="ch-meta">
+          <div class="ch-name">${esc(displayName || '(unnamed)')}</div>
+          <div class="ch-sub">${esc(sub)}</div>
+        </div>
+        <span class="ch-status ${status === 'configured' ? 'configured' : status === 'partial' ? 'partial' : ''}">${statusLbl}</span>
+        <span class="ch-chevron">▶</span>
+      </div>
+      <div class="conn-body">
+        <div class="conn-grid">${fields}</div>
+        <div class="conn-actions">
+          <button class="btn-sm" data-cn-suggest="${id}" title="Ask Claude to suggest reasonable defaults based on your agent's use case">✶ Suggest defaults</button>
+          <span class="spacer"></span>
+          <button class="btn-sm danger" data-cn-clear="${id}">Clear</button>
+          <button class="btn-sm primary" data-cn-save="${id}">Save</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function onConnSave(e) {
+  const id = e.currentTarget.dataset.cnSave;
+  const card = e.currentTarget.closest('.conn-card');
+  const vals = {};
+  card.querySelectorAll('[data-k]').forEach(el => { vals[el.dataset.k] = el.value; });
+  setConnValues(id, vals);
+  renderConnectors();   // re-render to update status pill
+  renderConnSide();
+  // re-open the card we just saved
+  const reopened = $('conn-list').querySelector(`[data-id="${id}"]`);
+  if (reopened) reopened.classList.add('open');
+}
+function onConnClear(e) {
+  const id = e.currentTarget.dataset.cnClear;
+  setConnValues(id, {});
+  renderConnectors();
+  renderConnSide();
+  const reopened = $('conn-list').querySelector(`[data-id="${id}"]`);
+  if (reopened) reopened.classList.add('open');
+}
+async function onConnSuggest(e) {
+  const id = e.currentTarget.dataset.cnSuggest;
+  const card = e.currentTarget.closest('.conn-card');
+  const schemaKey = card.dataset.schema;
+  const schema = schemaKey === 'lambda' ? ACTION_GROUP_SCHEMA : CONNECTOR_SCHEMAS[schemaKey];
+  const displayName = card.querySelector('.ch-name').textContent;
+  const btn = e.currentTarget;
+  const orig = btn.textContent;
+  btn.textContent = '… asking Claude'; btn.disabled = true;
+
+  const prompt = `Given this agent context:
+- Agent: ${state.agent.name || '(unnamed)'}
+- Use case: ${state.agent.useCase || '(unknown)'}
+- Target users: ${state.agent.targetUsers || '(unknown)'}
+
+Suggest reasonable PLACEHOLDER values for configuring a "${schema.label}" component named "${displayName}".
+Fields to fill (use exactly these keys): ${schema.fields.map(f => f.k).join(', ')}.
+For real secrets/credentials, return placeholder ARN strings like "arn:aws:secretsmanager:us-east-1:ACCOUNT:secret:..." — never invent real credentials.
+Respond with raw JSON only, no markdown fences:
+{ ${schema.fields.map(f => `"${f.k}": "..."`).join(', ')} }`;
+
+  try {
+    const data = await callBridge('/suggest', { prompt });
+    const raw = (data.raw || '').trim().replace(/^```json\n?/, '').replace(/```\s*$/, '');
+    let suggested = null;
+    try { suggested = JSON.parse(raw); }
+    catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) { try { suggested = JSON.parse(m[0]); } catch {} }
+    }
+    if (!suggested) throw new Error('Could not parse suggestion: ' + raw.slice(0, 120));
+    // apply only known keys, normalising arrays/booleans + select-option fuzzy match
+    card.querySelectorAll('[data-k]').forEach(el => {
+      const k = el.dataset.k;
+      let v = suggested[k];
+      if (v == null || v === '') return;
+      if (Array.isArray(v)) v = v.join(', ');
+      else if (typeof v === 'boolean') v = v ? 'Yes' : 'No';
+      else v = String(v);
+      if (el.tagName === 'SELECT') {
+        // try exact, then case-insensitive contains
+        const opts = Array.from(el.options).map(o => o.value);
+        const exact = opts.find(o => o === v);
+        const fuzzy = exact || opts.find(o => o.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(o.toLowerCase()));
+        if (fuzzy) el.value = fuzzy;
+      } else {
+        el.value = v;
+      }
+    });
+  } catch (err) {
+    alert('Suggest failed: ' + err.message);
+  } finally {
+    btn.textContent = orig; btn.disabled = false;
+  }
+}
+
+// ─── Side panel: Patched YAML / Secrets / .env ─────────────────────────────
+let connSideTab = 'yaml';
+document.querySelectorAll('[data-conn-side]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-conn-side]').forEach(x => x.classList.toggle('active', x === b));
+  connSideTab = b.dataset.connSide;
+  renderConnSide();
+}));
+
+function renderConnSide() {
+  const el = $('conn-side-content');
+  if (connSideTab === 'yaml')    el.innerHTML = `<pre>${esc(generatePatchedYAML())}</pre>`;
+  if (connSideTab === 'secrets') el.innerHTML = `<pre>${esc(generateSecretsManifest())}</pre>`;
+  if (connSideTab === 'env')     el.innerHTML = `<pre>${esc(generateEnvPreview())}</pre>`;
+}
+
+function collectAllConnVals() {
+  const out = { mcp: [], lambda: [] };
+  (state.agent.mcpConnectors || []).forEach((mc, i) => {
+    const type = detectConnectorType(mc.name, mc.type);
+    const id = connId('mcp', i, mc.name);
+    out.mcp.push({ source: mc, type, schema: CONNECTOR_SCHEMAS[type], values: getConnValues(id) });
+  });
+  (state.agent.actionGroups || []).forEach((ag, i) => {
+    const id = connId('lambda', i, ag.name);
+    out.lambda.push({ source: ag, schema: ACTION_GROUP_SCHEMA, values: getConnValues(id) });
+  });
+  return out;
+}
+
+function generatePatchedYAML() {
+  const base = _origGenerateYAML(state.agent);
+  if (!state.agent.name) return base;
+  const data = collectAllConnVals();
+
+  // Append a "deployment-config" block — clean append, doesn't mutate the base
+  let extra = `\n# ════════════════════════════════════════════════════════════\n# Connector wiring (filled via AgentEye Connectors tab)\n# ════════════════════════════════════════════════════════════\n\nDeploymentConfig:\n  AgentName: ${state.agent.name}\n`;
+
+  if (data.mcp.length) {
+    extra += `\n  McpConnectors:\n`;
+    data.mcp.forEach(({ source, type, schema, values }) => {
+      extra += `    - name: ${source.name}\n      type: ${type}\n      label: ${schema.label}\n      config:\n`;
+      schema.fields.forEach(f => {
+        const v = values[f.k];
+        if (v == null || v === '') return;
+        if (f.t === 'secret') extra += `        ${f.k}: !SecretRef "${v}"\n`;
+        else if (f.t === 'textarea') extra += `        ${f.k}: |\n${v.split('\n').map(l => '          ' + l).join('\n')}\n`;
+        else extra += `        ${f.k}: ${yamlScalar(v)}\n`;
+      });
+    });
+  }
+  if (data.lambda.length) {
+    extra += `\n  ActionGroups:\n`;
+    data.lambda.forEach(({ source, schema, values }) => {
+      extra += `    - name: ${source.name}\n      description: ${source.description || source.name}\n`;
+      schema.fields.forEach(f => {
+        const v = values[f.k];
+        if (v == null || v === '') return;
+        if (f.k === 'envVars') {
+          extra += `      environment:\n`;
+          v.split('\n').filter(Boolean).forEach(line => {
+            const [k, ...rest] = line.split('=');
+            extra += `        ${k.trim()}: ${yamlScalar(rest.join('=').trim())}\n`;
+          });
+        } else {
+          extra += `      ${f.k}: ${yamlScalar(v)}\n`;
+        }
+      });
+    });
+  }
+  return base + extra;
+}
+
+function yamlScalar(s) {
+  s = String(s);
+  if (/^[a-zA-Z0-9._/:-]+$/.test(s)) return s;
+  return JSON.stringify(s);
+}
+
+function generateSecretsManifest() {
+  const data = collectAllConnVals();
+  const arns = new Set();
+  const collect = (vals, schema) => schema.fields.filter(f => f.t === 'secret').forEach(f => {
+    const v = (vals[f.k] || '').trim();
+    if (v) arns.add(v);
+  });
+  data.mcp.forEach(({ values, schema }) => collect(values, schema));
+  data.lambda.forEach(({ values, schema }) => collect(values, schema));
+
+  if (!arns.size) return `# No secret references collected yet.\n# Fill in connector secret fields with AWS Secrets Manager ARNs and they'll appear here.`;
+
+  let y = `# ════════════════════════════════════════════════════════════\n# AWS Secrets Manager — secrets your agent expects to exist\n# ════════════════════════════════════════════════════════════\n# Pre-create each secret with:\n#   aws secretsmanager create-secret --name <name> --secret-string '<value>'\n#\n# Then grant the agent execution role read access via IAM.\n\nRequiredSecrets:\n`;
+  Array.from(arns).forEach(arn => {
+    const name = arn.split(':secret:').pop() || arn;
+    y += `  - arn: ${arn}\n    name: ${name}\n    grantRead: true\n`;
+  });
+  return y;
+}
+
+function generateEnvPreview() {
+  const data = collectAllConnVals();
+  const lines = [`# ════════════════════════════════════════════════════════════`,
+                 `# Local .env preview — values your runtime needs at startup`,
+                 `# (Convert ARNs to actual values via Secrets Manager at deploy time.)`,
+                 `# ════════════════════════════════════════════════════════════`,
+                 ``,
+                 `AGENT_NAME=${state.agent.name || ''}`,
+                 `AGENT_FOUNDATION_MODEL=${state.agent.foundationModel || ''}`,
+                 ``];
+  data.mcp.forEach(({ source, type, values }) => {
+    lines.push(`# ── ${source.name} (${type}) ──`);
+    Object.entries(values).forEach(([k, v]) => {
+      if (v == null || v === '') return;
+      const envKey = `MCP_${type.toUpperCase()}_${k.replace(/([A-Z])/g, '_$1').toUpperCase()}`;
+      lines.push(`${envKey}=${String(v).split('\n')[0]}`);
+    });
+    lines.push('');
+  });
+  data.lambda.forEach(({ source, values }) => {
+    lines.push(`# ── ${source.name} (Lambda) ──`);
+    Object.entries(values).forEach(([k, v]) => {
+      if (v == null || v === '' || k === 'envVars') return;
+      lines.push(`LAMBDA_${source.name.toUpperCase().replace(/[^A-Z0-9]/g,'_')}_${k.toUpperCase()}=${v}`);
+    });
+    if (values.envVars) lines.push(values.envVars);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+// Override generateYAML (used by Deploy/Copy/Download) so that once any
+// connector has values filled, the patched template is what gets emitted.
+generateYAML = function(cfg) {
+  if (cfg !== state.agent) return _origGenerateYAML(cfg);
+  const data = collectAllConnVals();
+  const anyFilled = [...data.mcp, ...data.lambda].some(c => Object.values(c.values).some(v => v && String(v).trim()));
+  return anyFilled ? generatePatchedYAML() : _origGenerateYAML(cfg);
+};
+
+// Override renderYAML so the Deploy tab header reflects "+ connectors"
+renderYAML = function() {
+  const data = collectAllConnVals();
+  const anyFilled = [...data.mcp, ...data.lambda].some(c => Object.values(c.values).some(v => v && String(v).trim()));
+  if (!anyFilled) return _origRenderYAML();
+  const yaml = generatePatchedYAML();
+  $('yaml-name').textContent = state.agent.name ? `# ${state.agent.name}.yaml + connectors` : '# agent.yaml';
+  $('yaml-body').innerHTML = yaml.split('\n').map(colorYAML).join('\n');
+};
+
+refreshConnectorsTab();
+
+// ───── Send message ─────
+const inputEl = $('chat-input');
+const sendBtn = $('chat-send');
+
+inputEl.addEventListener('input', () => {
+  inputEl.style.height = 'auto';
+  inputEl.style.height = Math.min(inputEl.scrollHeight, 160) + 'px';
+  sendBtn.disabled = state.busy || !inputEl.value.trim();
+});
+inputEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    if (!sendBtn.disabled) send();
+  }
+});
+sendBtn.addEventListener('click', send);
+
+async function send() {
+  const text = inputEl.value.trim();
+  if (!text || state.busy) return;
+  if (!state.bridgeOk) {
+    pingBridge();
+    state.display.push({ role:'assistant', content:'The local bridge is offline. Start it with `node server.js` (or `start.bat`) and try again.' });
+    renderChat();
+    return;
+  }
+
+  inputEl.value = ''; inputEl.style.height = 'auto'; sendBtn.disabled = true;
+  state.display.push({ role: 'user', content: text });
+  state.busy = true;
+  renderChat();
+
+  try {
+    const endpoint = state.forkMode ? '/fork-chat' : '/chat';
+    const body = state.forkMode
+      ? { message: text, sessionId: state.sessionId, priorAgent: state.priorAgent }
+      : { message: text, sessionId: state.sessionId };
+    const data = await callBridge(endpoint, body);
+    if (data.sessionId) state.sessionId = data.sessionId;
+    const parsed = parseAI(data.rawResult || '');
+    state.display.push({ role: 'assistant', content: parsed.message || data.rawResult || '(empty response)' });
+    if (parsed.stage) state.stage = parsed.stage;
+    if (parsed.agentConfig) state.agent = mergeAgent(state.agent, parsed.agentConfig);
+    if (parsed.readyToGenerate || state.forkMode) { state.ready = true; unlockTest(); }
+    refreshConnectorsTab();
+    refreshPublishButton();
+  } catch (err) {
+    state.display.push({ role: 'assistant', content: `Bridge error: ${err.message}` });
+  } finally {
+    state.busy = false;
+    renderChat();
+    renderStageRail();
+    renderSide();
+    sendBtn.disabled = !inputEl.value.trim();
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// LIBRARY · PUBLISH · FORK
+// ═════════════════════════════════════════════════════════════════════
+const libState = { items: [], filter: '' };
+
+async function loadLibrary() {
+  const grid = $('lib-grid'); const meta = $('lib-count-meta'); const gitMeta = $('lib-git-meta');
+  grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Loading…</div>`;
+  try {
+    const r = await fetch('/library', { cache: 'no-store' });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'failed to load');
+    libState.items = d.items || [];
+    meta.textContent = libState.items.length + ' version' + (libState.items.length === 1 ? '' : 's');
+    gitMeta.textContent = d.git ? '· git-backed' : '· filesystem only (git placeholder)';
+    $('tab-library-count').textContent = libState.items.length;
+    renderLibrary();
+  } catch (err) {
+    grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">!</div>Could not reach the bridge: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderLibrary() {
+  const grid = $('lib-grid');
+  const q = libState.filter.trim().toLowerCase();
+  const items = q
+    ? libState.items.filter(it => [it.agentName, it.useCase, it.foundationModel, it.gist].join(' ').toLowerCase().includes(q))
+    : libState.items;
+  if (!items.length) {
+    grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">◉</div>${q
+      ? 'No agents match that search.'
+      : 'No published agents yet.<br>Once you provision an agent and publish it from the Deploy tab, it will appear here.'}</div>`;
+    return;
+  }
+  grid.innerHTML = items.map(it => {
+    const counts = it.counts || { knowledgeBases:0, actionGroups:0, mcpConnectors:0 };
+    const ts = it.timestamp ? new Date(it.timestamp).toLocaleString() : '—';
+    const author = it.author ? esc(String(it.author).split('<')[0].trim() || it.author) : '—';
+    const model = (it.foundationModel || '').replace(/^anthropic\./, '').replace(/:0$/, '');
+    return `
+      <div class="lib-card" data-slug="${esc(it.slug)}" data-version="${esc(it.version)}">
+        <div class="lib-card-head">
+          <div class="lib-card-name">${esc(it.agentName || it.slug)}</div>
+          <span class="lib-version">${esc(it.version)}</span>
+        </div>
+        ${it.useCase ? `<div class="lib-usecase">${esc(it.useCase)}</div>` : ''}
+        <p class="lib-gist">${esc(it.gist || '_(no gist)_')}</p>
+        <div class="lib-card-foot">
+          ${model ? `<span class="lib-pill">${esc(model)}</span>` : ''}
+          <span class="lib-pill">${counts.knowledgeBases} kb</span>
+          <span class="lib-pill">${counts.actionGroups} act</span>
+          <span class="lib-pill">${counts.mcpConnectors} mcp</span>
+          <span class="spacer"></span>
+          <span>${author}</span>
+          <span>·</span>
+          <span>${esc(ts)}</span>
+        </div>
+      </div>`;
+  }).join('');
+  grid.querySelectorAll('.lib-card').forEach(c => c.addEventListener('click', () => openLibraryDetail(c.dataset.slug, c.dataset.version)));
+}
+
+$('lib-search').addEventListener('input', e => { libState.filter = e.target.value; renderLibrary(); });
+
+// ─── Detail modal ─────────────────────────────────────────────────────
+const libDetail = { slug:null, version:null, data:null, tab:'gist' };
+async function openLibraryDetail(slug, version) {
+  libDetail.slug = slug; libDetail.version = version; libDetail.tab = 'gist';
+  $('lib-detail-modal').classList.add('show');
+  $('lib-detail-title').textContent = '… loading';
+  $('lib-detail-sub').textContent = `${slug} · ${version}`;
+  $('lib-detail-body').innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Loading…</div>`;
+  try {
+    const r = await fetch(`/library/${encodeURIComponent(slug)}/${encodeURIComponent(version)}`);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'not found');
+    libDetail.data = d;
+    const m = d.meta || {};
+    $('lib-detail-title').textContent = m.agentName || slug;
+    $('lib-detail-sub').textContent = `${slug} · ${version}${m.timestamp ? ' · ' + new Date(m.timestamp).toLocaleString() : ''}${m.author ? ' · ' + m.author : ''}`;
+    setLibDetailTab('gist');
+  } catch (err) {
+    $('lib-detail-body').innerHTML = `<div class="lib-empty"><div class="ce-icon">!</div>${esc(err.message)}</div>`;
+  }
+}
+function setLibDetailTab(tab) {
+  libDetail.tab = tab;
+  document.querySelectorAll('[data-detail-tab]').forEach(b => b.classList.toggle('active', b.dataset.detailTab === tab));
+  const d = libDetail.data; if (!d) return;
+  const body = $('lib-detail-body');
+  if (tab === 'gist')        body.innerHTML = `<div style="font-family:var(--serif); font-size:16px; line-height:1.7;">${esc(d.gistMd || '_(no gist)_')}</div>`;
+  if (tab === 'config')      body.innerHTML = renderMd(d.agentMd || '_(no agent.md)_');
+  if (tab === 'transcript')  body.innerHTML = renderMd(d.transcriptMd || '_(no transcript)_');
+  if (tab === 'connectors')  body.innerHTML = d.connectorsYaml ? `<pre>${esc(d.connectorsYaml)}</pre>` : `<div class="lib-empty"><div class="ce-icon">◉</div>No connector wiring captured for this version.</div>`;
+}
+document.querySelectorAll('[data-detail-tab]').forEach(b => b.addEventListener('click', () => setLibDetailTab(b.dataset.detailTab)));
+$('lib-detail-close').addEventListener('click', () => $('lib-detail-modal').classList.remove('show'));
+$('lib-detail-modal').addEventListener('click', e => { if (e.target.id === 'lib-detail-modal') $('lib-detail-modal').classList.remove('show'); });
+
+// Tiny markdown renderer — handles headings (#…####), bold, code, lists, em, hr
+function renderMd(s) {
+  if (!s) return '';
+  let out = String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  out = out.replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+           .replace(/^### (.+)$/gm,  '<h3>$1</h3>')
+           .replace(/^## (.+)$/gm,   '<h2>$1</h2>')
+           .replace(/^# (.+)$/gm,    '<h1>$1</h1>')
+           .replace(/^---$/gm,       '<hr>')
+           .replace(/^- (.+)$/gm,    '<li>$1</li>')
+           .replace(/(<li>.*?<\/li>\n?)+/gs, m => '<ul>' + m + '</ul>')
+           .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+           .replace(/`([^`]+)`/g,    '<code>$1</code>')
+           .replace(/_([^_\n]+)_/g,  '<em>$1</em>')
+           .replace(/\n\n/g,         '</p><p>');
+  return '<p>' + out + '</p>';
+}
+
+// ─── Fork-from-version ────────────────────────────────────────────────
+$('lib-detail-fork').addEventListener('click', () => {
+  const d = libDetail.data; if (!d) return;
+  const prior = (d.meta && d.meta.agent) || null;
+  if (!prior) { toast('This version has no agent snapshot — cannot fork.', 'error'); return; }
+  if (state.display.some(m => m.role === 'user') && !confirm('This will replace your current conversation. Continue?')) return;
+  $('lib-detail-modal').classList.remove('show');
+  forkFromVersion(prior, libDetail.slug, libDetail.version);
+});
+
+function forkFromVersion(priorAgent, slug, version) {
+  // reseed state
+  state.sessionId   = null;
+  state.history     = [];
+  state.stage       = 'COMPLETE';
+  state.agent       = JSON.parse(JSON.stringify(priorAgent));   // deep clone
+  state.ready       = true;
+  state.forkMode    = true;
+  state.priorAgent  = priorAgent;
+  state.forkOrigin  = { slug, version };
+  state.display = [
+    { role: 'assistant', content: `**Forked from \`${slug}:${version}\`** — ${priorAgent.name || 'unnamed agent'}.\n\nThe full prior config is loaded. Tell me what you'd like to **change or extend**, and I'll update the bundle. Hop into **Deploy** to publish a new version when you're ready.` },
+  ];
+  unlockTest();
+  refreshConnectorsTab();
+  refreshPublishButton();
+  renderChat();
+  renderStageRail();
+  renderSide();
+  switchTab('provision');
+  toast(`Forked from ${slug}:${version}`, 'success');
+}
+
+// ─── Publish ──────────────────────────────────────────────────────────
+const publishModal = $('publish-modal');
+function refreshPublishButton() {
+  const b = $('publish-yaml');
+  b.disabled = !state.ready || !state.agent.name;
+  b.title = b.disabled ? 'Complete the provisioning conversation first' : 'Publish this version to the Library';
+}
+$('publish-yaml').addEventListener('click', () => {
+  if (!state.ready || !state.agent.name) return;
+  $('publish-author').value = localStorage.getItem('agenteye:author') || '';
+  $('publish-msg').value = state.forkMode && state.forkOrigin
+    ? `Fork ${state.forkOrigin.slug}:${state.forkOrigin.version} → ${state.agent.name}`
+    : `Publish ${state.agent.name}`;
+  publishModal.classList.add('show');
+  setTimeout(() => $('publish-author').focus(), 60);
+});
+$('publish-cancel').addEventListener('click', () => publishModal.classList.remove('show'));
+publishModal.addEventListener('click', e => { if (e.target === publishModal) publishModal.classList.remove('show'); });
+$('publish-confirm').addEventListener('click', async () => {
+  const author = $('publish-author').value.trim();
+  const message = $('publish-msg').value.trim();
+  if (!author) { $('publish-author').focus(); return; }
+  localStorage.setItem('agenteye:author', author);
+
+  // collect connector values keyed by stable id (same scheme as Connectors tab)
+  const connectorValues = {};
+  (state.agent.mcpConnectors || []).forEach((mc, i) => {
+    const id = connId('mcp', i, mc.name);
+    const v  = getConnValues(id);
+    if (v && Object.values(v).some(x => x && String(x).trim())) connectorValues[id] = v;
+  });
+  (state.agent.actionGroups || []).forEach((ag, i) => {
+    const id = connId('lambda', i, ag.name);
+    const v  = getConnValues(id);
+    if (v && Object.values(v).some(x => x && String(x).trim())) connectorValues[id] = v;
+  });
+
+  // Bake the cognitive-memory block into state.agent so the library
+  // bundle, gist and CloudFormation all see the same shape.
+  const memBlock = getMemAgentBlock();
+  if (memBlock && MEMORY_SCHEMAS.some(s => memBlock[s.key]?.enabled)) {
+    state.agent.cognitiveMemory = memBlock;
+  }
+
+  const btn = $('publish-confirm'); const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '… publishing';
+  try {
+    const r = await fetch('/publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        agent: state.agent,
+        transcript: state.display,
+        connectorValues,
+        cognitiveMemory: memBlock || null,
+        memoryProtocol: (memBlock && MEMORY_SCHEMAS.some(s => memBlock[s.key]?.enabled)) ? generateMemoryProtocol() : null,
+        author,
+        message,
+      }),
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'publish failed');
+    publishModal.classList.remove('show');
+    toast(`Published ${d.slug} ${d.version}${d.hash ? ' · ' + d.hash.slice(0,7) : ''}`, 'success');
+    // refresh library count + grid if open
+    loadLibrary();
+  } catch (err) {
+    toast('Publish failed: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+});
+
+// ─── Toast ────────────────────────────────────────────────────────────
+let toastTimer = null;
+function toast(msg, kind) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (kind ? ' ' + kind : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+}
+
+// ─── Collaborator picker (supervisor mode) ───────────────────────────
+const collabModal = $('collab-modal');
+const collabPick = new Set();   // slug+version keys
+
+$('pick-collab-btn').addEventListener('click', async () => {
+  collabPick.clear();
+  // pre-select anything already in state
+  (state.agent.collaborators || []).forEach(c => collabPick.add(`${c.slug}::${c.version}`));
+  collabModal.classList.add('show');
+  await renderCollabPicker();
+});
+$('collab-cancel').addEventListener('click', () => collabModal.classList.remove('show'));
+collabModal.addEventListener('click', e => { if (e.target === collabModal) collabModal.classList.remove('show'); });
+
+async function renderCollabPicker() {
+  const grid = $('collab-grid');
+  grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Loading library…</div>`;
+  try {
+    const r = await fetch('/library', { cache: 'no-store' });
+    const d = await r.json();
+    const items = (d.items || []).filter(it => it.agentName !== state.agent.name);  // can't fork into self
+    if (!items.length) {
+      grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">◉</div>No published agents yet — publish at least one specialist before forming a supervisor team.</div>`;
+      $('collab-count').textContent = '0';
+      return;
+    }
+    grid.innerHTML = items.map(it => {
+      const key = `${it.slug}::${it.version}`;
+      const sel = collabPick.has(key) ? 'selected' : '';
+      return `
+        <div class="collab-card ${sel}" data-key="${esc(key)}" data-slug="${esc(it.slug)}" data-version="${esc(it.version)}" data-name="${esc(it.agentName || it.slug)}" data-usecase="${esc(it.useCase || '')}">
+          <div class="cc-check">${sel ? '✓' : ''}</div>
+          <div class="cc-body">
+            <div class="cc-name">${esc(it.agentName || it.slug)} <span class="cc-version">${esc(it.version)}</span></div>
+            ${it.useCase ? `<div class="cc-usecase">${esc(it.useCase)}</div>` : ''}
+            <div class="cc-gist">${esc(it.gist || '')}</div>
+          </div>
+        </div>`;
+    }).join('');
+    grid.querySelectorAll('.collab-card').forEach(c => c.addEventListener('click', () => {
+      const k = c.dataset.key;
+      if (collabPick.has(k)) collabPick.delete(k); else collabPick.add(k);
+      c.classList.toggle('selected');
+      c.querySelector('.cc-check').textContent = collabPick.has(k) ? '✓' : '';
+      $('collab-count').textContent = collabPick.size;
+    }));
+    $('collab-count').textContent = collabPick.size;
+  } catch (err) {
+    grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">!</div>${esc(err.message)}</div>`;
+  }
+}
+
+$('collab-confirm').addEventListener('click', async () => {
+  // build collaborator entries from picked cards
+  const cards = $('collab-grid').querySelectorAll('.collab-card.selected');
+  const collaborators = Array.from(cards).map(c => ({
+    slug: c.dataset.slug,
+    version: c.dataset.version,
+    agentName: c.dataset.name,
+    useCase: c.dataset.usecase || null,
+    routingRule: null,    // Claude will fill at COMPLETE
+  }));
+  state.agent.collaborators = collaborators;
+  collabModal.classList.remove('show');
+  renderSide();
+
+  if (!collaborators.length) { toast('Cleared collaborator team', 'success'); return; }
+
+  // Compose a synthetic user turn so Claude can see the picks and continue naturally.
+  const lines = collaborators.map(c => `- **${c.agentName}** (\`${c.slug}:${c.version}\`)${c.useCase ? ' — ' + c.useCase : ''}`).join('\n');
+  const synthetic = `I've picked these specialists from my Library to be this supervisor's team:\n\n${lines}\n\nPlease continue. When you reach COMPLETE, fill in a one-line \`routingRule\` for each collaborator that says when the supervisor should route to them.`;
+
+  if (state.busy) { toast(`Added ${collaborators.length}. Tell Claude "I've picked them" to continue.`, 'success'); return; }
+  // If the input has unsent text, don't clobber it — fall back to toast guidance.
+  if (inputEl.value.trim()) {
+    toast(`Added ${collaborators.length}. Send your message, then I'll feed the picks to Claude.`, 'success');
+    return;
+  }
+  // Auto-send the synthetic message via the normal send() pipeline
+  inputEl.value = synthetic;
+  send();
+});
+
+// ─── YAML supervisor patch ────────────────────────────────────────────
+// Wrap the original generateYAML to inject AgentCollaboration + AgentCollaborators.
+const _supervisorBaseGenerate = generateYAML;
+generateYAML = function(cfg) {
+  let yaml = _supervisorBaseGenerate(cfg);
+  if (cfg !== state.agent) return yaml;
+  if (cfg.agentMode !== 'supervisor') return yaml;
+
+  // Inject AgentCollaboration into the supervisor's Properties block (right after AutoPrepare: true)
+  const collabHeader = `      AgentCollaboration: SUPERVISOR\n`;
+  yaml = yaml.replace(/(\s+AutoPrepare: true\n)/, '$1' + collabHeader);
+
+  // Append AgentCollaborators block at the end of supervisor agent's properties: easier — inject right before the next "  # ── Agent Alias" comment
+  if (cfg.collaborators && cfg.collaborators.length) {
+    let collabBlock = `      AgentCollaborators:\n`;
+    cfg.collaborators.forEach((c, i) => {
+      const safeName = (c.agentName || `Collaborator${i+1}`).replace(/[^a-zA-Z0-9]/g, '');
+      const rule = (c.routingRule || `Route here for ${c.useCase || c.agentName}`).replace(/\n/g, ' ');
+      collabBlock += `        - CollaboratorName: ${safeName}\n`;
+      collabBlock += `          AgentDescriptor:\n`;
+      collabBlock += `            AliasArn: !Sub 'arn:aws:bedrock:\${AWS::Region}:\${AWS::AccountId}:agent-alias/${c.slug}/${c.version}'\n`;
+      collabBlock += `          CollaborationInstruction: |\n            ${rule}\n`;
+      collabBlock += `          RelayConversationHistory: TO_COLLABORATOR\n`;
+    });
+    // insert just before "  # ── Agent Alias"
+    yaml = yaml.replace(/(\n  # ── Agent Alias)/, '\n' + collabBlock + '$1');
+  }
+  return yaml;
+};
+
+// ═════════════════════════════════════════════════════════════════════
+// AGENTCORE — Identity / Memory / Observability
+// ═════════════════════════════════════════════════════════════════════
+const AC_STORE_KEY = 'agenteye:agentcore';
+function loadAcStore() { try { return JSON.parse(localStorage.getItem(AC_STORE_KEY) || '{}'); } catch { return {}; } }
+function saveAcStore(s) { localStorage.setItem(AC_STORE_KEY, JSON.stringify(s)); }
+function getAcAgentBlock() {
+  const s = loadAcStore();
+  return s[agentKey()] || null;
+}
+function setAcAgentBlock(block) {
+  const s = loadAcStore();
+  s[agentKey()] = block;
+  saveAcStore(s);
+  state.agent.agentCore = block;
+  refreshAgentCoreCount();
+}
+
+const AGENTCORE_SCHEMAS = [
+  {
+    key: 'identity', label: 'AgentCore Identity', icon: 'ID',
+    desc: 'OAuth-based federated identity so the agent calls downstream tools (Salesforce, SAP, Jira) AS THE END USER, not a shared service role. Critical for audit trails in regulated workloads.',
+    fields: [
+      { k:'providerType',  l:'Provider',         t:'select', opts:['Okta','Azure AD','Google Workspace','Auth0','Cognito','Custom OIDC'] },
+      { k:'providerName',  l:'Display name',     t:'text',   ph:'novartis-okta-prod' },
+      { k:'issuerUrl',     l:'Issuer URL',       t:'text',   ph:'https://novartis.okta.com/oauth2/default', req:true },
+      { k:'clientId',      l:'Client ID',        t:'text' },
+      { k:'secretArn',     l:'Client Secret',    t:'secret', ph:'arn:aws:secretsmanager:...:secret:agentcore/identity-XXX', req:true },
+      { k:'scopes',        l:'OAuth scopes',     t:'text',   def:'openid profile email offline_access' },
+      { k:'propagation',   l:'Token propagation', t:'select', opts:['as-user (recommended)','as-service'] },
+      { k:'allowedDomains',l:'Allowed email domains', t:'text', ph:'novartis.com, accenture.com', hint:'Comma-separated; restricts who the agent will accept tokens for' },
+    ],
+  },
+  {
+    key: 'memory', label: 'AgentCore Memory', icon: 'MM',
+    desc: 'Long-term, cross-session memory store separate from session summary. Captures semantic recall (vector) and/or raw event stream so the agent remembers patient context across calls.',
+    fields: [
+      { k:'storeName',          l:'Memory store name',  t:'text', req:true, ph:'pharma-support-memory', hint:'Becomes part of the AgentCore Memory resource ARN' },
+      { k:'type',               l:'Memory type',         t:'select', opts:['Semantic only','Event only','Semantic + Event'] },
+      { k:'embeddingModel',     l:'Embedding model',     t:'select', opts:['amazon.titan-embed-text-v2:0','cohere.embed-english-v3','cohere.embed-multilingual-v3'], def:'amazon.titan-embed-text-v2:0' },
+      { k:'retentionSemantic',  l:'Semantic retention (days)', t:'text', def:'90' },
+      { k:'retentionEvent',     l:'Event retention (days)',     t:'text', def:'30' },
+      { k:'accessPolicy',       l:'Access policy',       t:'select', opts:['agent-only','shared with team agents','shared with org']},
+      { k:'piiStrategy',        l:'PII in stored memory', t:'select', opts:['anonymize','mask','exclude'] },
+    ],
+  },
+  {
+    key: 'observability', label: 'AgentCore Observability', icon: 'OB',
+    desc: 'Traces every reasoning step + tool call, runs scheduled evals against a golden dataset, and ships a CloudWatch dashboard. Goes beyond plain CloudWatch logs — lets you ask "why did the agent route here?".',
+    fields: [
+      { k:'tracingEnabled',     l:'Reasoning traces',    t:'select', opts:['On','Off'], def:'On' },
+      { k:'tracingSampleRate',  l:'Sample rate (%)',     t:'text',   def:'100' },
+      { k:'evalEnabled',        l:'Scheduled evals',     t:'select', opts:['On','Off'], def:'Off' },
+      { k:'evalDatasetArn',     l:'Eval dataset',        t:'text',   ph:'arn:aws:bedrock:...:dataset/golden-v1', hint:'S3 dataset of input/expected-output pairs' },
+      { k:'evalFrequencyHours', l:'Eval frequency (hr)', t:'text',   def:'24' },
+      { k:'dashboardArn',       l:'CloudWatch dashboard', t:'text',  ph:'auto-created if blank' },
+      { k:'alarmEmail',         l:'Alarm SNS topic',     t:'text',   ph:'arn:aws:sns:...:topic/agent-alarms' },
+    ],
+  },
+  {
+    key: 'gateway', label: 'AgentCore Gateway', icon: 'GW',
+    desc: 'Wraps your existing REST APIs as MCP tools with managed OAuth + connection pooling — the agent calls them through Gateway without ever seeing the credentials.',
+    fields: [
+      { k:'gatewayName',     l:'Gateway name',           t:'text',   req:true, ph:'novartis-pmaas-gateway' },
+      { k:'api1Name',        l:'API #1 — name',          t:'text',   ph:'patient-records' },
+      { k:'api1OpenApiUrl',  l:'API #1 — OpenAPI spec',  t:'text',   ph:'https://api.your-org.com/patient-records/openapi.json' },
+      { k:'api1Auth',        l:'API #1 — auth',          t:'select', opts:['OAuth 2.0 Client Credentials','OAuth 2.0 Authorization Code','API Key Header','None'] },
+      { k:'api1SecretArn',   l:'API #1 — secret',        t:'secret', ph:'arn:aws:secretsmanager:...:secret:gateway/api1-XXX' },
+      { k:'api2Name',        l:'API #2 — name',          t:'text',   ph:'(optional)' },
+      { k:'api2OpenApiUrl',  l:'API #2 — OpenAPI spec',  t:'text' },
+      { k:'api2Auth',        l:'API #2 — auth',          t:'select', opts:['OAuth 2.0 Client Credentials','OAuth 2.0 Authorization Code','API Key Header','None','—'] },
+      { k:'api2SecretArn',   l:'API #2 — secret',        t:'secret' },
+      { k:'rateLimitRpm',    l:'Per-tool rate limit (RPM)', t:'text', def:'120', hint:'Gateway-enforced cap, separate from per-agent RPM' },
+    ],
+  },
+  {
+    key: 'builtIn', label: 'AgentCore Built-in Tools', icon: 'BT',
+    desc: 'Sandboxed runtime tools the agent can use without you writing any Lambda — Code Interpreter, Browser, File Search.',
+    fields: [
+      { k:'codeInterpreter',         l:'Code Interpreter',     t:'select', opts:['On','Off'], def:'Off' },
+      { k:'codeInterpreterRuntime',  l:'CI runtime',           t:'select', opts:['python3.12','python3.11','nodejs20'], def:'python3.12' },
+      { k:'codeInterpreterTimeoutSec', l:'CI timeout (sec)',   t:'text',   def:'60' },
+      { k:'codeInterpreterMemoryMB', l:'CI memory (MB)',       t:'select', opts:['1024','2048','4096','8192'], def:'2048' },
+      { k:'browser',                 l:'Browser tool',         t:'select', opts:['On','Off'], def:'Off' },
+      { k:'browserAllowList',        l:'Browser allow-list',   t:'text',   ph:'novartis.com, accenture.com', hint:'Comma-separated domains the agent may navigate to' },
+      { k:'browserDownloads',        l:'Allow downloads',      t:'select', opts:['No','Yes'], def:'No' },
+      { k:'fileSearch',              l:'File Search',          t:'select', opts:['On','Off'], def:'Off' },
+      { k:'fileSearchSources',       l:'File Search sources',  t:'text',   ph:'s3://your-bucket/docs/, sharepoint:novartis-policies' },
+    ],
+  },
+];
+
+function refreshAgentCoreCount() {
+  const block = getAcAgentBlock();
+  const enabled = block ? AGENTCORE_SCHEMAS.filter(s => block[s.key]?.enabled).length : 0;
+  $('tab-agentcore-count').textContent = enabled;
+  if (panels.agentcore.classList.contains('active')) {
+    renderAgentCore();
+    renderAgentCoreSide();
+  }
+}
+
+function renderAgentCore() {
+  const list = $('ac-list');
+  const block = getAcAgentBlock() || {};
+  list.innerHTML = AGENTCORE_SCHEMAS.map(schema => {
+    const sub  = block[schema.key] || { enabled: false };
+    const open = sub.enabled ? 'open' : 'ac-disabled';
+    const fields = schema.fields.map(f => {
+      const v = sub[f.k] != null ? sub[f.k] : (f.def || '');
+      const lbl = `<label>${f.l}${f.req ? ' <span class="req">*</span>' : ''}${f.t === 'secret' ? ' <span class="secret-tag">secret</span>' : ''}</label>`;
+      let input;
+      if (f.t === 'select') input = `<select data-ac-k="${f.k}">${f.opts.map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+      else                  input = `<input data-ac-k="${f.k}" type="text" value="${esc(v)}" placeholder="${esc(f.ph || '')}">`;
+      return `<div class="field">${lbl}${input}${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}</div>`;
+    }).join('');
+    return `
+      <div class="conn-card ${open}" data-ac-section="${schema.key}">
+        <div class="conn-head">
+          <div class="conn-icon">${schema.icon}</div>
+          <div class="ch-meta">
+            <div class="ch-name">${schema.label}</div>
+            <div class="ch-sub">${esc(schema.desc)}</div>
+          </div>
+          <span class="ac-toggle ${sub.enabled ? 'on' : ''}" data-ac-toggle="${schema.key}"></span>
+        </div>
+        <div class="conn-body">
+          <div class="conn-grid">${fields}</div>
+          <div class="conn-actions">
+            <span class="spacer"></span>
+            <button class="btn-sm primary" data-ac-save="${schema.key}">Save</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  list.querySelectorAll('[data-ac-toggle]').forEach(t => t.addEventListener('click', e => {
+    e.stopPropagation();
+    const key = e.currentTarget.dataset.acToggle;
+    const cur = getAcAgentBlock() || {};
+    cur[key] = cur[key] || {};
+    cur[key].enabled = !cur[key].enabled;
+    setAcAgentBlock(cur);
+    renderAgentCore();
+    renderAgentCoreSide();
+  }));
+  list.querySelectorAll('[data-ac-save]').forEach(b => b.addEventListener('click', e => {
+    const key = e.currentTarget.dataset.acSave;
+    const card = e.currentTarget.closest('.conn-card');
+    const cur = getAcAgentBlock() || {};
+    cur[key] = cur[key] || {};
+    cur[key].enabled = true;
+    card.querySelectorAll('[data-ac-k]').forEach(el => { cur[key][el.dataset.acK] = el.value; });
+    setAcAgentBlock(cur);
+    renderAgentCore();
+    renderAgentCoreSide();
+    toast(`Saved ${key} settings`, 'success');
+  }));
+}
+
+let acSideTab = 'yaml';
+document.querySelectorAll('[data-ac-side]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-ac-side]').forEach(x => x.classList.toggle('active', x === b));
+  acSideTab = b.dataset.acSide;
+  renderAgentCoreSide();
+}));
+
+function renderAgentCoreSide() {
+  const el = $('ac-side-content');
+  if (acSideTab === 'yaml') el.innerHTML = `<pre>${esc(generateAgentCoreYaml())}</pre>`;
+  if (acSideTab === 'iam')  el.innerHTML = `<pre>${esc(generateAgentCoreIAMHints())}</pre>`;
+}
+
+function generateAgentCoreYaml() {
+  const block = getAcAgentBlock();
+  if (!block || !AGENTCORE_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Toggle a section on the left to see the AgentCoreConfig\n# block that will be appended to your CloudFormation template.`;
+  }
+  let out = `# ════════════════════════════════════════════════════════════\n# AgentCore runtime configuration (separate from Bedrock Agents core)\n# Apply with: aws bedrock-agentcore apply-config --config agentcore.yaml\n# ════════════════════════════════════════════════════════════\n\nAgentCoreConfig:\n  AgentName: ${state.agent.name || '<unnamed>'}\n`;
+  AGENTCORE_SCHEMAS.forEach(schema => {
+    const sub = block[schema.key];
+    if (!sub || !sub.enabled) return;
+    out += `\n  ${schema.key}:\n    enabled: true\n`;
+    schema.fields.forEach(f => {
+      const v = sub[f.k];
+      if (v == null || v === '') return;
+      const safe = /^[a-zA-Z0-9._/:@\s,-]+$/.test(String(v)) && !String(v).includes('\n') ? String(v) : JSON.stringify(String(v));
+      const yamlKey = f.k;
+      const isSecret = f.t === 'secret';
+      out += `    ${yamlKey}: ${isSecret ? `!SecretRef ${JSON.stringify(String(v))}` : safe}\n`;
+    });
+  });
+  return out;
+}
+
+function generateAgentCoreIAMHints() {
+  const block = getAcAgentBlock();
+  if (!block || !AGENTCORE_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Enable at least one AgentCore section to see the IAM permissions\n# the agent execution role will need.`;
+  }
+  let out = `# IAM permissions the agent execution role needs for AgentCore\n# Append these statements to AgentRoleArn's policy.\n\nStatements:\n`;
+  if (block.identity?.enabled) {
+    out += `\n  - Sid: AgentCoreIdentity\n    Effect: Allow\n    Action:\n      - bedrock:GetIdentityProvider\n      - bedrock:CreateWorkloadIdentity\n      - bedrock:GetResourceApiKey\n      - secretsmanager:GetSecretValue\n    Resource:\n      - ${block.identity.secretArn || '<identity-secret-arn>'}\n      - "*"  # scope to specific identity provider ARN in production\n`;
+  }
+  if (block.memory?.enabled) {
+    out += `\n  - Sid: AgentCoreMemory\n    Effect: Allow\n    Action:\n      - bedrock-agentcore:CreateMemoryStore\n      - bedrock-agentcore:PutEvent\n      - bedrock-agentcore:RetrieveMemoryRecords\n      - bedrock-agentcore:UpdateMemoryRecord\n    Resource:\n      - "arn:aws:bedrock-agentcore:*:*:memory-store/${block.memory.storeName || '<store-name>'}"\n`;
+  }
+  if (block.observability?.enabled) {
+    out += `\n  - Sid: AgentCoreObservability\n    Effect: Allow\n    Action:\n      - cloudwatch:PutMetricData\n      - logs:CreateLogStream\n      - logs:PutLogEvents\n      - xray:PutTraceSegments\n      - xray:PutTelemetryRecords\n      - bedrock-agentcore:StartEvaluation\n    Resource: "*"\n`;
+  }
+  if (block.gateway?.enabled) {
+    out += `\n  - Sid: AgentCoreGateway\n    Effect: Allow\n    Action:\n      - bedrock-agentcore:InvokeGateway\n      - bedrock-agentcore:GetGatewayTool\n      - bedrock-agentcore:ListGatewayTools\n      - secretsmanager:GetSecretValue\n    Resource:\n      - "arn:aws:bedrock-agentcore:*:*:gateway/${block.gateway.gatewayName || '<gateway>'}"\n      - ${block.gateway.api1SecretArn || '<api1-secret-arn>'}\n      - ${block.gateway.api2SecretArn || '<api2-secret-arn>'}\n`;
+  }
+  if (block.builtIn?.enabled) {
+    out += `\n  - Sid: AgentCoreBuiltInTools\n    Effect: Allow\n    Action:\n      - bedrock-agentcore:InvokeCodeInterpreter\n      - bedrock-agentcore:InvokeBrowserTool\n      - bedrock-agentcore:InvokeFileSearch\n    Resource: "*"\n`;
+  }
+  return out;
+}
+
+// Wrap generateYAML once more so AgentCore is appended after Enterprise.
+const _agentCoreBaseGenerate = generateYAML;
+generateYAML = function(cfg) {
+  let yaml = _agentCoreBaseGenerate(cfg);
+  if (cfg !== state.agent) return yaml;
+  const block = getAcAgentBlock();
+  if (!block || !AGENTCORE_SCHEMAS.some(s => block[s.key]?.enabled)) return yaml;
+  return yaml + '\n' + generateAgentCoreYaml();
+};
+
+// ═════════════════════════════════════════════════════════════════════
+// COGNITIVE MEMORY — Working / Semantic / Procedural / Episodic
+// Modelled on the obsidian-agent-memory-skills pattern (markdown vault
+// + wikilinks) and lifted onto Bedrock AgentCore Memory + S3.
+// ═════════════════════════════════════════════════════════════════════
+const MEM_STORE_KEY = 'agenteye:cognitive-memory';
+function loadMemStore() { try { return JSON.parse(localStorage.getItem(MEM_STORE_KEY) || '{}'); } catch { return {}; } }
+function saveMemStore(s) { localStorage.setItem(MEM_STORE_KEY, JSON.stringify(s)); }
+function getMemAgentBlock() { return loadMemStore()[agentKey()] || null; }
+function setMemAgentBlock(block) {
+  const s = loadMemStore();
+  s[agentKey()] = block;
+  saveMemStore(s);
+  state.agent.cognitiveMemory = block;
+  refreshMemoryCount();
+}
+
+const MEMORY_SCHEMAS = [
+  {
+    key: 'working', label: 'Working memory', icon: 'WM',
+    tagline: 'In-turn scratchpad — what the agent is currently reasoning about.',
+    desc: 'Short-lived state that lives inside a single conversation. Holds the active task, intermediate calculations, and the agent\'s plan-of-action. Never persisted across sessions; cleared when the session ends.',
+    fields: [
+      { k:'mode',           l:'Scratchpad mode',     t:'select', opts:['structured-plan','free-form-notes','plan + scratch'], def:'plan + scratch' },
+      { k:'maxTokens',      l:'Max scratchpad tokens', t:'text', def:'2000', hint:'Soft cap inside the model\'s context window' },
+      { k:'showToUser',     l:'Surface to user',     t:'select', opts:['hidden','collapsed','always-visible'], def:'collapsed' },
+      { k:'planFormat',     l:'Plan format',         t:'select', opts:['markdown checklist','numbered steps','XML <plan>…</plan>'], def:'markdown checklist' },
+    ],
+  },
+  {
+    key: 'semantic', label: 'Semantic memory', icon: 'SM',
+    tagline: 'Facts, entities and concepts — the "what is true".',
+    desc: 'Vector-indexed durable knowledge: domain facts, entity profiles, learned patterns. Survives across every session for this agent. This is where "what the customer\'s plan covers" or "which suppliers ship to APAC" lives.',
+    fields: [
+      { k:'storeName',      l:'Memory store name',   t:'text', req:true, ph:'agent-semantic-store', hint:'Becomes part of the AgentCore Memory resource ARN' },
+      { k:'embeddingModel', l:'Embedding model',     t:'select', opts:['amazon.titan-embed-text-v2:0','cohere.embed-english-v3','cohere.embed-multilingual-v3'], def:'amazon.titan-embed-text-v2:0' },
+      { k:'retentionDays',  l:'Retention (days)',    t:'text', def:'180' },
+      { k:'piiStrategy',    l:'PII strategy',        t:'select', opts:['anonymize','mask','exclude','allow (compliant zones only)'], def:'anonymize' },
+      { k:'writePolicy',    l:'Write policy',        t:'select', opts:['agent-decides','user-confirmed','tool-only'], def:'user-confirmed', hint:'When the agent may add facts to long-term memory' },
+      { k:'topK',           l:'Recall top-K',        t:'text', def:'8' },
+    ],
+  },
+  {
+    key: 'procedural', label: 'Procedural memory', icon: 'PM',
+    tagline: 'Learned how-to — runbooks, playbooks, recoveries.',
+    desc: 'Step-by-step procedures the agent has executed successfully and may re-use. Stored as markdown runbooks in S3 with a thin vector index over titles + preconditions. The agent recalls "the last time I closed a P1, here\'s what worked".',
+    fields: [
+      { k:'bucket',         l:'S3 bucket',           t:'text', req:true, ph:'agent-procedural-runbooks' },
+      { k:'prefix',         l:'Key prefix',          t:'text', def:'runbooks/' },
+      { k:'authoring',      l:'Authoring mode',      t:'select', opts:['agent-distills-after-success','human-curated','hybrid'], def:'hybrid' },
+      { k:'approvalRequired', l:'New-runbook approval', t:'select', opts:['none','any human','named approver group'], def:'any human' },
+      { k:'maxRunbookSize', l:'Max runbook size (KB)', t:'text', def:'24' },
+      { k:'recallStrategy', l:'Recall strategy',     t:'select', opts:['exact-task-match','similarity-search','agent-judges'], def:'similarity-search' },
+    ],
+  },
+  {
+    key: 'episodic', label: 'Episodic memory', icon: 'EM',
+    tagline: 'Timestamped event log — what happened, when.',
+    desc: 'Append-only stream of session events: user turns, tool calls, decisions, outcomes. Drives session recaps and post-incident review. Closest to obsidian-agent-memory-skills\' "Session Log.md" pattern, but as a Bedrock AgentCore event stream.',
+    fields: [
+      { k:'storeName',      l:'Event store name',    t:'text', req:true, ph:'agent-episodic-events' },
+      { k:'eventTypes',     l:'Event types captured', t:'select', opts:['user turns only','+ tool calls','+ reasoning steps','everything'], def:'+ tool calls' },
+      { k:'retentionDays',  l:'Retention (days)',    t:'text', def:'30' },
+      { k:'recapOnSessionEnd', l:'Auto-recap',       t:'select', opts:['on','off'], def:'on', hint:'At session end, distill the episode into a semantic-memory note' },
+      { k:'piiStrategy',    l:'PII strategy',        t:'select', opts:['anonymize','mask','exclude','retain (compliance zones only)'], def:'mask' },
+      { k:'replayable',     l:'Replayable transcript', t:'select', opts:['yes','no'], def:'yes', hint:'Yes = stored verbatim; no = only outcomes + decisions' },
+    ],
+  },
+];
+
+function refreshMemoryCount() {
+  const block = getMemAgentBlock();
+  const enabled = block ? MEMORY_SCHEMAS.filter(s => block[s.key]?.enabled).length : 0;
+  const el = $('tab-memory-count');
+  if (el) el.textContent = enabled;
+  if (panels.memory && panels.memory.classList.contains('active')) {
+    renderMemory();
+    renderMemorySide();
+  }
+}
+
+function renderMemory() {
+  const list = $('mem-list');
+  if (!list) return;
+  const block = getMemAgentBlock() || {};
+  list.innerHTML = MEMORY_SCHEMAS.map(schema => {
+    const sub  = block[schema.key] || { enabled: false };
+    const open = sub.enabled ? 'open' : 'ac-disabled';
+    const fields = schema.fields.map(f => {
+      const v = sub[f.k] != null ? sub[f.k] : (f.def || '');
+      const lbl = `<label>${f.l}${f.req ? ' <span class="req">*</span>' : ''}</label>`;
+      let input;
+      if (f.t === 'select') input = `<select data-mem-k="${f.k}">${f.opts.map(o => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+      else                  input = `<input data-mem-k="${f.k}" type="text" value="${esc(v)}" placeholder="${esc(f.ph || '')}">`;
+      return `<div class="field">${lbl}${input}${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}</div>`;
+    }).join('');
+    return `
+      <div class="conn-card ${open}" data-mem-section="${schema.key}">
+        <div class="conn-head">
+          <div class="conn-icon">${schema.icon}</div>
+          <div class="ch-meta">
+            <div class="ch-name">${schema.label} <span style="font-weight:500;color:var(--text-4);font-size:12px;margin-left:6px;">${esc(schema.tagline)}</span></div>
+            <div class="ch-sub">${esc(schema.desc)}</div>
+          </div>
+          <span class="ac-toggle ${sub.enabled ? 'on' : ''}" data-mem-toggle="${schema.key}"></span>
+        </div>
+        <div class="conn-body">
+          <div class="conn-grid">${fields}</div>
+          <div class="conn-actions">
+            <span class="spacer"></span>
+            <button class="btn-sm primary" data-mem-save="${schema.key}">Save</button>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+  list.querySelectorAll('[data-mem-toggle]').forEach(t => t.addEventListener('click', e => {
+    e.stopPropagation();
+    const key = e.currentTarget.dataset.memToggle;
+    const cur = getMemAgentBlock() || {};
+    cur[key] = cur[key] || {};
+    cur[key].enabled = !cur[key].enabled;
+    setMemAgentBlock(cur);
+    renderMemory();
+    renderMemorySide();
+  }));
+  list.querySelectorAll('[data-mem-save]').forEach(b => b.addEventListener('click', e => {
+    const key = e.currentTarget.dataset.memSave;
+    const card = e.currentTarget.closest('.conn-card');
+    const cur = getMemAgentBlock() || {};
+    cur[key] = cur[key] || {};
+    cur[key].enabled = true;
+    card.querySelectorAll('[data-mem-k]').forEach(el => { cur[key][el.dataset.memK] = el.value; });
+    setMemAgentBlock(cur);
+    renderMemory();
+    renderMemorySide();
+    toast(`Saved ${key} memory settings`, 'success');
+  }));
+}
+
+let memSideTab = 'protocol';
+document.querySelectorAll('[data-mem-side]').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('[data-mem-side]').forEach(x => x.classList.toggle('active', x === b));
+  memSideTab = b.dataset.memSide;
+  renderMemorySide();
+}));
+
+function renderMemorySide() {
+  const el = $('mem-side-content');
+  if (!el) return;
+  if (memSideTab === 'protocol') el.innerHTML = `<pre>${esc(generateMemoryProtocol())}</pre>`;
+  if (memSideTab === 'yaml')     el.innerHTML = `<pre>${esc(generateCognitiveMemoryYaml())}</pre>`;
+  if (memSideTab === 'iam')      el.innerHTML = `<pre>${esc(generateCognitiveMemoryIAM())}</pre>`;
+  if (memSideTab === 'vault')    el.innerHTML = `<pre>${esc(generateVaultScaffold())}</pre>`;
+}
+
+function generateMemoryProtocol() {
+  const block = getMemAgentBlock();
+  if (!block || !MEMORY_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Enable one or more memory tiers to see the protocol\n# appendix that will be attached to the agent's system instruction.\n#\n# The protocol teaches the agent WHEN to read each tier, WHEN to\n# write to each tier, and HOW to keep tiers in sync.`;
+  }
+  const lines = [];
+  lines.push(`# ─── Memory protocol (appended to system instruction) ───`);
+  lines.push(`#`);
+  lines.push(`# Apply this protocol on every turn. Read before reasoning, write after acting.`);
+  lines.push(``);
+  lines.push(`## At the start of every session`);
+  if (block.episodic?.enabled) lines.push(`- Read the last episodic recap for this user (top 1) so you know where you left off.`);
+  if (block.semantic?.enabled) lines.push(`- Recall the top ${block.semantic.topK || 8} semantic notes matching the user's opening message.`);
+  if (block.procedural?.enabled) lines.push(`- Skim runbook titles whose preconditions match the current task. Do not load bodies yet.`);
+  lines.push(``);
+  lines.push(`## While reasoning`);
+  if (block.working?.enabled) {
+    const fmt = block.working.planFormat || 'markdown checklist';
+    const surface = block.working.showToUser || 'collapsed';
+    lines.push(`- Maintain a working scratchpad as a ${fmt}. Visibility to user: ${surface}.`);
+    lines.push(`- Soft-cap the scratchpad at ${block.working.maxTokens || 2000} tokens; compress older entries into a single "decisions so far" line.`);
+  }
+  if (block.procedural?.enabled) {
+    lines.push(`- If a relevant runbook exists, load its body ONLY when you commit to executing it. Cite the runbook id when you do.`);
+  }
+  lines.push(``);
+  lines.push(`## When you learn a new fact`);
+  if (block.semantic?.enabled) {
+    const pol = block.semantic.writePolicy || 'user-confirmed';
+    if (pol === 'user-confirmed') lines.push(`- Propose the fact to the user in one short line; write to semantic memory ONLY after they confirm.`);
+    if (pol === 'agent-decides')  lines.push(`- Write to semantic memory immediately. Tag entries with confidence ∈ {high, medium, low}.`);
+    if (pol === 'tool-only')      lines.push(`- Never write to semantic memory directly. A separate curation tool does that asynchronously.`);
+    const pii = block.semantic.piiStrategy || 'anonymize';
+    if (pii !== 'allow (compliant zones only)') lines.push(`- Apply PII strategy "${pii}" before writing. If unsure, default to redact.`);
+  }
+  lines.push(``);
+  lines.push(`## When you successfully complete a task`);
+  if (block.procedural?.enabled) {
+    const auth = block.procedural.authoring || 'hybrid';
+    if (auth === 'agent-distills-after-success') lines.push(`- Distill the steps you took into a runbook (≤${block.procedural.maxRunbookSize || 24}KB). Submit to the approval queue.`);
+    if (auth === 'human-curated') lines.push(`- Surface the trace; a human curator decides whether it becomes a runbook.`);
+    if (auth === 'hybrid')        lines.push(`- If the task pattern is new (no near-duplicate in procedural store), draft a runbook and queue for approval.`);
+  }
+  if (block.episodic?.enabled) {
+    lines.push(`- Append a "decision: <one-line>" event to episodic memory with the outcome.`);
+  }
+  lines.push(``);
+  lines.push(`## At session end`);
+  if (block.episodic?.enabled && block.episodic.recapOnSessionEnd === 'on') {
+    lines.push(`- Write a recap: 3–5 lines covering goal, key decisions, open threads, follow-ups.`);
+    if (block.semantic?.enabled) lines.push(`- Extract any durable facts from the recap and upsert into semantic memory.`);
+  }
+  lines.push(``);
+  lines.push(`## Hard rules`);
+  lines.push(`- NEVER write to long-term memory inside the same turn you read from it (avoid feedback loops).`);
+  lines.push(`- If a memory item conflicts with the current user message, trust the user and flag the stale memory for review.`);
+  lines.push(`- Cite memory recall in your reasoning: "(recall: <store>/<id>)" so traces stay auditable.`);
+  return lines.join('\n');
+}
+
+function generateCognitiveMemoryYaml() {
+  const block = getMemAgentBlock();
+  if (!block || !MEMORY_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Toggle a memory tier on the left to see the CognitiveMemoryConfig\n# block that will be appended to your CloudFormation template.`;
+  }
+  let out = `# ════════════════════════════════════════════════════════════\n# Cognitive memory architecture (Working / Semantic / Procedural / Episodic)\n# Inspired by obsidian-agent-memory-skills — vault-as-storage,\n# but lifted onto Bedrock AgentCore Memory + S3.\n# ════════════════════════════════════════════════════════════\n\nCognitiveMemoryConfig:\n  AgentName: ${state.agent.name || '<unnamed>'}\n  Tiers:\n`;
+  MEMORY_SCHEMAS.forEach(schema => {
+    const sub = block[schema.key];
+    if (!sub || !sub.enabled) return;
+    out += `\n    ${schema.key}:\n      enabled: true\n`;
+    schema.fields.forEach(f => {
+      const v = sub[f.k];
+      if (v == null || v === '') return;
+      const safe = /^[a-zA-Z0-9._/:@\s,()+-]+$/.test(String(v)) && !String(v).includes('\n') ? String(v) : JSON.stringify(String(v));
+      out += `      ${f.k}: ${safe}\n`;
+    });
+  });
+  out += `\n# Resources generated when this block is applied:\n`;
+  if (block.semantic?.enabled)   out += `#   - AWS::BedrockAgentCore::MemoryStore  (vector, ${block.semantic.storeName || '<store>'})\n`;
+  if (block.episodic?.enabled)   out += `#   - AWS::BedrockAgentCore::MemoryStore  (event, ${block.episodic.storeName || '<store>'})\n`;
+  if (block.procedural?.enabled) out += `#   - AWS::S3::Bucket                     (runbooks, ${block.procedural.bucket || '<bucket>'})\n`;
+  if (block.working?.enabled)    out += `#   - (no resource — working memory lives in session context)\n`;
+  return out;
+}
+
+function generateCognitiveMemoryIAM() {
+  const block = getMemAgentBlock();
+  if (!block || !MEMORY_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Enable one or more memory tiers to see the IAM permissions\n# the agent execution role will need.`;
+  }
+  let out = `# IAM additions for cognitive memory. Append these statements to AgentRoleArn.\n\nStatements:\n`;
+  if (block.semantic?.enabled) {
+    out += `\n  - Sid: CognitiveSemanticMemory\n    Effect: Allow\n    Action:\n      - bedrock-agentcore:RetrieveMemoryRecords\n      - bedrock-agentcore:PutMemoryRecord\n      - bedrock-agentcore:UpdateMemoryRecord\n    Resource:\n      - "arn:aws:bedrock-agentcore:*:*:memory-store/${block.semantic.storeName || '<semantic-store>'}"\n`;
+  }
+  if (block.episodic?.enabled) {
+    out += `\n  - Sid: CognitiveEpisodicMemory\n    Effect: Allow\n    Action:\n      - bedrock-agentcore:PutEvent\n      - bedrock-agentcore:ListEvents\n      - bedrock-agentcore:GetSessionRecap\n    Resource:\n      - "arn:aws:bedrock-agentcore:*:*:memory-store/${block.episodic.storeName || '<episodic-store>'}"\n`;
+  }
+  if (block.procedural?.enabled) {
+    out += `\n  - Sid: CognitiveProceduralRunbooks\n    Effect: Allow\n    Action:\n      - s3:GetObject\n      - s3:ListBucket\n      - s3:PutObject  # only for agents allowed to author runbooks\n    Resource:\n      - "arn:aws:s3:::${block.procedural.bucket || '<runbook-bucket>'}"\n      - "arn:aws:s3:::${block.procedural.bucket || '<runbook-bucket>'}/${block.procedural.prefix || 'runbooks/'}*"\n`;
+  }
+  if (block.working?.enabled) {
+    out += `\n  # Working memory: no IAM needed — lives inside the session context.\n`;
+  }
+  return out;
+}
+
+function generateVaultScaffold() {
+  const block = getMemAgentBlock();
+  if (!block || !MEMORY_SCHEMAS.some(s => block[s.key]?.enabled)) {
+    return `# Enable one or more memory tiers to see the vault scaffold that\n# will be written under library/<slug>/<version>/memory/ at publish time.\n#\n# The scaffold mirrors the obsidian-agent-memory-skills vault template:\n# markdown notes, YAML frontmatter, and wikilinks between tiers.`;
+  }
+  const slug = (state.agent.name || 'agent').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const lines = [];
+  lines.push(`# Vault scaffold (written at publish time)`);
+  lines.push(`# Path: library/${slug}/v<N>/memory/`);
+  lines.push(``);
+  lines.push(`memory/`);
+  lines.push(`├── README.md                 — overview + how to navigate`);
+  lines.push(`├── PROTOCOL.md               — the memory protocol appendix`);
+  if (block.working?.enabled) {
+    lines.push(`├── working/`);
+    lines.push(`│   └── _template.md          — scratchpad shape for the agent to fill`);
+  }
+  if (block.semantic?.enabled) {
+    lines.push(`├── semantic/`);
+    lines.push(`│   ├── entities/             — one .md per entity, YAML frontmatter`);
+    lines.push(`│   ├── concepts/             — domain concepts + definitions`);
+    lines.push(`│   └── INDEX.md              — wikilink hub`);
+  }
+  if (block.procedural?.enabled) {
+    lines.push(`├── procedural/`);
+    lines.push(`│   ├── runbooks/             — one .md per runbook, preconditions in frontmatter`);
+    lines.push(`│   └── INDEX.md              — title-only index for cheap recall`);
+  }
+  if (block.episodic?.enabled) {
+    lines.push(`└── episodic/`);
+    lines.push(`    ├── sessions/             — Session-Log-YYYY-MM-DD.md`);
+    lines.push(`    └── recaps/               — distilled 3-5 line recaps`);
+  }
+  return lines.join('\n');
+}
+
+// Wrap generateYAML so CognitiveMemory is appended after AgentCore.
+const _memoryBaseGenerate = generateYAML;
+generateYAML = function(cfg) {
+  let yaml = _memoryBaseGenerate(cfg);
+  if (cfg !== state.agent) return yaml;
+  const block = getMemAgentBlock();
+  if (!block || !MEMORY_SCHEMAS.some(s => block[s.key]?.enabled)) return yaml;
+  return yaml + '\n' + generateCognitiveMemoryYaml();
+};
+
+// ─── Enterprise YAML patch ────────────────────────────────────────────
+const _enterpriseBaseGenerate = generateYAML;
+generateYAML = function(cfg) {
+  let yaml = _enterpriseBaseGenerate(cfg);
+  if (cfg !== state.agent) return yaml;
+  const e = cfg.enterprise;
+  if (!e) return yaml;
+  const resId = (cfg.name || 'Agent').replace(/[^a-zA-Z0-9]/g, '') || 'Agent';
+
+  // 1) Inject CustomerEncryptionKeyArn + Tags into the supervisor agent Properties block
+  const inject = [];
+  if (e.encryption && e.encryption.mode === 'customer-managed' && e.encryption.kmsKeyArn) {
+    inject.push(`      CustomerEncryptionKeyArn: ${e.encryption.kmsKeyArn}`);
+  }
+  if (e.tags && Object.values(e.tags).some(v => v)) {
+    inject.push(`      Tags:`);
+    Object.entries(e.tags).forEach(([k, v]) => {
+      if (!v) return;
+      const safe = /^[a-zA-Z0-9._/:-]+$/.test(String(v)) ? String(v) : JSON.stringify(String(v));
+      inject.push(`        ${k}: ${safe}`);
+    });
+  }
+  if (inject.length) {
+    yaml = yaml.replace(/(\s+AutoPrepare: true\n)/, '$1' + inject.join('\n') + '\n');
+  }
+
+  // 2) Append the Enterprise-hardening section at the end
+  let extra = `\n# ════════════════════════════════════════════════════════════
+# Enterprise hardening (captured via AgentEye Enterprise stage)
+# ════════════════════════════════════════════════════════════\n`;
+
+  if (e.network && e.network.mode && e.network.mode !== 'public') {
+    extra += `\n# ── Networking (${e.network.mode}) ──\n`;
+    extra += `# Action-group Lambdas must sit in the project VPC. Bedrock-side calls\n`;
+    extra += `# are reached via VPC interface endpoints (com.amazonaws.<region>.bedrock-agent-runtime).\n`;
+    if (e.network.vpcId)                       extra += `#   VPC:             ${e.network.vpcId}\n`;
+    if (e.network.subnetIds && e.network.subnetIds.length)             extra += `#   Subnets:         ${e.network.subnetIds.join(', ')}\n`;
+    if (e.network.securityGroupIds && e.network.securityGroupIds.length) extra += `#   Security groups: ${e.network.securityGroupIds.join(', ')}\n`;
+    extra += `#\n# Add to every AWS::Lambda::Function in this template:\n#   VpcConfig:\n#     SubnetIds:        [<subnet-ids>]\n#     SecurityGroupIds: [<sg-ids>]\n`;
+  }
+
+  if (e.approvals && e.approvals.mode && e.approvals.mode !== 'none') {
+    extra += `\n# ── Human-in-the-loop approvals (${e.approvals.mode}) ──\n`;
+    extra += `# Destructive ${e.approvals.mode === 'all-actions' ? 'and read' : 'write'} actions pause for human approval before executing.\n`;
+    if (e.approvals.approverGroupArn) extra += `#   Approver group:  ${e.approvals.approverGroupArn}\n`;
+    extra += `#\n# Pattern: action-group Lambda → Step Functions (Wait-for-token) → SNS (notify approver)\n`;
+    extra += `#          → manual approval via console/Slack → Step Functions resumes Lambda.\n`;
+  }
+
+  if (e.observability) {
+    extra += `\n# ── Observability ──\n`;
+    extra += `${resId}AgentLogGroup:\n  Type: AWS::Logs::LogGroup\n  Properties:\n    LogGroupName: !Sub '/aws/bedrock/agents/\${Environment}-${resId.toLowerCase()}'\n    RetentionInDays: 90\n`;
+    if (e.encryption && e.encryption.mode === 'customer-managed' && e.encryption.kmsKeyArn) {
+      extra += `    KmsKeyId: ${e.encryption.kmsKeyArn}\n`;
+    }
+    if (e.observability.xrayTracing) {
+      extra += `\n# X-Ray tracing enabled — each AWS::Lambda::Function above should add:\n#   TracingConfig: { Mode: Active }\n`;
+    }
+    if (e.observability.externalCollectorUrl) {
+      extra += `# External telemetry collector: ${e.observability.externalCollectorUrl}\n# Wire via the AWS Distro for OpenTelemetry (ADOT) Lambda layer.\n`;
+    }
+  }
+
+  if (e.dr && e.dr.posture && e.dr.posture !== 'single-region') {
+    extra += `\n# ── Disaster recovery (${e.dr.posture}) ──\n`;
+    if (e.dr.primaryRegion)   extra += `#   Primary region:    ${e.dr.primaryRegion}\n`;
+    if (e.dr.secondaryRegion) extra += `#   Secondary region:  ${e.dr.secondaryRegion}\n`;
+    extra += `#\n# Deploy this stack into both regions. Replicate the KMS key, knowledge-base\n`;
+    extra += `# OpenSearch collections, and Secrets Manager secrets. Use Route 53 weighted\n`;
+    extra += `# (active-active) or failover (active-passive) records to flip traffic.\n`;
+  }
+
+  if (e.quotas && e.quotas.perAgentRpm) {
+    extra += `\n# ── Per-agent quotas ──\n`;
+    extra += `# Soft cap: ${e.quotas.perAgentRpm} requests/minute. Enforce via a token-bucket Lambda layer\n`;
+    extra += `# in front of invoke-agent, plus AWS::ApplicationAutoScaling::ScalableTarget on the\n`;
+    extra += `# Lambda concurrency (Service Quotas alone won't enforce per-agent fairness).\n`;
+  }
+
+  return yaml + extra;
+};
+
+// initial load — pull library count so the tab badge is correct from boot
+loadLibrary();
+refreshPublishButton();
+refreshModeStrip();
+refreshAgentCoreCount();
+refreshMemoryCount();
+
+</script>
+</body>
+</html>

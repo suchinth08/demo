@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"console.log\\(require\\('path'\\).resolve\\('C:/Users/sudheer.chinthala/Downloads/AgentEye/server.js'\\)\\)\")",
+      "Bash(PORT=7861 node *)",
+      "Bash(where claude *)",
+      "Bash(where git *)",
+      "Bash(git --version)",
+      "Bash(python -c \"import sys, json; d=json.loads\\(sys.stdin.read\\(\\)\\); r=json.loads\\(d['rawResult']\\); print\\(json.dumps\\(r['agentConfig'].get\\('enterprise'\\), indent=2\\)\\)\")",
+      "Bash(python -c \"import sys,json; d=json.loads\\(sys.stdin.read\\(\\)\\); print\\('hash:', d.get\\('hash'\\), '| version:', d.get\\('version'\\)\\)\")",
+      "Bash(git -C \"C:\\\\Users\\\\sudheer.chinthala\\\\Downloads\\\\AgentEye\\\\library\" log --oneline -3)",
+      "Bash(git -C \"C:\\\\Users\\\\sudheer.chinthala\\\\Downloads\\\\AgentEye\\\\library\" show --stat HEAD)",
+      "Bash(python -c \"from PIL import Image; im=Image.open\\('autoenthra-logo.png'\\); print\\('size:',im.size,'aspect:',round\\(im.size[0]/im.size[1],2\\)\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\),b=fs.readFileSync\\('autoenthra-logo.png'\\);const w=b.readUInt32BE\\(16\\),h=b.readUInt32BE\\(20\\);console.log\\('size:',w,'x',h,'aspect:',\\(w/h\\).toFixed\\(2\\)\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\),b=fs.readFileSync\\('C:/Users/sudheer.chinthala/Downloads/AgentEye/website/assets/autoenthra-logo.png'\\);const w=b.readUInt32BE\\(16\\),h=b.readUInt32BE\\(20\\);console.log\\('size:',w,'x',h,'aspect:',\\(w/h\\).toFixed\\(2\\)\\)\")",
+      "Bash(powershell *)",
+      "PowerShell(Get-Content *)",
+      "WebFetch(domain:github.com)",
+      "Bash(node -c \"C:\\\\Users\\\\sudheer.chinthala\\\\Downloads\\\\AgentEye\\\\server.js\")"
+    ]
+  }
+}
