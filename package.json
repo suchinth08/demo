@@ -1,0 +1,13 @@
+{
+  "name": "agenteye-hub",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Conversational Bedrock-agent provisioning UI bridged to local Claude Code",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
