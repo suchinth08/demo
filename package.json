@@ -5,9 +5,18 @@
   "description": "Conversational Bedrock-agent provisioning UI bridged to local Claude Code",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "cfn:build": "node cfn/build.js",
+    "cfn:backfill": "node cfn/build.js --all",
+    "cfn:lint": "node cfn/lint.js",
+    "cfn:deploy-bundle": "node cfn/deploy-manifest.js",
+    "app:gen": "node appgen/generate.js",
+    "solution:bundle": "node cfn/solution-deploy.js"
   },
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "js-yaml": "^4.2.0"
   }
 }

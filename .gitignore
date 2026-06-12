@@ -1,0 +1,12 @@
+# dependencies
+node_modules/
+
+# generated solution repos (regenerable from a SolutionSpec via appgen)
+generated/
+
+# logs
+*.log
+.agenteye_server.log
+
+# stray local memory (project memory lives under ~/.claude/projects/.../memory)
+memory/

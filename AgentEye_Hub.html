@@ -397,6 +397,168 @@
   .msg.assistant .msg-bubble { padding: 0; }
   .msg.assistant .msg-bubble strong { color: var(--text); font-weight: 600; }
 
+  /* Forked prior conversation — read-only history */
+  .msg.historical { opacity: 0.6; }
+  .msg.historical .msg-bubble { font-size: 14.5px; }
+  .chat-divider {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-4);
+    margin: 4px 0 22px;
+  }
+  .chat-divider::before, .chat-divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+  .chat-divider.hist-top { color: var(--accent-deep); margin-top: 2px; }
+
+  /* Fork "what loaded" summary card (rendered inside the chat stream) */
+  .fork-card {
+    border: 1px solid var(--accent-soft);
+    background: var(--accent-faint);
+    border-radius: 12px;
+    padding: 14px 16px;
+    max-width: 94%;
+    box-shadow: var(--shadow-sm);
+  }
+  .fork-card-head { font-family: var(--serif); font-size: 15px; color: var(--text); margin-bottom: 11px; }
+  .fork-card-head code {
+    font-family: var(--mono); font-size: 12.5px;
+    background: var(--bg-soft); padding: 1px 6px; border-radius: 5px;
+  }
+  .fork-card-label {
+    font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent-deep); margin-bottom: 6px;
+  }
+  .fork-card-body {
+    font-family: var(--serif); font-size: 14.5px; line-height: 1.85;
+    color: var(--text-2); white-space: pre-wrap;
+    padding-bottom: 11px; margin-bottom: 11px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .fork-card-body code { font-family: var(--mono); font-size: 12.5px; }
+  .fork-card-foot { font-family: var(--serif); font-size: 14px; color: var(--text-3); }
+
+  /* ═══ AGENT GRAPH ═══ */
+  .graph-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 14px; }
+  .graph-controls { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+  .graph-legend { display: flex; gap: 14px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; color: var(--text-3); }
+  .gl-item { display: flex; align-items: center; gap: 6px; }
+  .gl-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .gl-dot.sup { background: var(--accent-soft); border: 2px solid var(--accent); }
+  .gl-dot.spec { background: var(--info-bg); border: 2px solid var(--info); }
+  .gl-ring.mem { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 1.5px dashed var(--success); }
+  .gl-line.stale { width: 18px; border-top: 2px dashed var(--warn); display: inline-block; }
+  .graph-body { display: flex; gap: 16px; height: 560px; }
+  .graph-canvas-wrap { flex: 1; position: relative; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  #graph-svg { width: 100%; height: 100%; display: block; cursor: grab; }
+  .graph-detail { width: 340px; flex-shrink: 0; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 14px; padding: 18px; overflow-y: auto; }
+  .graph-detail-empty { color: var(--text-4); font-family: var(--serif); font-size: 14px; line-height: 1.6; }
+
+  /* SVG edges + nodes */
+  .g-edge { stroke: var(--text-4); stroke-width: 1.6px; opacity: 0.5; transition: opacity 0.15s; }
+  .g-edge.hot { stroke: var(--accent); stroke-width: 2.4px; opacity: 1; }
+  .g-edge.dim { opacity: 0.1; }
+  .g-edge.stale { stroke: var(--warn); stroke-dasharray: 5 4; }
+  marker#arrow path { fill: var(--text-4); }
+  marker#arrow-stale path { fill: var(--warn); }
+  .g-node { cursor: pointer; }
+  .g-node-circle { transition: stroke-width 0.12s; }
+  .g-node-circle.sup { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2px; }
+  .g-node-circle.spec { fill: var(--info-bg); stroke: var(--info); stroke-width: 2px; }
+  .g-node.sel .g-node-circle { stroke-width: 3.5px; }
+  .g-node.dim { opacity: 0.26; }
+  .g-node-mem { fill: none; stroke: var(--success); stroke-width: 1.5px; stroke-dasharray: 3 3; opacity: 0.85; }
+  .g-node-icon { text-anchor: middle; font-size: 14px; fill: var(--text); font-family: var(--serif); pointer-events: none; }
+  .g-node-label { text-anchor: middle; font-size: 12px; fill: var(--text); font-family: var(--mono); font-weight: 600; pointer-events: none; }
+  .g-node-ver { text-anchor: middle; font-size: 10px; fill: var(--text-3); font-family: var(--mono); pointer-events: none; }
+
+  /* graph detail card */
+  .gd-name { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .gd-meta { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+  .gd-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 10px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .gd-badge.sup { background: var(--accent-soft); color: var(--accent-deep); }
+  .gd-badge.spec { background: var(--info-bg); color: var(--info); }
+  .gd-section { margin-top: 16px; }
+  .gd-section h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-4); margin: 0 0 8px; }
+  .gd-usecase { font-family: var(--serif); font-size: 13.5px; line-height: 1.6; color: var(--text-2); }
+  .gd-row { padding: 8px 10px; border: 1px solid var(--border); border-radius: 9px; margin-bottom: 7px; background: var(--bg-soft); }
+  .gd-row-name { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; gap: 8px; }
+  .gd-row-rule { font-family: var(--serif); font-size: 12px; color: var(--text-3); margin-top: 4px; line-height: 1.5; }
+  .gd-stale { color: var(--warn); font-family: var(--mono); font-size: 10px; }
+  .gd-tier { display: inline-block; font-family: var(--mono); font-size: 10.5px; padding: 3px 9px; border-radius: 10px; margin: 0 5px 5px 0; background: var(--success-bg); color: var(--success); }
+  .gd-impact { font-family: var(--serif); font-size: 13px; line-height: 1.6; padding: 10px 12px; border-radius: 9px; }
+  .gd-impact.warn { background: var(--warn-bg); color: var(--warn); }
+  .gd-impact.ok { background: var(--success-bg); color: var(--success); }
+  .gd-empty { font-family: var(--serif); font-size: 12.5px; color: var(--text-4); font-style: italic; }
+  .gd-actions { margin-top: 18px; display: flex; gap: 8px; }
+
+  /* ═══ FINOPS ═══ */
+  .finops-source { display: flex; gap: 8px; align-items: center; }
+  .finops-badge { font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 12px; background: var(--warn-bg); color: var(--warn); white-space: nowrap; }
+  .finops-badge.live { background: var(--success-bg); color: var(--success); }
+  .finops-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 18px; }
+  .kpi { background: var(--bg-elev); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-4); margin-bottom: 7px; }
+  .kpi-value { font-family: var(--serif); font-size: 23px; font-weight: 700; color: var(--text); line-height: 1.1; }
+  .kpi-sub { font-family: var(--mono); font-size: 10.5px; color: var(--text-3); margin-top: 5px; }
+  .kpi.warn .kpi-value { color: var(--warn); }
+  .kpi.good .kpi-value { color: var(--success); }
+  .finops-cols { display: flex; gap: 16px; align-items: flex-start; }
+  .finops-main { flex: 1; min-width: 0; }
+  .finops-side { width: 320px; flex-shrink: 0; }
+  .finops-h { font-family: var(--mono); font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-4); margin-bottom: 10px; }
+  .fo-table { width: 100%; border-collapse: collapse; }
+  .fo-table th { font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-4); text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .fo-table th:first-child { text-align: left; }
+  .fo-table td { font-family: var(--mono); font-size: 12px; color: var(--text-2); text-align: right; padding: 9px 10px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+  .fo-table td:first-child { text-align: left; }
+  .fo-agent { font-weight: 600; color: var(--text); font-family: var(--serif); font-size: 13.5px; }
+  .fo-model { font-size: 10px; color: var(--text-4); margin-top: 2px; }
+  .fo-cost { color: var(--text); font-weight: 600; }
+  .fo-budget-bar { position: relative; height: 5px; border-radius: 3px; background: var(--bg-hover); margin-top: 5px; overflow: hidden; }
+  .fo-budget-fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--success); }
+  .fo-budget-fill.over { background: var(--risk); }
+  .fo-over { color: var(--risk); font-size: 9.5px; margin-top: 2px; }
+  .fo-spark { display: inline-flex; align-items: flex-end; gap: 1.5px; height: 22px; }
+  .fo-spark i { width: 4px; background: var(--accent); opacity: 0.5; border-radius: 1px; display: inline-block; }
+  .fo-sugg { background: var(--bg-elev); border: 1px solid var(--border); border-left: 3px solid var(--text-4); border-radius: 9px; padding: 11px 13px; margin-bottom: 9px; }
+  .fo-sugg.opportunity { border-left-color: var(--success); }
+  .fo-sugg.warn { border-left-color: var(--warn); }
+  .fo-sugg.risk { border-left-color: var(--risk); }
+  .fo-sugg-agent { font-family: var(--mono); font-size: 10px; color: var(--text-4); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .fo-sugg-text { font-family: var(--serif); font-size: 13px; line-height: 1.5; color: var(--text-2); }
+  .modal-select { width: 100%; padding: 11px 14px; border: 1.5px solid var(--border); border-radius: 10px; background: var(--bg); color: var(--text); font-family: var(--mono); font-size: 13px; }
+  .modal-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+  /* ═══ GOVERNANCE GREEN-PATH ADVISOR ═══ */
+  .gov-card { margin-top: 12px; background: var(--accent-faint); border: 1px solid var(--accent-soft); border-radius: 12px; padding: 13px 14px; }
+  .gov-head { font-family: var(--serif); font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .gov-sub { font-family: var(--serif); font-size: 12px; color: var(--text-3); line-height: 1.5; margin-bottom: 10px; }
+  .gov-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .gov-chip { font-family: var(--mono); font-size: 10.5px; padding: 4px 9px; border-radius: 11px; border: 1px solid var(--border); background: var(--bg); color: var(--text-3); cursor: pointer; user-select: none; transition: all 0.12s; }
+  .gov-chip:hover { border-color: var(--accent); }
+  .gov-chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .gov-tier { margin-bottom: 9px; }
+  .gov-rationale { margin: 0 0 11px; padding-left: 16px; }
+  .gov-rationale li { font-family: var(--serif); font-size: 12.5px; color: var(--text-2); line-height: 1.55; margin-bottom: 3px; }
+  .gov-actions { display: flex; }
+  .gov-actions .btn { width: 100%; justify-content: center; }
+
+  /* ═══ GRAPH COCKPIT LENSES ═══ */
+  .graph-lenses { display: inline-flex; gap: 2px; background: var(--bg-soft); border: 1px solid var(--border); border-radius: 9px; padding: 2px; }
+  .lens-btn { font-family: var(--mono); font-size: 11px; padding: 5px 11px; border: none; background: transparent; color: var(--text-3); border-radius: 7px; cursor: pointer; transition: all 0.12s; }
+  .lens-btn:hover { color: var(--text); }
+  .lens-btn.active { background: var(--accent); color: #fff; }
+  .g-node-badge { text-anchor: middle; font-size: 10px; font-family: var(--mono); font-weight: 700; pointer-events: none; }
+  .g-gate { fill: var(--warn-bg); stroke: var(--warn); stroke-width: 1.2px; }
+  .g-gate-icon { text-anchor: middle; font-size: 9px; fill: var(--warn); pointer-events: none; }
+  .gd-lint-ok { color: var(--success); }
+  .gd-lint-warn { color: var(--warn); }
+  .gd-lint-risk { color: var(--risk); }
+  .gd-cost-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 12px; padding: 3px 0; color: var(--text-2); }
+  .gd-opt { background: var(--success-bg); border: 1px solid #C8E6D5; border-radius: 9px; padding: 10px 12px; margin-top: 8px; font-family: var(--serif); font-size: 12.5px; color: var(--success); line-height: 1.5; }
+  .gd-vault-node { display: inline-block; font-family: var(--mono); font-size: 10.5px; padding: 3px 8px; border-radius: 9px; margin: 0 5px 5px 0; background: var(--bg-soft); border: 1px solid var(--border); color: var(--text-2); }
+
   /* ═══ TYPING INDICATOR ═══ */
   .typing {
     display: inline-flex; align-items: center; gap: 5px;
@@ -1287,7 +1449,10 @@
 <nav class="tabs">
   <button class="tab active" data-panel="home">Home</button>
   <button class="tab" data-panel="library">Library <span class="tcount" id="tab-library-count">0</span></button>
+  <button class="tab" data-panel="graph" id="tab-graph">Graph</button>
+  <button class="tab" data-panel="finops" id="tab-finops">FinOps</button>
   <button class="tab" data-panel="provision">Provision Agent</button>
+  <button class="tab" data-panel="buildapp">Build App</button>
   <button class="tab" data-panel="config">Configuration</button>
   <button class="tab locked" data-panel="connectors" id="tab-connectors">Connectors <span class="tcount" id="tab-connectors-count">0</span></button>
   <button class="tab" data-panel="agentcore" id="tab-agentcore">AgentCore <span class="tcount" id="tab-agentcore-count">0</span></button>
@@ -1368,6 +1533,62 @@
     <div class="lib-grid" id="lib-grid"></div>
   </div>
 
+  <!-- ─────── GRAPH ─────── -->
+  <div class="panel" id="panel-graph">
+    <div class="graph-head">
+      <div>
+        <h1 class="lib-title">Agent Graph</h1>
+        <div class="lib-sub">How agents depend on each other, and the cognitive context behind each one. Click a node to see what it impacts if you change it.</div>
+      </div>
+      <div class="graph-controls">
+        <div class="graph-lenses" id="graph-lenses">
+          <button class="lens-btn active" data-lens="deps">Dependencies</button>
+          <button class="lens-btn" data-lens="cost">Cost</button>
+          <button class="lens-btn" data-lens="governance">Governance</button>
+          <button class="lens-btn" data-lens="orchestration">Orchestration</button>
+        </div>
+        <div class="graph-legend" id="graph-legend"></div>
+        <button class="btn" id="graph-refresh">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="graph-body">
+      <div class="graph-canvas-wrap" id="graph-canvas-wrap">
+        <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <aside class="graph-detail" id="graph-detail">
+        <div class="graph-detail-empty">Select an agent node to inspect its dependencies, impact, and cognitive context.</div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ─────── FINOPS ─────── -->
+  <div class="panel" id="panel-finops">
+    <div class="graph-head">
+      <div>
+        <h1 class="lib-title">FinOps &amp; AI P&amp;L</h1>
+        <div class="lib-sub">Consolidated cost, token consumption and budget governance across your running agents — with fine-tune suggestions. <span id="finops-window" class="mono"></span></div>
+      </div>
+      <div class="graph-controls">
+        <div class="finops-source">
+          <span class="finops-badge" id="finops-source-badge">● dummy data</span>
+          <button class="btn" id="finops-connect">⚡ Connect runtime</button>
+          <button class="btn" id="finops-refresh">↻ Refresh</button>
+        </div>
+      </div>
+    </div>
+    <div class="finops-kpis" id="finops-kpis"></div>
+    <div class="finops-cols">
+      <div class="finops-main">
+        <div class="finops-h">Per-agent breakdown</div>
+        <div id="finops-table"></div>
+      </div>
+      <aside class="finops-side">
+        <div class="finops-h">Optimization opportunities</div>
+        <div id="finops-suggestions"></div>
+      </aside>
+    </div>
+  </div>
+
   <!-- ─────── PROVISION ─────── -->
   <div class="panel" id="panel-provision">
     <div class="prov-shell">
@@ -1406,6 +1627,61 @@ To begin: <strong>what business problem do you want this agent to solve, and who
             <div class="se-icon">◉</div>
             Your agent's profile will appear here as the conversation progresses.
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────── BUILD APP (Solution track) ─────── -->
+  <div class="panel" id="panel-buildapp">
+    <style>
+      #panel-buildapp .arch-gallery { display:flex; flex-direction:column; gap:14px; padding:24px; max-width:760px; margin:0 auto; }
+      #panel-buildapp .arch-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+      #panel-buildapp .arch-card { border:1px solid var(--line, #2a2a32); border-radius:10px; padding:16px; cursor:pointer; background:var(--bg-soft,#1a1a20); transition:transform .12s,border-color .12s; }
+      #panel-buildapp .arch-card:hover:not(.soon) { transform:translateY(-2px); border-color:var(--accent,#A000FF); }
+      #panel-buildapp .arch-card.soon { opacity:.5; cursor:not-allowed; }
+      #panel-buildapp .arch-card .ac-icon { font-size:22px; }
+      #panel-buildapp .arch-card .ac-title { font-weight:700; margin:8px 0 4px; }
+      #panel-buildapp .arch-card .ac-desc { font-size:12px; color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .arch-card .ac-badge { display:inline-block; margin-top:8px; font-size:10px; padding:2px 7px; border-radius:9px; background:var(--accent,#A000FF); color:#fff; }
+      #panel-buildapp .arch-card.soon .ac-badge { background:var(--bg,#2a2a32); color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-summary { font-size:12.5px; line-height:1.7; }
+      #panel-buildapp .appx-summary .k { color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-pin { font-family:var(--mono,monospace); font-size:11px; color:var(--accent,#A000FF); }
+      #panel-buildapp .appx-gen { width:100%; margin-top:14px; }
+      #panel-buildapp .appx-result { margin-top:12px; font-size:12px; font-family:var(--mono,monospace); white-space:pre-wrap; color:var(--text-3,#c8c8d0); }
+    </style>
+    <div class="prov-shell">
+      <div class="prov-chat">
+        <div class="chat-scroll" id="appx-scroll">
+          <div class="arch-gallery" id="appx-gallery">
+            <div>
+              <div class="sec-h" style="border:0;padding:0;margin-bottom:4px;">What do you want to build?</div>
+              <div class="lib-sub">Pick an application archetype. AgentEye will guide you through a SolutionSpec, then generate a runnable repo + deployable IaC that pins agents from your Library.</div>
+            </div>
+            <div class="arch-cards">
+              <div class="arch-card" data-arch="dashboard-portal">
+                <div class="ac-icon">▦</div><div class="ac-title">Dashboard / Portal</div>
+                <div class="ac-desc">A portal users log into — KPI widgets, charts, tables, and an embedded agent assistant.</div>
+                <div class="ac-badge">Available</div>
+              </div>
+              <div class="arch-card soon"><div class="ac-icon">💬</div><div class="ac-title">Chat App</div><div class="ac-desc">Chainlit/Streamlit + LangGraph chat experience.</div><div class="ac-badge">Coming soon</div></div>
+              <div class="arch-card soon"><div class="ac-icon">🗂</div><div class="ac-title">Workflow / Kanban</div><div class="ac-desc">Board UI with agent-driven steps.</div><div class="ac-badge">Coming soon</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-wrap">
+          <div class="chat-input">
+            <textarea id="appx-input" rows="1" placeholder="Pick an archetype above to begin..." disabled></textarea>
+            <button class="chat-send" id="appx-send" disabled>↑</button>
+          </div>
+          <div class="chat-hint">Enter to send · Shift+Enter for newline · context retained across turns</div>
+        </div>
+      </div>
+      <div class="prov-side">
+        <div class="side-tabs"><button class="side-tab active">Solution</button></div>
+        <div class="side-content" id="appx-side">
+          <div class="side-empty"><div class="se-icon">◧</div>Your solution profile will appear here as the conversation progresses.</div>
         </div>
       </div>
     </div>
@@ -1530,6 +1806,28 @@ To begin: <strong>what business problem do you want this agent to solve, and who
 </main>
 
 <!-- ═════ PUBLISH MODAL ═════ -->
+<div class="modal-bg" id="finops-modal">
+  <div class="modal modal-wide">
+    <h2>Connect runtime telemetry</h2>
+    <p><strong>Stub:</strong> point AgentEye at your live cost &amp; usage source. Wiring to live telemetry is the next phase — the dashboard stays on dummy data until the backend connector is enabled.</p>
+    <label>Provider</label>
+    <select id="fc-provider" class="modal-select">
+      <option value="cloudwatch">Amazon CloudWatch (logs &amp; metrics)</option>
+      <option value="bedrock">Amazon Bedrock (model-invocation usage)</option>
+    </select>
+    <label style="margin-top:14px;">Region</label>
+    <input type="text" id="fc-region" placeholder="us-east-1">
+    <label style="margin-top:14px;">Log group / Metric namespace</label>
+    <input type="text" id="fc-group" placeholder="/aws/bedrock/agents">
+    <label style="margin-top:14px;">Read-only role ARN</label>
+    <input type="text" id="fc-role" placeholder="arn:aws:iam::ACCOUNT:role/AgentEyeReadOnly">
+    <div class="modal-actions">
+      <button class="btn" id="fc-cancel">Cancel</button>
+      <button class="btn primary" id="fc-save">Save connection</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="publish-modal">
   <div class="modal modal-wide">
     <h2>Publish to Library</h2>
@@ -1563,6 +1861,7 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       <button class="side-tab" data-detail-tab="config">Config (md)</button>
       <button class="side-tab" data-detail-tab="transcript">Transcript</button>
       <button class="side-tab" data-detail-tab="connectors">Connectors</button>
+      <button class="side-tab" data-detail-tab="modelcard">Model card</button>
     </div>
     <div class="lib-detail-body" id="lib-detail-body"></div>
   </div>
@@ -1628,7 +1927,7 @@ const state = {
 // ───── DOM ─────
 const $ = id => document.getElementById(id);
 const tabs = document.querySelectorAll('.tab');
-const panels = { home: $('panel-home'), library: $('panel-library'), provision: $('panel-provision'), config: $('panel-config'), connectors: $('panel-connectors'), agentcore: $('panel-agentcore'), memory: $('panel-memory'), deploy: $('panel-deploy'), test: $('panel-test') };
+const panels = { home: $('panel-home'), library: $('panel-library'), graph: $('panel-graph'), finops: $('panel-finops'), provision: $('panel-provision'), buildapp: $('panel-buildapp'), config: $('panel-config'), connectors: $('panel-connectors'), agentcore: $('panel-agentcore'), memory: $('panel-memory'), deploy: $('panel-deploy'), test: $('panel-test') };
 
 // ───── Tab routing ─────
 tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
@@ -1644,6 +1943,8 @@ function switchTab(name) {
   if (name === 'agentcore')  { renderAgentCore(); renderAgentCoreSide(); }
   if (name === 'memory')     { renderMemory(); renderMemorySide(); }
   if (name === 'library')    { loadLibrary(); }
+  if (name === 'graph')      { loadGraph(); }
+  if (name === 'finops')     { loadFinops(); }
   if (name === 'provision') setTimeout(() => $('chat-input').focus(), 80);
   if (name === 'test')      setTimeout(() => $('test-input').focus(), 80);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1699,12 +2000,40 @@ function md(s) {
 }
 function renderChat() {
   const c = $('chat-scroll');
-  c.innerHTML = state.display.map(m => `
-    <div class="msg ${m.role}">
+  const firstHist = state.display.findIndex(m => m.historical);
+  let lastHist = -1;
+  state.display.forEach((m, i) => { if (m.historical) lastHist = i; });
+  let html = '';
+  state.display.forEach((m, i) => {
+    if (i === firstHist) {
+      html += `<div class="chat-divider hist-top">Prior conversation${state.forkOrigin ? ' · forked from ' + esc(state.forkOrigin.slug) + ':' + esc(state.forkOrigin.version) : ''} · read-only</div>`;
+    }
+    if (m.kind === 'fork-summary') {
+      const headHtml = m.headHtml || `⑂ Forked from <code>${esc(m.origin)}</code> → <strong>${esc(m.title)}</strong>`;
+      const label = m.label || 'Loaded into the workspace';
+      const footHtml = m.footHtml || `Tell me what you'd like to <strong>change or extend</strong>, then hop into <strong>Deploy</strong> to publish a new version.`;
+      html += `
+    <div class="msg assistant">
+      <div class="msg-role">AgentEye</div>
+      <div class="fork-card">
+        <div class="fork-card-head">${headHtml}</div>
+        <div class="fork-card-label">${esc(label)}</div>
+        <div class="fork-card-body">${md(m.summary)}</div>
+        <div class="fork-card-foot">${footHtml}</div>
+      </div>
+    </div>`;
+    } else {
+      html += `
+    <div class="msg ${m.role}${m.historical ? ' historical' : ''}">
       <div class="msg-role">${m.role === 'user' ? 'You' : 'AgentEye'}</div>
       <div class="msg-bubble">${md(m.content)}</div>
-    </div>
-  `).join('') + (state.busy ? `
+    </div>`;
+    }
+    if (i === lastHist) {
+      html += `<div class="chat-divider">New changes from here</div>`;
+    }
+  });
+  c.innerHTML = html + (state.busy ? `
     <div class="msg assistant">
       <div class="msg-role">AgentEye</div>
       <div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>
@@ -1735,6 +2064,7 @@ function refreshModeStrip() {
   pill.className = 'mode-pill' + (a.agentMode === 'supervisor' ? ' supervisor' : '');
   btn.style.display = a.agentMode === 'supervisor' ? '' : 'none';
 }
+const govState = { applied: false, dataTypes: null };   // dataTypes: null = auto-detect; [] = explicit "public"
 function renderSide() {
   refreshModeStrip();
   const el = $('side-content');
@@ -1766,13 +2096,14 @@ function renderSide() {
       ? `<div class="cfg-card"><div class="cl">Team (${a.collaborators.length})</div><div class="cv">${a.collaborators.map((c, i) => `
             <span class="collab-chip">${esc(c.agentName || c.slug)}<span class="v">${esc(c.version || '')}</span><span class="x" data-collab-rm="${i}">×</span></span>`).join('')}</div></div>`
       : '';
-    el.innerHTML = cards + counts + collabBlock;
+    el.innerHTML = cards + counts + collabBlock + renderGovAdvisor();
     el.querySelectorAll('[data-collab-rm]').forEach(x => x.addEventListener('click', e => {
       e.stopPropagation();
       const i = parseInt(e.currentTarget.dataset.collabRm, 10);
       a.collaborators.splice(i, 1);
       renderSide();
     }));
+    wireGovAdvisor(el);
   } else {
     const parts = [];
     if (a.instruction) parts.push(card('Agent instruction', a.instruction.length > 320 ? a.instruction.slice(0, 320) + '…' : a.instruction));
@@ -2786,6 +3117,635 @@ function renderLibrary() {
 
 $('lib-search').addEventListener('input', e => { libState.filter = e.target.value; renderLibrary(); });
 
+// ═════════════════════════════════════════════════════════════════════
+// AGENT GRAPH — dependency + impact + cognitive-context visualization
+// ═════════════════════════════════════════════════════════════════════
+const graphState = { nodes: [], edges: [], latestBySlug: {}, selected: null, idx: {} };
+
+async function loadGraph() {
+  const svg = $('graph-svg');
+  svg.innerHTML = '';
+  $('graph-detail').innerHTML = `<div class="graph-detail-empty">Loading graph…</div>`;
+  try {
+    const r = await fetch('/graph', { cache: 'no-store' });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'failed to load');
+    graphState.nodes = (d.nodes || []).map(n => ({ ...n, x: null, y: null }));
+    graphState.edges = d.edges || [];
+    graphState.latestBySlug = d.latestBySlug || {};
+    graphState.selected = null;
+    graphState.lens = graphState.lens || 'deps';
+    graphState.idx = {};
+    graphState.nodes.forEach((n, i) => { graphState.idx[n.id] = i; });
+    // best-effort cost overlay for the Cost lens + detail panel (join by slug)
+    graphState.cost = {};
+    try {
+      const fr = await fetch('/finops', { cache: 'no-store' });
+      const fd = await fr.json();
+      if (fd.ok) (fd.agents || []).forEach(a => { graphState.cost[a.slug] = a; });
+    } catch {}
+    if (!graphState.nodes.length) {
+      $('graph-detail').innerHTML = `<div class="graph-detail-empty">No published agents yet. Publish from the Deploy tab and they'll appear here.</div>`;
+      renderGraphLegend();
+      return;
+    }
+    layoutGraph();
+    renderGraph();
+    renderGraphLegend();
+    renderGraphDetail(null);
+  } catch (err) {
+    $('graph-detail').innerHTML = `<div class="graph-detail-empty">Could not reach the bridge: ${esc(err.message)}</div>`;
+  }
+}
+
+// Simple force-directed layout (repulsion + edge springs + center gravity).
+function layoutGraph() {
+  const wrap = $('graph-canvas-wrap');
+  const W = wrap.clientWidth || 820, H = wrap.clientHeight || 560;
+  const N = graphState.nodes, idx = graphState.idx;
+  N.forEach((n, i) => {
+    const ang = (i / N.length) * Math.PI * 2;
+    n.x = W / 2 + Math.cos(ang) * Math.min(W, H) * 0.3;
+    n.y = H / 2 + Math.sin(ang) * Math.min(W, H) * 0.3;
+    n.vx = 0; n.vy = 0;
+  });
+  const E = graphState.edges.filter(e => e.to && idx[e.from] != null && idx[e.to] != null);
+  const ITER = 320, gravity = 0.02, rep = 9000, springLen = 110;
+  for (let it = 0; it < ITER; it++) {
+    for (let i = 0; i < N.length; i++) {
+      for (let j = i + 1; j < N.length; j++) {
+        let dx = N[i].x - N[j].x, dy = N[i].y - N[j].y;
+        let dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+        const f = rep / (dist * dist), ux = dx / dist, uy = dy / dist;
+        N[i].vx += ux * f; N[i].vy += uy * f; N[j].vx -= ux * f; N[j].vy -= uy * f;
+      }
+    }
+    E.forEach(e => {
+      const a = N[idx[e.from]], b = N[idx[e.to]];
+      let dx = b.x - a.x, dy = b.y - a.y, dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+      const f = (dist - springLen) * 0.5, ux = dx / dist, uy = dy / dist;
+      a.vx += ux * f; a.vy += uy * f; b.vx -= ux * f; b.vy -= uy * f;
+    });
+    N.forEach(n => {
+      n.vx += (W / 2 - n.x) * gravity; n.vy += (H / 2 - n.y) * gravity;
+      n.x += n.vx * 0.08; n.y += n.vy * 0.08;
+      n.vx *= 0.85; n.vy *= 0.85;
+      n.x = Math.max(64, Math.min(W - 64, n.x));
+      n.y = Math.max(48, Math.min(H - 56, n.y));
+    });
+  }
+}
+
+function renderGraph() {
+  const wrap = $('graph-canvas-wrap');
+  const W = wrap.clientWidth || 820, H = wrap.clientHeight || 560;
+  const svg = $('graph-svg'), N = graphState.nodes, idx = graphState.idx, sel = graphState.selected;
+  const lens = graphState.lens || 'deps';
+  const connected = new Set();
+  if (sel) {
+    connected.add(sel);
+    graphState.edges.forEach(e => { if (e.from === sel && e.to) connected.add(e.to); if (e.to === sel) connected.add(e.from); });
+  }
+  let edgeSvg = '', gateSvg = '';
+  graphState.edges.forEach(e => {
+    if (!e.to || idx[e.from] == null || idx[e.to] == null) return;
+    const a = N[idx[e.from]], b = N[idx[e.to]];
+    const ang = Math.atan2(b.y - a.y, b.x - a.x);
+    const sx = a.x + Math.cos(ang) * 22, sy = a.y + Math.sin(ang) * 22;
+    const ex = b.x - Math.cos(ang) * 28, ey = b.y - Math.sin(ang) * 28;
+    const hot = sel && (e.from === sel || e.to === sel);
+    const dim = sel && !hot;
+    edgeSvg += `<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" class="g-edge${e.stale ? ' stale' : ''}${hot ? ' hot' : ''}${dim ? ' dim' : ''}" marker-end="url(#arrow${e.stale ? '-stale' : ''})"></line>`;
+    if (lens === 'orchestration') {   // HITL approval gate on the routing edge
+      const src = N[idx[e.from]], ap = src && src.gov && src.gov.approvals;
+      if (ap && ap !== 'none') {
+        const mx = (sx + ex) / 2, my = (sy + ey) / 2;
+        gateSvg += `<g transform="translate(${mx.toFixed(1)},${my.toFixed(1)})"><rect class="g-gate" x="-9" y="-7" width="18" height="14" rx="3"></rect><text class="g-gate-icon" dy="3">⊘</text></g>`;
+      }
+    }
+  });
+  let nodeSvg = '';
+  N.forEach(n => {
+    const dim = sel && !connected.has(n.id), isSel = n.id === sel, R = isSel ? 26 : 22;
+    const ls = lensStyle(n);   // null for deps lens → use the mode-based class
+    const circle = ls
+      ? `<circle r="${R}" class="g-node-circle" style="fill:${ls.fill};stroke:${ls.stroke}"></circle>`
+      : `<circle r="${R}" class="g-node-circle ${n.mode === 'supervisor' ? 'sup' : 'spec'}"></circle>`;
+    const badge = ls && ls.badge ? `<text class="g-node-badge" dy="${-(R + 8)}" style="fill:${ls.badgeColor}">${esc(ls.badge)}</text>` : '';
+    nodeSvg += `<g class="g-node${dim ? ' dim' : ''}${isSel ? ' sel' : ''}" data-id="${esc(n.id)}" transform="translate(${n.x.toFixed(1)},${n.y.toFixed(1)})">
+      ${n.hasMemory ? `<circle r="${R + 4}" class="g-node-mem"></circle>` : ''}
+      ${circle}
+      ${badge}
+      <text class="g-node-icon" dy="5">${n.mode === 'supervisor' ? '★' : '●'}</text>
+      <text class="g-node-label" dy="${R + 16}">${esc(n.name)}</text>
+      <text class="g-node-ver" dy="${R + 30}">${esc(n.version)}</text>
+    </g>`;
+  });
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = `
+    <defs>
+      <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"></path></marker>
+      <marker id="arrow-stale" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"></path></marker>
+    </defs>${edgeSvg}${gateSvg}${nodeSvg}`;
+  svg.querySelectorAll('.g-node').forEach(g => {
+    g.addEventListener('click', () => {
+      if (g._dragged) { g._dragged = false; return; }
+      graphState.selected = (graphState.selected === g.dataset.id) ? null : g.dataset.id;
+      renderGraph(); renderGraphDetail(graphState.selected);
+    });
+    enableNodeDrag(g);
+  });
+}
+
+// Drag a node to reposition (coords map 1:1 because viewBox == canvas px size).
+function enableNodeDrag(g) {
+  const svg = $('graph-svg');
+  g.addEventListener('mousedown', e => {
+    e.preventDefault();
+    const n = graphState.nodes[graphState.idx[g.dataset.id]];
+    const rect = svg.getBoundingClientRect();
+    let moved = false;
+    const move = ev => {
+      moved = true; g._dragged = true;
+      n.x = ev.clientX - rect.left; n.y = ev.clientY - rect.top;
+      renderGraph();
+    };
+    const up = () => { document.removeEventListener('mousemove', move); document.removeEventListener('mouseup', up); if (!moved) g._dragged = false; };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+  });
+}
+
+function renderGraphDetail(id) {
+  const el = $('graph-detail');
+  if (!id) { el.innerHTML = `<div class="graph-detail-empty">Select an agent node to inspect its dependencies, impact, and cognitive context.</div>`; return; }
+  const n = graphState.nodes.find(x => x.id === id);
+  if (!n) { el.innerHTML = ''; return; }
+  const deps = graphState.edges.filter(e => e.from === id && e.to);            // this agent → collaborators
+  const dependents = graphState.edges.filter(e => e.to === id);               // who points AT this agent
+  const staleDeps = deps.filter(e => e.stale);
+
+  const depRows = deps.length ? deps.map(e => `
+    <div class="gd-row">
+      <div class="gd-row-name"><span>${esc(e.label || e.to)}</span>${e.stale ? `<span class="gd-stale">stale → ${esc(e.latestVersion)}</span>` : `<span class="mono" style="color:var(--text-4);font-size:10px">${esc((e.to || '').split(':')[1] || '')}</span>`}</div>
+      ${e.rule ? `<div class="gd-row-rule">${esc(e.rule)}</div>` : ''}
+      ${!e.targetExists ? `<div class="gd-stale">⚠ target version not in library</div>` : ''}
+    </div>`).join('') : `<div class="gd-empty">No collaborators — this is a leaf agent.</div>`;
+
+  const depnRows = dependents.length ? dependents.map(e => {
+    const fromName = (graphState.nodes[graphState.idx[e.from]] || {}).name || e.from;
+    return `<div class="gd-row"><div class="gd-row-name"><span>${esc(fromName)}</span><span class="mono" style="color:var(--text-4);font-size:10px">${esc((e.from || '').split(':')[1] || '')}</span></div>${e.rule ? `<div class="gd-row-rule">routes here when: ${esc(e.rule)}</div>` : ''}</div>`;
+  }).join('') : `<div class="gd-empty">Nothing depends on this agent yet.</div>`;
+
+  const impact = dependents.length
+    ? `<div class="gd-impact warn">Changing or re-publishing <strong>${esc(n.name)}</strong> impacts <strong>${dependents.length}</strong> agent${dependents.length === 1 ? '' : 's'} pinned to <code>${esc(n.version)}</code>. Re-fork ${dependents.length === 1 ? 'it' : 'them'} onto the new version and re-check routing rules.</div>`
+    : `<div class="gd-impact ok">Safe to change — no other agent depends on this version.</div>`;
+
+  const tiers = (n.memTiers && n.memTiers.length)
+    ? n.memTiers.map(t => `<span class="gd-tier">${esc(t)}</span>`).join('')
+    : `<span class="gd-empty">No cognitive-memory tiers configured.</span>`;
+
+  // Governance lint
+  const lint = policyLint(n);
+  const lintCls = lint.status === 'risk' ? 'gd-lint-risk' : lint.status === 'warn' ? 'gd-lint-warn' : 'gd-lint-ok';
+  const lintHead = lint.status === 'ok' ? `✓ Compliant (${lint.tier} tier)` : `${lint.status.toUpperCase()} · ${lint.tier} tier`;
+  const lintHtml = `<div class="${lintCls}" style="font-family:var(--mono);font-size:12px;margin-bottom:6px">${lintHead}</div>`
+    + (lint.issues.length ? `<ul class="gd-rationale" style="margin:0;padding-left:16px">${lint.issues.map(i => `<li>${esc(i)}</li>`).join('')}</ul>` : '');
+
+  // Cost + routing optimizer (joined from /finops by slug)
+  const c = graphState.cost && graphState.cost[n.slug];
+  const costHtml = c ? `
+    <div class="gd-cost-row"><span>Spend (30d)</span><span class="${c.costUsd > c.budgetUsd ? 'gd-lint-risk' : ''}">${fmtUsd(c.costUsd)} / ${fmtUsd(c.budgetUsd)}</span></div>
+    <div class="gd-cost-row"><span>Invocations</span><span>${fmtNum(c.calls)}</span></div>
+    <div class="gd-cost-row"><span>Tokens in/out</span><span>${fmtTok(c.tokensIn)}/${fmtTok(c.tokensOut)}</span></div>
+    ${c.altSaveUsd ? `<div class="gd-opt">⚡ Route simple turns to Haiku 4.5: <strong>${fmtUsd(c.costUsd)} → ${fmtUsd(c.altCostUsd)}</strong> (save ${fmtUsd(c.altSaveUsd)}/mo).</div>` : ''}
+  ` : `<div class="gd-empty">No runtime data for this agent.</div>`;
+
+  el.innerHTML = `
+    <div class="gd-name">${esc(n.name)}</div>
+    <div class="gd-meta">
+      <span class="gd-badge ${n.mode === 'supervisor' ? 'sup' : 'spec'}">${esc(n.mode)}</span>
+      <span class="lib-version">${esc(n.version)}</span>
+      ${n.model ? `<span class="lib-pill">${esc(n.model.replace(/^anthropic\./, '').replace(/:0$/, ''))}</span>` : ''}
+    </div>
+    ${n.useCase ? `<div class="gd-section"><h4>Use case</h4><div class="gd-usecase">${esc(n.useCase)}</div></div>` : ''}
+    <div class="gd-section"><h4>Impact if changed</h4>${impact}</div>
+    <div class="gd-section"><h4>Governance</h4>${lintHtml}</div>
+    <div class="gd-section"><h4>Cost &amp; routing (30d)</h4>${costHtml}</div>
+    <div class="gd-section"><h4>Depends on (${deps.length})</h4>${depRows}</div>
+    <div class="gd-section"><h4>Used by · dependents (${dependents.length})</h4>${depnRows}</div>
+    <div class="gd-section"><h4>Cognitive context</h4><div>${tiers}</div><div id="gd-vault" style="margin-top:8px"></div><button class="btn" id="gd-vault-btn" style="margin-top:8px">⌗ Load cognitive vault</button></div>
+    <div class="gd-actions">
+      ${staleDeps.length ? `<button class="btn primary" id="gd-propagate">⟳ Propagate ${staleDeps.length} update${staleDeps.length === 1 ? '' : 's'}</button>` : ''}
+      <button class="btn" id="gd-open">Open details & fork →</button>
+    </div>
+  `;
+  const open = $('gd-open');
+  if (open) open.addEventListener('click', () => openLibraryDetail(n.slug, n.version));
+  const prop = $('gd-propagate');
+  if (prop) prop.addEventListener('click', () => propagateUpdates(n.id));
+  const vbtn = $('gd-vault-btn');
+  if (vbtn) vbtn.addEventListener('click', () => loadVault(n.slug, n.version));
+  if (staleDeps.length) toast(`${n.name} points to ${staleDeps.length} stale collaborator version${staleDeps.length === 1 ? '' : 's'} — use “Propagate” to update.`, 'error');
+}
+
+$('graph-refresh').addEventListener('click', loadGraph);
+
+// Lens switcher (wired once)
+document.querySelectorAll('#graph-lenses .lens-btn').forEach(b => b.addEventListener('click', () => {
+  graphState.lens = b.dataset.lens;
+  document.querySelectorAll('#graph-lenses .lens-btn').forEach(x => x.classList.toggle('active', x === b));
+  if (graphState.nodes && graphState.nodes.length) { renderGraph(); renderGraphLegend(); }
+}));
+
+// Policy-as-code lint: infer the data tier from the use case, check posture against it.
+function policyLint(n) {
+  const g = n.gov || {};
+  const text = [n.name, n.useCase].filter(Boolean).join(' ');
+  const detected = (typeof GOV_SIGNALS !== 'undefined') ? GOV_SIGNALS.filter(s => s.kw.test(text)).map(s => s.key) : [];
+  const tier = detected.includes('phi') ? 'phi' : detected.includes('financial') ? 'financial' : detected.includes('pii') ? 'pii' : 'public';
+  const issues = [];
+  if (!g.hasGuardrails) issues.push('No guardrails configured');
+  if (tier !== 'public' && (!g.piiHandling || g.piiHandling === 'NONE')) issues.push('Sensitive use case without PII handling');
+  if (tier === 'phi' && !g.phiHandling) issues.push('PHI use case without PHI handling');
+  if ((tier === 'phi' || tier === 'financial') && g.encryption !== 'customer-managed') issues.push('Should use customer-managed KMS');
+  if ((tier === 'phi' || tier === 'financial') && (g.network === 'public' || !g.network)) issues.push('Should not run on a public network');
+  if (g.hasGuardrails && !g.contentFilters) issues.push('Content filters off');
+  const risk = issues.length && (tier === 'phi' || tier === 'financial');
+  return { status: !issues.length ? 'ok' : (risk ? 'risk' : 'warn'), issues, tier };
+}
+
+function lensStyle(n) {
+  const lens = graphState.lens || 'deps';
+  if (lens === 'cost') {
+    const c = graphState.cost && graphState.cost[n.slug];
+    if (!c) return { fill: 'var(--bg-soft)', stroke: 'var(--text-4)', badge: 'no data', badgeColor: 'var(--text-4)' };
+    const over = c.costUsd > c.budgetUsd;
+    return { fill: over ? 'var(--risk-bg)' : 'var(--success-bg)', stroke: over ? 'var(--risk)' : 'var(--success)', badge: '$' + Math.round(c.costUsd), badgeColor: over ? 'var(--risk)' : 'var(--success)' };
+  }
+  if (lens === 'governance') {
+    const lint = policyLint(n);
+    const col = lint.status === 'risk' ? 'var(--risk)' : lint.status === 'warn' ? 'var(--warn)' : 'var(--success)';
+    const bg = lint.status === 'risk' ? 'var(--risk-bg)' : lint.status === 'warn' ? 'var(--warn-bg)' : 'var(--success-bg)';
+    return { fill: bg, stroke: col, badge: lint.status === 'ok' ? '✓' : (lint.issues.length + '⚠'), badgeColor: col };
+  }
+  if (lens === 'orchestration') {
+    const ap = n.gov && n.gov.approvals, hitl = ap && ap !== 'none';
+    return { fill: n.mode === 'supervisor' ? 'var(--accent-soft)' : 'var(--info-bg)', stroke: hitl ? 'var(--warn)' : (n.mode === 'supervisor' ? 'var(--accent)' : 'var(--info)'), badge: hitl ? 'HITL' : '', badgeColor: 'var(--warn)' };
+  }
+  return null;
+}
+
+function renderGraphLegend() {
+  const el = $('graph-legend'); if (!el) return;
+  const lens = graphState.lens || 'deps';
+  const dot = (label, style) => `<span class="gl-item"><i class="gl-dot" style="${style}"></i>${label}</span>`;
+  if (lens === 'deps') {
+    el.innerHTML = `<span class="gl-item"><i class="gl-dot sup"></i>Supervisor</span><span class="gl-item"><i class="gl-dot spec"></i>Specialist</span><span class="gl-item"><i class="gl-ring mem"></i>Has memory</span><span class="gl-item"><i class="gl-line stale"></i>Stale link</span>`;
+  } else if (lens === 'cost') {
+    el.innerHTML = dot('Under budget', 'background:var(--success-bg);border:2px solid var(--success)') + dot('Over budget', 'background:var(--risk-bg);border:2px solid var(--risk)') + `<span class="gl-item">badge = $/mo</span>`;
+  } else if (lens === 'governance') {
+    el.innerHTML = dot('Compliant', 'background:var(--success-bg);border:2px solid var(--success)') + dot('Warnings', 'background:var(--warn-bg);border:2px solid var(--warn)') + dot('Risk', 'background:var(--risk-bg);border:2px solid var(--risk)');
+  } else if (lens === 'orchestration') {
+    el.innerHTML = `<span class="gl-item"><i class="gl-dot sup"></i>Supervisor</span><span class="gl-item"><i class="gl-dot spec"></i>Specialist</span><span class="gl-item"><span style="color:var(--warn);font-weight:700">⊘</span> HITL approval gate</span>`;
+  }
+}
+
+// Cognitive-vault loader (Deepen-the-Graph) — lazy-fetch the memory vault for a node.
+async function loadVault(slug, version) {
+  const el = $('gd-vault'); if (!el) return;
+  el.innerHTML = `<span class="gd-empty">Loading vault…</span>`;
+  try {
+    const r = await fetch(`/memorygraph/${encodeURIComponent(slug)}/${encodeURIComponent(version)}`);
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'failed');
+    if (!d.hasVault) { el.innerHTML = `<span class="gd-empty">No cognitive vault for this version. Publish an agent with cognitive-memory tiers enabled to populate it.</span>`; return; }
+    const files = d.nodes.filter(x => x.kind === 'file');
+    const wikilinks = d.edges.filter(e => e.kind === 'wikilink').length;
+    el.innerHTML = `<div style="font-family:var(--mono);font-size:10.5px;color:var(--text-4);margin-bottom:6px">${d.tiers.length} tier(s) · ${files.length} file(s) · ${wikilinks} wikilink(s)</div>`
+      + files.map(f => `<span class="gd-vault-node" title="${esc(f.path)}">${esc(f.tier)}/${esc(f.label)}</span>`).join('');
+  } catch (err) { el.innerHTML = `<span class="gd-empty">Vault load failed: ${esc(err.message)}</span>`; }
+}
+
+// ── Propagate stale dependency updates into a supervisor, then stage for publish ──
+function patchRoutingInInstruction(instruction, agentName, newRule) {
+  if (!instruction || !newRule) return instruction;
+  let replaced = false;
+  return instruction.split('\n').map(line => {
+    if (!replaced && line.includes(`Route to "${agentName}"`)) {
+      replaced = true;
+      return line.replace(/Route to "[^\n]*/, newRule);   // keep any leading "- " bullet
+    }
+    return line;
+  }).join('\n');
+}
+
+async function fetchSnapshot(slug, version) {
+  const r = await fetch(`/library/${encodeURIComponent(slug)}/${encodeURIComponent(version)}`);
+  const d = await r.json();
+  if (!d.ok || !d.meta || !d.meta.agent) throw new Error(`snapshot missing for ${slug}:${version}`);
+  return d.meta.agent;
+}
+
+async function propagateUpdates(supervisorId) {
+  const node = graphState.nodes.find(n => n.id === supervisorId);
+  if (!node) return;
+  const stale = graphState.edges.filter(e => e.from === supervisorId && e.stale && e.latestVersion);
+  if (!stale.length) { toast('Nothing to propagate — all collaborators are on their latest version.', 'success'); return; }
+
+  if (state.display.some(m => m.role === 'user') && !confirm('This will replace your current conversation with an updated copy of this supervisor. Continue?')) return;
+  toast(`Propagating ${stale.length} update${stale.length === 1 ? '' : 's'} into ${node.name}…`, 'success');
+
+  let supAgent;
+  try { supAgent = JSON.parse(JSON.stringify(await fetchSnapshot(node.slug, node.version))); }
+  catch (err) { toast('Could not load supervisor: ' + err.message, 'error'); return; }
+  supAgent.collaborators = supAgent.collaborators || [];
+
+  const changes = [];
+  for (const e of stale) {
+    const newVer = e.latestVersion, newId = `${e.toSlug}:${newVer}`, oldId = e.to;
+    const entry = supAgent.collaborators.find(c => c.agentId === oldId || c.agentName === e.label);
+    if (!entry) { changes.push(`• ${e.label}: not found in supervisor's team — skipped`); continue; }
+    const oldVer = (entry.agentId || '').split(':')[1] || '?';
+
+    let colab = null;
+    try { colab = await fetchSnapshot(e.toSlug, newVer); } catch { /* keep going with the re-pin only */ }
+
+    const oldDesc = entry.description;
+    const newDesc = colab ? (colab.description || colab.useCase || entry.description) : entry.description;
+    entry.agentId = newId;
+    entry.description = newDesc;
+
+    // Regenerate the routing rule only when the collaborator's purpose actually changed.
+    let ruleChanged = false;
+    if (colab && newDesc !== oldDesc) {
+      try {
+        const prompt = JSON.stringify({
+          task: 'Write ONE concise routing rule line for a supervisor agent that decides when to hand off to this collaborator.',
+          collaboratorName: entry.agentName,
+          collaboratorUseCase: colab.useCase || null,
+          collaboratorDescription: colab.description || null,
+          format: `Route to "${entry.agentName}" when the user asks about <comma-separated topics drawn from the use case>`,
+          return: { routingRule: 'string' },
+        });
+        const sg = await callBridge('/suggest', { prompt });
+        const parsed = JSON.parse(String(sg.raw || '').replace(/```json\n?|```/g, '').trim());
+        if (parsed && parsed.routingRule && parsed.routingRule !== entry.routingRule) {
+          supAgent.instruction = patchRoutingInInstruction(supAgent.instruction, entry.agentName, parsed.routingRule);
+          entry.routingRule = parsed.routingRule;
+          ruleChanged = true;
+        }
+      } catch { /* bridge/parse failure — keep the existing rule, version is still re-pinned */ }
+    }
+    changes.push(`• **${entry.agentName}**: re-pinned \`${oldVer}\` → \`${newVer}\`${newDesc !== oldDesc ? ' · description refreshed' : ''}${ruleChanged ? ' · routing rule regenerated' : ''}`);
+  }
+
+  seedPropagation(supAgent, node.slug, node.version, changes);
+}
+
+function seedPropagation(agent, slug, version, changes) {
+  state.sessionId = null;
+  state.history = [];
+  state.stage = 'COMPLETE';
+  state.agent = JSON.parse(JSON.stringify(agent));
+  state.ready = true;
+  state.forkMode = true;
+  state.priorAgent = JSON.parse(JSON.stringify(agent));   // /fork-chat sees the already-updated state
+  state.forkOrigin = { slug, version };
+  if (agent.cognitiveMemory && MEMORY_SCHEMAS.some(s => agent.cognitiveMemory[s.key]?.enabled)) {
+    setMemAgentBlock(JSON.parse(JSON.stringify(agent.cognitiveMemory)));
+  }
+  state.display = [
+    {
+      role: 'assistant',
+      kind: 'fork-summary',
+      origin: `${slug}:${version}`,
+      title: agent.name || 'supervisor',
+      headHtml: `⟳ Propagated updates into <strong>${esc(agent.name || 'supervisor')}</strong> — based on <code>${esc(slug)}:${esc(version)}</code>`,
+      label: 'Changes applied · new version pending',
+      summary: changes.join('\n'),
+      footHtml: `Review the routing in <strong>Configuration</strong>, tweak by chatting below if needed, then publish a new version from <strong>Deploy</strong>.`,
+      content: `Propagated ${changes.length} update(s) into ${agent.name}.`,
+    },
+  ];
+  unlockTest();
+  refreshConnectorsTab();
+  refreshPublishButton();
+  renderChat();
+  renderStageRail();
+  renderSide();
+  switchTab('provision');
+  toast(`Loaded ${agent.name} with ${changes.length} propagated update(s) — review & publish.`, 'success');
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// FINOPS — consolidated cost / token / budget view (dummy data + connector seam)
+// ═════════════════════════════════════════════════════════════════════
+const finopsState = { data: null, conn: null };
+
+function fmtUsd(n) { return '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+function fmtNum(n) { return Number(n || 0).toLocaleString('en-US'); }
+function fmtTok(n) { n = Number(n || 0); if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M'; if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K'; return String(n); }
+
+async function loadFinops() {
+  $('finops-table').innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Loading…</div>`;
+  $('finops-suggestions').innerHTML = '';
+  try {
+    finopsState.conn = JSON.parse(localStorage.getItem('agenteye:finops-conn') || 'null');
+    const src = finopsState.conn ? finopsState.conn.provider : 'dummy';
+    const r = await fetch('/finops?source=' + encodeURIComponent(src), { cache: 'no-store' });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'failed to load');
+    finopsState.data = d;
+    renderFinops();
+  } catch (err) {
+    $('finops-kpis').innerHTML = '';
+    $('finops-table').innerHTML = `<div class="lib-empty"><div class="ce-icon">!</div>Could not reach the bridge: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderFinops() {
+  const d = finopsState.data; if (!d) return;
+  $('finops-window').textContent = d.window ? '· ' + d.window + (d.synthetic ? ' · synthetic data' : '') : '';
+  const badge = $('finops-source-badge');
+  badge.textContent = finopsState.conn
+    ? '● ' + (finopsState.conn.provider === 'bedrock' ? 'Bedrock' : 'CloudWatch') + ' (stub · dummy)'
+    : '● dummy data';
+
+  const t = d.totals || {};
+  $('finops-kpis').innerHTML = [
+    { l: 'Total spend', v: fmtUsd(t.costUsd), s: d.window || '', cls: (t.costUsd > t.budgetUsd ? 'warn' : '') },
+    { l: 'Budget', v: fmtUsd(t.budgetUsd), s: `${t.overBudget || 0} agent(s) over`, cls: (t.overBudget > 0 ? 'warn' : 'good') },
+    { l: 'Invocations', v: fmtNum(t.calls), s: `${t.avgLatencyMs || 0}ms avg latency` },
+    { l: 'Tokens', v: fmtTok((t.tokensIn || 0) + (t.tokensOut || 0)), s: `${fmtTok(t.tokensIn)} in · ${fmtTok(t.tokensOut)} out` },
+    { l: 'Identified savings', v: fmtUsd(t.savingsUsd), s: 'from suggestions', cls: (t.savingsUsd > 0 ? 'good' : '') },
+  ].map(k => `<div class="kpi ${k.cls}"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-sub">${esc(k.s)}</div></div>`).join('');
+
+  const rows = (d.agents || []).map(a => {
+    const over = a.costUsd > a.budgetUsd;
+    const pct = a.budgetUsd > 0 ? Math.min(100, (a.costUsd / a.budgetUsd) * 100) : 100;
+    const mx = Math.max(...(a.trend || [0]), 0.01);
+    const spark = `<span class="fo-spark">${(a.trend || []).map(v => `<i style="height:${Math.max(2, (v / mx) * 22).toFixed(1)}px"></i>`).join('')}</span>`;
+    return `<tr>
+      <td><div class="fo-agent">${esc(a.name)}</div><div class="fo-model">${esc((a.model || '').replace(/^anthropic\./, '').replace(/:0$/, ''))} · ${esc(a.mode)} · ${esc(a.version)}</div></td>
+      <td>${fmtNum(a.calls)}</td>
+      <td>${fmtTok(a.tokensIn)}/${fmtTok(a.tokensOut)}</td>
+      <td>$${a.costPerCall.toFixed(4)}</td>
+      <td>${a.avgLatencyMs}ms</td>
+      <td>${a.errorRate}%</td>
+      <td>${spark}</td>
+      <td><div class="fo-cost">${fmtUsd(a.costUsd)}</div><div class="fo-budget-bar"><div class="fo-budget-fill ${over ? 'over' : ''}" style="width:${pct}%"></div></div>${over ? `<div class="fo-over">over by ${fmtUsd(a.costUsd - a.budgetUsd)}</div>` : `<div class="kpi-sub" style="margin-top:3px">budget ${fmtUsd(a.budgetUsd)}</div>`}</td>
+    </tr>`;
+  }).join('');
+  $('finops-table').innerHTML = `<table class="fo-table"><thead><tr>
+    <th>Agent</th><th>Calls</th><th>Tokens in/out</th><th>$/call</th><th>Latency</th><th>Err</th><th>7d</th><th>Cost vs budget</th>
+  </tr></thead><tbody>${rows || `<tr><td colspan="8" style="text-align:center;color:var(--text-4)">No agents published yet.</td></tr>`}</tbody></table>`;
+
+  const all = [];
+  (d.agents || []).forEach(a => (a.suggestions || []).forEach(s => all.push({ ...s, agent: a.name })));
+  const sevRank = { risk: 0, warn: 1, opportunity: 2 };
+  all.sort((x, y) => (sevRank[x.sev] ?? 9) - (sevRank[y.sev] ?? 9));
+  $('finops-suggestions').innerHTML = all.length
+    ? all.map(s => `<div class="fo-sugg ${esc(s.sev)}"><div class="fo-sugg-agent">${esc(s.agent)}${s.saveUsd ? ` · save ~${fmtUsd(s.saveUsd)}` : ''}</div><div class="fo-sugg-text">${esc(s.text)}</div></div>`).join('')
+    : `<div class="graph-detail-empty">No optimization opportunities — agents are running efficiently.</div>`;
+}
+
+$('finops-refresh').addEventListener('click', loadFinops);
+$('finops-connect').addEventListener('click', () => {
+  const c = JSON.parse(localStorage.getItem('agenteye:finops-conn') || 'null');
+  if (c) { $('fc-provider').value = c.provider || 'cloudwatch'; $('fc-region').value = c.region || ''; $('fc-group').value = c.group || ''; $('fc-role').value = c.role || ''; }
+  $('finops-modal').classList.add('show');
+});
+$('fc-cancel').addEventListener('click', () => $('finops-modal').classList.remove('show'));
+$('finops-modal').addEventListener('click', e => { if (e.target.id === 'finops-modal') $('finops-modal').classList.remove('show'); });
+$('fc-save').addEventListener('click', () => {
+  const conn = { provider: $('fc-provider').value, region: $('fc-region').value.trim(), group: $('fc-group').value.trim(), role: $('fc-role').value.trim() };
+  localStorage.setItem('agenteye:finops-conn', JSON.stringify(conn));
+  $('finops-modal').classList.remove('show');
+  toast('Runtime connection saved (stub) — dashboard stays on dummy data until the backend connector is wired.', 'success');
+  loadFinops();
+});
+
+// ═════════════════════════════════════════════════════════════════════
+// GOVERNANCE GREEN-PATH RECOMMENDER
+// Infers data sensitivity from the use case and proposes a compliant
+// guardrails + enterprise baseline the user can apply in one click.
+// ═════════════════════════════════════════════════════════════════════
+const GOV_SIGNALS = [
+  { key: 'phi',       label: 'PHI / Health',   rank: 4, kw: /\b(patient|medical|clinic|clinical|prescription|medication|diagnos|health|hospital|doctor|nurse|therap|treatment|hipaa|phi|symptom|pharmac|care coordinat)\w*/i },
+  { key: 'financial', label: 'Financial',      rank: 3, kw: /\b(payment|card|credit|debit|invoice|transaction|bank|billing|salar|payroll|tax|pci|financ|trading|loan|wire transfer|refund)\w*/i },
+  { key: 'pii',       label: 'Personal (PII)', rank: 2, kw: /\b(customer|user|email|address|phone|personal|profile|ssn|identit|passport|licen[sc]e|date of birth|dob|account)\w*/i },
+];
+
+function classifyData(a) {
+  const hay = [a.useCase, a.description, a.instruction, a.targetUsers, a.name].filter(Boolean).join(' ');
+  return GOV_SIGNALS.filter(s => s.kw.test(hay)).map(s => s.key);
+}
+function govSelected(a) { return govState.dataTypes ? govState.dataTypes : classifyData(a); }
+function govTier(selected) {
+  if (!selected.length) return { key: 'public', label: 'Public / low', rank: 1 };
+  const top = GOV_SIGNALS.filter(s => selected.includes(s.key)).sort((x, y) => y.rank - x.rank)[0];
+  return { key: top.key, label: top.label, rank: top.rank };
+}
+function buildGuardrails(content, pii, phi, denied, disclaimers) {
+  const g = {
+    contentFiltering: content,
+    contentFilters: { harmful: content, hateful: content, sexual: content, violent: content },
+    piiHandling: pii,
+    topics: denied, deniedTopics: denied,    // both shapes so every renderer + YAML agree
+  };
+  if (phi) g.phiHandling = phi;
+  if (disclaimers && disclaimers.length) g.disclaimers = disclaimers;
+  return g;
+}
+function buildEnterprise(network, enc, approvals, xray, dr, rpm, dataClass) {
+  return {
+    network: { mode: network, vpcId: null, subnetIds: [], securityGroupIds: [] },
+    encryption: { mode: enc, kmsKeyArn: null },
+    approvals: { mode: approvals, approverGroupArn: null },
+    observability: { cloudwatchLogs: true, xrayTracing: !!xray, externalCollectorUrl: null },
+    dr: { posture: dr, primaryRegion: 'us-east-1', secondaryRegion: dr !== 'single-region' ? 'us-west-2' : null },
+    quotas: { perAgentRpm: rpm },
+    tags: { Project: null, Environment: 'prod', Owner: null, DataClass: dataClass },
+  };
+}
+function recommendGovernance(a) {
+  const selected = govSelected(a);
+  const tier = govTier(selected);
+  let guardrails, enterprise, rationale;
+  if (tier.key === 'phi') {
+    guardrails = buildGuardrails(true, 'ANONYMIZE', 'ANONYMIZE',
+      ['clinical diagnosis or diagnostic claims', 'specific medical advice or treatment recommendations', 'medication dosing decisions'],
+      ["I'm a virtual assistant and not a substitute for professional medical advice. For urgent symptoms, call 911 or go to your nearest emergency room."]);
+    enterprise = buildEnterprise('privateLinkOnly', 'customer-managed', 'writes-only', true, 'active-passive', 100, 'PHI');
+    rationale = ['PHI anonymized in logs & traces (HIPAA posture)', 'PrivateLink-only network + customer-managed KMS', 'Human approval on write actions', 'CloudWatch + X-Ray audit trail', 'Denied: diagnosis, dosing, medical advice'];
+  } else if (tier.key === 'financial') {
+    guardrails = buildGuardrails(true, 'ANONYMIZE', null,
+      ['specific financial, investment or tax advice'],
+      ["I can't provide financial, investment or tax advice — please consult a qualified professional."]);
+    enterprise = buildEnterprise('vpcEndpoints', 'customer-managed', 'writes-only', true, 'active-passive', 120, 'Financial/PCI');
+    rationale = ['PII / card data anonymized (PCI posture)', 'VPC endpoints + customer-managed KMS', 'Human approval on write actions', 'CloudWatch + X-Ray audit trail', 'Denied: financial / investment advice'];
+  } else if (tier.key === 'pii') {
+    guardrails = buildGuardrails(true, 'ANONYMIZE', null, [], []);
+    enterprise = buildEnterprise('vpcEndpoints', 'aws-managed', 'writes-only', false, 'single-region', 240, 'PII');
+    rationale = ['PII anonymized in logs & traces', 'VPC endpoints, AWS-managed encryption', 'Human approval on write actions', 'CloudWatch logging'];
+  } else {
+    guardrails = buildGuardrails(true, 'NONE', null, [], []);
+    enterprise = buildEnterprise('public', 'aws-managed', 'none', false, 'single-region', null, 'Public');
+    rationale = ['Standard content-safety filters on', 'No PII handling required', 'Public network, AWS-managed encryption'];
+  }
+  return { tier, selected, guardrails, enterprise, rationale };
+}
+
+function renderGovAdvisor() {
+  const a = state.agent;
+  if (!a.useCase && !a.description) return '';
+  const rec = recommendGovernance(a);
+  const sel = rec.selected;
+  const chips = GOV_SIGNALS.map(s => `<span class="gov-chip${sel.includes(s.key) ? ' on' : ''}" data-gov-chip="${s.key}">${s.label}</span>`).join('')
+    + `<span class="gov-chip${sel.length === 0 ? ' on' : ''}" data-gov-chip="public">Public</span>`;
+  const tierCls = rec.tier.rank >= 2 ? 'amber' : 'green';
+  return `
+    <div class="gov-card">
+      <div class="gov-head">🛡 Governance green path</div>
+      <div class="gov-sub">Data sensitivity inferred from your use case. Tap to refine, then apply a compliant baseline in one click.</div>
+      <div class="gov-chips">${chips}</div>
+      <div class="gov-tier"><span class="badge ${tierCls}">Risk tier: ${esc(rec.tier.label)}</span></div>
+      <ul class="gov-rationale">${rec.rationale.map(r => `<li>${esc(r)}</li>`).join('')}</ul>
+      <div class="gov-actions"><button class="btn primary" id="gov-apply">${govState.applied ? '↻ Re-apply green path' : '✓ Apply green path'}</button></div>
+    </div>`;
+}
+function wireGovAdvisor(el) {
+  el.querySelectorAll('[data-gov-chip]').forEach(chip => chip.addEventListener('click', () => {
+    const key = chip.dataset.govChip;
+    let sel = govState.dataTypes ? [...govState.dataTypes] : classifyData(state.agent);
+    if (key === 'public') sel = [];
+    else if (sel.includes(key)) sel = sel.filter(k => k !== key);
+    else sel.push(key);
+    govState.dataTypes = sel;
+    renderSide();
+  }));
+  const apply = el.querySelector('#gov-apply');
+  if (apply) apply.addEventListener('click', applyGreenPath);
+}
+function applyGreenPath() {
+  const rec = recommendGovernance(state.agent);
+  const a = state.agent;
+  a.guardrails = JSON.parse(JSON.stringify(rec.guardrails));
+  const prevE = a.enterprise || {};
+  const e = JSON.parse(JSON.stringify(rec.enterprise));
+  // preserve any concrete values the user already entered
+  if (prevE.encryption && prevE.encryption.kmsKeyArn) e.encryption.kmsKeyArn = prevE.encryption.kmsKeyArn;
+  if (prevE.network && prevE.network.vpcId) { e.network.vpcId = prevE.network.vpcId; e.network.subnetIds = prevE.network.subnetIds || []; e.network.securityGroupIds = prevE.network.securityGroupIds || []; }
+  if (prevE.tags) e.tags = { ...e.tags, ...prevE.tags };
+  a.enterprise = e;
+  govState.applied = true;
+  renderSide();
+  refreshPublishButton();
+  if (panels.config && panels.config.classList.contains('active')) renderFullConfig();
+  toast(`Applied ${rec.tier.label} governance green path — review in Configuration.`, 'success');
+}
+
 // ─── Detail modal ─────────────────────────────────────────────────────
 const libDetail = { slug:null, version:null, data:null, tab:'gist' };
 async function openLibraryDetail(slug, version) {
@@ -2816,6 +3776,24 @@ function setLibDetailTab(tab) {
   if (tab === 'config')      body.innerHTML = renderMd(d.agentMd || '_(no agent.md)_');
   if (tab === 'transcript')  body.innerHTML = renderMd(d.transcriptMd || '_(no transcript)_');
   if (tab === 'connectors')  body.innerHTML = d.connectorsYaml ? `<pre>${esc(d.connectorsYaml)}</pre>` : `<div class="lib-empty"><div class="ce-icon">◉</div>No connector wiring captured for this version.</div>`;
+  if (tab === 'modelcard') {
+    body.innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Generating model card…</div>`;
+    fetch(`/modelcard/${encodeURIComponent(libDetail.slug)}/${encodeURIComponent(libDetail.version)}`)
+      .then(r => r.json())
+      .then(mc => {
+        if (!mc.ok) throw new Error(mc.error || 'failed');
+        libDetail.modelcard = mc;
+        body.innerHTML = `<div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="btn" id="mc-download">⤓ Download .md</button></div>` + renderMd(mc.markdown);
+        const dl = $('mc-download');
+        if (dl) dl.addEventListener('click', () => {
+          const blob = new Blob([mc.markdown], { type: 'text/markdown' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob); a.download = mc.filename || 'model-card.md';
+          a.click(); URL.revokeObjectURL(a.href);
+        });
+      })
+      .catch(err => { body.innerHTML = `<div class="lib-empty"><div class="ce-icon">!</div>${esc(err.message)}</div>`; });
+  }
 }
 document.querySelectorAll('[data-detail-tab]').forEach(b => b.addEventListener('click', () => setLibDetailTab(b.dataset.detailTab)));
 $('lib-detail-close').addEventListener('click', () => $('lib-detail-modal').classList.remove('show'));
@@ -2846,10 +3824,93 @@ $('lib-detail-fork').addEventListener('click', () => {
   if (!prior) { toast('This version has no agent snapshot — cannot fork.', 'error'); return; }
   if (state.display.some(m => m.role === 'user') && !confirm('This will replace your current conversation. Continue?')) return;
   $('lib-detail-modal').classList.remove('show');
-  forkFromVersion(prior, libDetail.slug, libDetail.version);
+  forkFromVersion(prior, libDetail.slug, libDetail.version, d);
 });
 
-function forkFromVersion(priorAgent, slug, version) {
+// Parse a stored transcript.md back into display messages (read-only history).
+// Matches the shape written by server.js buildTranscriptMd: "#### You" / "#### AgentEye".
+function parseTranscriptMd(mdText) {
+  if (!mdText) return [];
+  const re = /^####\s+(You|AgentEye)\s*$/gm;
+  const segments = [];
+  let m, lastRole = null, lastIndex = 0;
+  while ((m = re.exec(mdText)) !== null) {
+    if (lastRole !== null) segments.push({ role: lastRole, content: mdText.slice(lastIndex, m.index) });
+    lastRole = m[1] === 'You' ? 'user' : 'assistant';
+    lastIndex = re.lastIndex;
+  }
+  if (lastRole !== null) segments.push({ role: lastRole, content: mdText.slice(lastIndex) });
+  return segments
+    .map(s => ({ role: s.role, content: s.content.trim(), historical: true }))
+    .filter(s => s.content);
+}
+
+// Parse the non-secret connector fields captured in connectors.yaml at publish time.
+// Format (server.js buildConnectorsYaml): "id:" lines + 2-space-indented "key: value".
+function parseConnectorsYaml(yaml) {
+  const out = {};
+  let curId = null;
+  String(yaml || '').split('\n').forEach(line => {
+    if (!line.trim() || line.trim().startsWith('#')) return;
+    if (!/^\s/.test(line)) {
+      const mm = line.match(/^([^:]+):\s*$/);
+      if (mm) { curId = mm[1]; out[curId] = {}; }
+      return;
+    }
+    const mm = line.match(/^\s+([^:]+):\s*(.*)$/);
+    if (mm && curId) {
+      let v = mm[2];
+      if (v.startsWith('"') && v.endsWith('"')) { try { v = JSON.parse(v); } catch {} }
+      out[curId][mm[1].trim()] = v;
+    }
+  });
+  return out;
+}
+
+// Build a human summary of everything a fork pulled into the workspace, for the banner.
+function forkLoadSummary(a, histLen, connCount) {
+  const plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`;
+  const mode = a.agentMode || 'specialist';
+  const L = [];
+  L.push(`• **Identity:** ${a.name || 'unnamed'}${a.roleTitle ? ' · ' + a.roleTitle : ''} _(${mode})_`);
+  if (a.foundationModel) L.push(`• **Model:** \`${a.foundationModel}\``);
+  if (histLen) L.push(`• **Conversation:** ${plural(histLen, 'prior turn')} restored above (read-only)`);
+
+  const caps = [];
+  if (mode === 'supervisor') caps.push(plural((a.collaborators || []).length, 'collaborator'));
+  caps.push(plural((a.knowledgeBases || []).length, 'knowledge base'));
+  caps.push(plural((a.actionGroups || []).length, 'action group'));
+  caps.push(plural((a.mcpConnectors || []).length, 'MCP connector'));
+  L.push(`• **Capabilities:** ${caps.join(' · ')}`);
+  if (a.collaborators && a.collaborators.length) L.push(`• **Team:** ${a.collaborators.map(c => c.agentName).join(', ')}`);
+
+  if (a.guardrails) {
+    const g = [];
+    if (a.guardrails.piiHandling) g.push('PII ' + a.guardrails.piiHandling);
+    if (a.guardrails.phiHandling) g.push('PHI ' + a.guardrails.phiHandling);
+    if (a.guardrails.contentFilters || a.guardrails.contentFiltering) g.push('content filters');
+    const dt = a.guardrails.deniedTopics || a.guardrails.topics;
+    if (dt && dt.length) g.push(plural(dt.length, 'denied topic'));
+    if (g.length) L.push(`• **Guardrails:** ${g.join(' · ')}`);
+  }
+
+  const tiers = a.cognitiveMemory ? ['working', 'semantic', 'procedural', 'episodic'].filter(k => a.cognitiveMemory[k] && a.cognitiveMemory[k].enabled) : [];
+  if (tiers.length) L.push(`• **Cognitive memory:** ${tiers.join(' · ')}`);
+  else if (a.memory && (a.memory.longTermMemory || a.memory.sessionMemory || a.memory.sessionSummary)) L.push(`• **Memory:** session / long-term enabled`);
+
+  if (a.enterprise) {
+    const e = [];
+    if (a.enterprise.network && a.enterprise.network.mode) e.push(a.enterprise.network.mode);
+    if (a.enterprise.encryption && a.enterprise.encryption.mode) e.push(a.enterprise.encryption.mode + ' KMS');
+    if (a.enterprise.dr && a.enterprise.dr.posture) e.push(a.enterprise.dr.posture);
+    if (e.length) L.push(`• **Enterprise:** ${e.join(' · ')}`);
+  }
+
+  if (connCount) L.push(`• **Connector wiring:** ${plural(connCount, 'field set')} restored`);
+  return L.join('\n');
+}
+
+function forkFromVersion(priorAgent, slug, version, bundle) {
   // reseed state
   state.sessionId   = null;
   state.history     = [];
@@ -2859,9 +3920,39 @@ function forkFromVersion(priorAgent, slug, version) {
   state.forkMode    = true;
   state.priorAgent  = priorAgent;
   state.forkOrigin  = { slug, version };
+
+  // Prior conversation — display-only history. The model's context comes from the
+  // priorAgent config injected server-side, not from replaying these turns.
+  const history = parseTranscriptMd(bundle && bundle.transcriptMd);
+
+  // Rehydrate non-secret connector fields from connectors.yaml (secrets are ARN refs only).
+  let connCount = 0;
+  if (bundle && bundle.connectorsYaml) {
+    try {
+      const conn = parseConnectorsYaml(bundle.connectorsYaml);
+      Object.entries(conn).forEach(([id, vals]) => { setConnValues(id, vals); connCount++; });
+    } catch (e) { /* non-fatal — connector wiring is optional */ }
+  }
+
+  // Rehydrate the cognitive-memory tab. It lives in localStorage keyed by agent name,
+  // so a fork (especially on a fresh machine) would otherwise show an empty Memory tab.
+  if (priorAgent.cognitiveMemory && MEMORY_SCHEMAS.some(s => priorAgent.cognitiveMemory[s.key]?.enabled)) {
+    setMemAgentBlock(JSON.parse(JSON.stringify(priorAgent.cognitiveMemory)));
+  }
+
+  // Seed the chat with a structured "what loaded" summary card (rendered by renderChat).
   state.display = [
-    { role: 'assistant', content: `**Forked from \`${slug}:${version}\`** — ${priorAgent.name || 'unnamed agent'}.\n\nThe full prior config is loaded. Tell me what you'd like to **change or extend**, and I'll update the bundle. Hop into **Deploy** to publish a new version when you're ready.` },
+    ...history,
+    {
+      role: 'assistant',
+      kind: 'fork-summary',
+      origin: `${slug}:${version}`,
+      title: priorAgent.name || 'unnamed agent',
+      summary: forkLoadSummary(priorAgent, history.length, connCount),
+      content: `Forked from ${slug}:${version} — ${priorAgent.name || 'unnamed agent'}.`,  // plain-text fallback
+    },
   ];
+
   unlockTest();
   refreshConnectorsTab();
   refreshPublishButton();
@@ -3691,6 +4782,112 @@ refreshPublishButton();
 refreshModeStrip();
 refreshAgentCoreCount();
 refreshMemoryCount();
+
+// ═════════════════════════════════════════════════════════════════════
+// BUILD APP — dashboard-portal solution track (reuses callBridge/parseAI/mergeAgent)
+// ═════════════════════════════════════════════════════════════════════
+(function () {
+  const appState = { sessionId: null, solution: {}, display: [], busy: false, started: false, ready: false, result: null };
+  const scroll  = $('appx-scroll');
+  const gallery = $('appx-gallery');
+  const input   = $('appx-input');
+  const sendBtn = $('appx-send');
+  const side    = $('appx-side');
+  if (!scroll || !input || !sendBtn) return;
+  const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+  document.querySelectorAll('#panel-buildapp .arch-card[data-arch]').forEach(card => {
+    card.addEventListener('click', () => startArchetype(card.dataset.arch));
+  });
+
+  function startArchetype(arch) {
+    if (arch !== 'dashboard-portal' || appState.started) return;
+    appState.started = true;
+    if (gallery) gallery.style.display = 'none';
+    input.disabled = false; input.placeholder = 'Describe the portal you want to build…'; input.focus();
+    appState.display.push({ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" });
+    renderChat();
+  }
+
+  function renderChat() {
+    scroll.innerHTML = appState.display.map(m =>
+      `<div class="msg ${m.role}"><div class="msg-role">${m.role === 'user' ? 'You' : 'AgentEye'}</div><div class="msg-bubble">${fmt(m.content)}</div></div>`
+    ).join('') + (appState.busy ? `<div class="msg assistant"><div class="msg-role">AgentEye</div><div class="msg-bubble">…</div></div>` : '');
+    scroll.scrollTop = scroll.scrollHeight;
+  }
+
+  function renderSide() {
+    const s = appState.solution || {};
+    const app = s.app || {};
+    if (!s.name && !(s.agents || []).length && !(app.pages || []).length) {
+      side.innerHTML = `<div class="side-empty"><div class="se-icon">◧</div>Your solution profile will appear here as the conversation progresses.</div>`;
+      return;
+    }
+    const agents = (s.agents || []).map(a => `<span class="appx-pin">${esc(a.slug)}:${esc(a.version)}</span>${a.role ? ' (' + esc(a.role) + ')' : ''}`).join('<br>') || '—';
+    const rows = [
+      ['Solution', esc(s.name) || '—'],
+      ['Archetype', esc(s.archetype) || 'dashboard-portal'],
+      ['Stage', esc(appState.stage) || '—'],
+      ['Tenancy', esc(s.tenancy && s.tenancy.scope) || '—'],
+      ['Pages', (app.pages || []).map(p => esc(p.title || p.id)).join(', ') || '—'],
+      ['Widgets', String((app.widgets || []).length || 0)],
+      ['Theme', esc(app.theme && app.theme.palette) || '—'],
+      ['Identity', esc(app.identity && app.identity.provider) || '—'],
+      ['Pinned agents', agents],
+    ];
+    side.innerHTML = `<div class="appx-summary">${rows.map(([k, v]) => `<div><span class="k">${k}:</span> ${v}</div>`).join('')}</div>` +
+      `<button class="btn primary appx-gen" id="appx-gen-btn" ${appState.ready ? '' : 'disabled'}>${appState.ready ? '⚙ Generate solution' : 'Generate (finish the conversation first)'}</button>` +
+      (appState.result ? `<div class="appx-result">${esc(appState.result)}</div>` : '');
+    const gb = $('appx-gen-btn');
+    if (gb) gb.addEventListener('click', generate);
+  }
+
+  input.addEventListener('input', () => {
+    input.style.height = 'auto'; input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+    sendBtn.disabled = appState.busy || !input.value.trim();
+  });
+  input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!sendBtn.disabled) send(); } });
+  sendBtn.addEventListener('click', send);
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text || appState.busy) return;
+    if (typeof state !== 'undefined' && !state.bridgeOk) { try { pingBridge(); } catch (e) {} }
+    input.value = ''; input.style.height = 'auto'; sendBtn.disabled = true;
+    appState.display.push({ role: 'user', content: text });
+    appState.busy = true; renderChat();
+    try {
+      const data = await callBridge('/app/chat', { message: text, sessionId: appState.sessionId });
+      if (data.sessionId) appState.sessionId = data.sessionId;
+      const parsed = parseAI(data.rawResult || '');
+      appState.display.push({ role: 'assistant', content: parsed.message || data.rawResult || '(empty response)' });
+      if (parsed.solution) appState.solution = mergeAgent(appState.solution, parsed.solution);
+      if (parsed.stage) appState.stage = parsed.stage;
+      appState.ready = !!parsed.readyToGenerate;
+    } catch (err) {
+      appState.display.push({ role: 'assistant', content: 'Bridge error: ' + err.message });
+    } finally {
+      appState.busy = false; renderChat(); renderSide();
+      sendBtn.disabled = !input.value.trim();
+    }
+  }
+
+  async function generate() {
+    if (!appState.ready || appState.busy) return;
+    const gb = $('appx-gen-btn'); if (gb) { gb.disabled = true; gb.textContent = '⚙ Generating…'; }
+    try {
+      const data = await callBridge('/app/generate', { solution: appState.solution });
+      appState.result = `✓ Generated ${data.fileCount} files\n  repo:   ${data.appRepo}\n  deploy: ${data.deployBundle}\n  order:  ${data.deployOrder.join(' → ')}\n\nRun locally: cd ${data.appRepo} && npm install && npm run dev`;
+      appState.display.push({ role: 'assistant', content: `Done — your solution repo is generated.\n\n**${data.fileCount} files** at \`${data.appRepo}\`, with a deploy bundle wiring **${data.deployOrder.join(' → ')}**. See CLAUDE.md for the remaining build tasks.` });
+    } catch (err) {
+      appState.result = '✗ ' + err.message;
+      appState.display.push({ role: 'assistant', content: 'Generation failed: ' + err.message });
+    } finally {
+      renderChat(); renderSide();
+    }
+  }
+})();
 
 </script>
 </body>

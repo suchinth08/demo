@@ -1,0 +1,65 @@
+{
+  "kind": "solution",
+  "schemaVersion": "0.1",
+  "name": "PatientPortal",
+  "slug": "patientportal",
+  "version": "v001",
+  "archetype": "dashboard-portal",
+  "description": "Clinician-facing portal that surfaces patient KPIs and embeds the PatientCareCoordinator assistant for triage and routing.",
+  "targetUsers": "Clinicians and front-desk staff at the practice.",
+  "tenancy": { "scope": "client-workspace", "clientId": "demo-health", "promotedFrom": null, "sanitized": false },
+  "environments": ["dev", "stage", "prod"],
+  "app": {
+    "stack": { "frontend": "react-vite", "componentLib": "shadcn-tailwind", "language": "typescript", "bff": "node-http", "database": "aurora-serverless-pg" },
+    "theme": {
+      "palette": "accenture",
+      "tokens": { "primary": "#A000FF", "accent": "#C1A3FF", "surface": "#FFFFFF", "ink": "#000000", "muted": "#6B6B6B" },
+      "mode": "light",
+      "logoRef": null,
+      "fontFamily": null,
+      "a11y": "WCAG-AA"
+    },
+    "identity": { "provider": "cognito", "rbacRoles": ["clinician", "front-desk", "admin"], "sessionStrategy": "jwt", "propagateToAgent": true },
+    "pages": [
+      { "id": "overview", "title": "Overview", "route": "/", "layout": "grid", "roles": [], "widgets": ["kpi-cards", "trend-chart", "recent-table", "assistant"] }
+    ],
+    "widgets": [
+      { "id": "kpi-cards",   "type": "kpi",        "title": "Key metrics", "dataSourceId": "ops-db", "refresh": "60s", "metrics": ["Active patients", "Open refills", "Avg. triage time", "Routed today"] },
+      { "id": "trend-chart", "type": "chart",      "title": "Requests trend", "dataSourceId": "ops-db", "chart": "line" },
+      { "id": "recent-table","type": "table",      "title": "Recent requests", "dataSourceId": "ops-db", "pageSize": 25, "columns": ["Time", "Patient", "Type", "Status"] },
+      { "id": "assistant",   "type": "agent-chat", "title": "Assistant", "agentRef": "patientcarecoordinator:v001", "binding": "bff", "streaming": true }
+    ],
+    "data": {
+      "sources": [
+        { "id": "ops-db", "type": "database", "engine": "postgres", "secretRef": "arn:aws:secretsmanager:us-east-1:111122223333:secret:ops-db", "iamAuth": true }
+      ],
+      "governance": { "residency": "match-agent-region", "piiClassification": "review", "migrations": "managed", "backup": "default", "retentionDays": null }
+    },
+    "guardrails": null,
+    "enterprise": {
+      "network":      { "mode": "vpcEndpoints", "vpcId": "vpc-12345", "subnetIds": [], "securityGroupIds": [] },
+      "encryption":   { "mode": "customer-managed", "kmsKeyArn": "arn:aws:kms:us-east-1:111122223333:key/abcd" },
+      "approvals":    { "mode": "writes-only", "approverGroupArn": null },
+      "observability":{ "cloudwatchLogs": true, "xrayTracing": true, "correlationIds": true, "frontendRUM": false, "externalCollectorUrl": null },
+      "tags":         { "Project": "PCaaS", "Environment": "prod", "Owner": "patient-ops", "CostCenter": "CC-1001" },
+      "dr":           { "posture": "single-region", "primaryRegion": "us-east-1", "secondaryRegion": null },
+      "quotas":       { "perAgentRpm": 100 },
+      "hosting":      { "frontend": "cloudfront-s3", "bff": "lambda-apigw", "iac": "cloudformation" },
+      "cicd":         { "platform": "github-actions", "environments": ["dev", "stage", "prod"], "signOffGate": true, "scans": ["sbom", "sca", "sast", "license"], "approvedTech": null, "rollback": true }
+    }
+  },
+  "agents": [
+    {
+      "slug": "patientcarecoordinator",
+      "version": "v001",
+      "role": "primary",
+      "binding": "bff",
+      "interfaceContract": { "input": { "type": "text" }, "output": { "type": "text+trace" }, "session": "per-user", "auth": "identity-propagated" }
+    }
+  ],
+  "validation": [],
+  "generation": { "blueprintVersion": "dashboard-portal@0.1", "modelVersion": null, "skeleton": "deterministic", "regeneration": "one-time", "verificationGate": ["install", "build", "typecheck", "lint", "test"], "generatedAt": null, "promptDigest": null },
+  "artifacts": null,
+  "stage": "COMPLETE",
+  "readyToGenerate": true
+}
