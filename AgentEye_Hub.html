@@ -1082,6 +1082,28 @@
   }
   .lib-card-foot .spacer { flex: 1; }
 
+  /* Archive state */
+  .lib-card-archived { opacity: .55; }
+  .lib-archived-badge {
+    font-family: var(--mono);
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    background: var(--bg-soft); color: var(--text-3);
+    border: 1px solid var(--border);
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .lib-archive-btn {
+    font-family: var(--mono);
+    font-size: 10.5px; font-weight: 600;
+    padding: 2px 8px; border-radius: 4px;
+    background: transparent; color: var(--text-3);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .lib-archive-btn:hover { border-color: var(--accent); color: var(--accent); }
+
   /* Library detail modal — wider/taller than the standard one */
   .modal-wide  { width: 540px; }
   .modal-xl    {
@@ -1430,6 +1452,218 @@
   .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); display: inline-block; animation: pulse 1.6s infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.3); } }
 
+  /* ═══ PROVISION MODE TOGGLE (Chat | Form) ═══ */
+  .prov-mode-toggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 18px;
+    border-bottom: 1px solid var(--border-soft);
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+  .pmtoggle-btn {
+    padding: 5px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--text-3);
+    font-size: 12.5px;
+    font-weight: 500;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: all 0.13s;
+  }
+  .pmtoggle-btn.active {
+    background: var(--accent-faint);
+    border-color: var(--accent-soft);
+    color: var(--accent-deep);
+    font-weight: 600;
+  }
+  .pmtoggle-btn:not(.active):hover { background: var(--bg-soft); color: var(--text-2); }
+
+  /* ═══ AGENT FORM ═══ */
+  #agent-form {
+    padding: 20px 28px 28px;
+  }
+  .af-section {
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--bg-elev);
+  }
+  .af-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 16px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .af-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .af-suggest-btn {
+    padding: 3px 11px;
+    border-radius: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.13s;
+  }
+  .af-suggest-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-faint); }
+  .af-suggest-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .af-section-body {
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .af-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .af-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.03em;
+  }
+  .af-input, .af-textarea, .af-select {
+    padding: 7px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 13.5px;
+    font-family: var(--sans);
+    outline: none;
+    transition: border-color 0.14s;
+    width: 100%;
+  }
+  .af-input:focus, .af-textarea:focus, .af-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .af-textarea { resize: vertical; min-height: 64px; font-family: var(--sans); }
+  .af-radio-row {
+    display: flex;
+    gap: 10px;
+  }
+  .af-radio-opt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-2);
+    transition: all 0.13s;
+    user-select: none;
+    background: var(--bg);
+  }
+  .af-radio-opt.selected {
+    border-color: var(--accent);
+    background: var(--accent-faint);
+    color: var(--accent-deep);
+    font-weight: 600;
+  }
+  .af-radio-opt input[type=radio] { display: none; }
+  /* List rows (KB, action groups, MCP) */
+  .af-list-rows { display: flex; flex-direction: column; gap: 6px; }
+  .af-list-row {
+    display: flex; gap: 6px; align-items: flex-start;
+  }
+  .af-list-row .af-input { flex: 1; }
+  .af-list-row .af-select { flex: 0 0 140px; }
+  .af-rm-btn {
+    padding: 7px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-4);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    transition: all 0.13s;
+    flex-shrink: 0;
+  }
+  .af-rm-btn:hover { border-color: var(--risk); color: var(--risk); background: var(--risk-bg); }
+  .af-add-btn {
+    padding: 5px 12px;
+    border: 1.5px dashed var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-4);
+    font-size: 12px;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: all 0.13s;
+  }
+  .af-add-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .af-check-row {
+    display: flex; flex-wrap: wrap; gap: 10px;
+  }
+  .af-check-opt {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--text-2);
+    cursor: pointer; user-select: none;
+  }
+  .af-check-opt input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; }
+
+  /* ═══ AGENT READINESS CHECKLIST (Config tab) ═══ */
+  .ar-checklist {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+  }
+  .ar-checklist-head {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ar-checklist-score {
+    font-size: 11px;
+    color: var(--text-4);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  .ar-items {
+    display: flex; flex-wrap: wrap; gap: 6px 14px;
+  }
+  .ar-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12.5px;
+  }
+  .ar-item .ar-mark { font-size: 13px; }
+  .ar-item.done .ar-mark { color: var(--success); }
+  .ar-item.miss .ar-mark { color: var(--risk); }
+  .ar-item.opt .ar-mark { color: var(--text-4); }
+  .ar-item.done { color: var(--text-2); }
+  .ar-item.miss { color: var(--risk); font-weight: 500; }
+  .ar-item.opt  { color: var(--text-4); }
+  .ar-opt-tag   { font-size: 10px; color: var(--text-4); margin-left: 2px; }
+
 </style>
 </head>
 <body>
@@ -1441,6 +1675,16 @@
     <span class="brand-name">AgentEye</span>
   </div>
   <div class="topbar-meta">
+    <div class="ws-control" id="ws-control" style="display:none;">
+      <span class="ws-icon" title="Active project">▦</span>
+      <select id="ws-project" class="ws-select" title="Active project"></select>
+      <button id="ws-new" class="ws-btn" title="New project">＋</button>
+    </div>
+    <span class="ws-user" id="ws-user" style="display:none;">
+      <span class="ws-avatar" id="ws-avatar">·</span>
+      <span class="ws-name" id="ws-name"></span>
+      <button id="ws-logout" class="ws-btn" title="Log out">⇥</button>
+    </span>
     <span class="mi mono" id="header-clock">--:--:--</span>
   </div>
 </header>
@@ -1448,6 +1692,7 @@
 <!-- ═════ TABS ═════ -->
 <nav class="tabs">
   <button class="tab active" data-panel="home">Home</button>
+  <button class="tab" data-panel="workspace" id="tab-workspace">Workspace <span class="tcount" id="tab-workspace-count">0</span></button>
   <button class="tab" data-panel="library">Library <span class="tcount" id="tab-library-count">0</span></button>
   <button class="tab" data-panel="graph" id="tab-graph">Graph</button>
   <button class="tab" data-panel="finops" id="tab-finops">FinOps</button>
@@ -1514,6 +1759,31 @@
       <div class="stat"><div class="l">Foundation models</div><div class="v">12+</div><div class="d">Claude · Nova · Llama</div></div>
       <div class="stat"><div class="l">MCP connectors</div><div class="v">20+</div><div class="d">SAP · Salesforce · Jira · …</div></div>
       <div class="stat"><div class="l">Time to deploy</div><div class="v">~15<span style="font-size:14px; font-weight:500; color:var(--text-3)"> min</span></div><div class="d">Conversation to <code>cloudformation deploy</code></div></div>
+    </div>
+  </div>
+
+  <!-- ─────── WORKSPACE ─────── -->
+  <div class="panel" id="panel-workspace">
+    <div class="ws-head">
+      <div>
+        <h2 id="ws-proj-title">My Workspace</h2>
+        <div class="ws-sub" id="ws-proj-sub">Your private drafts and saved conversations live here. Publishing promotes a draft into the shared Library.</div>
+      </div>
+      <div class="ws-head-actions">
+        <button class="btn" id="ws-rename">Rename project</button>
+        <button class="btn" id="ws-delete">Delete project</button>
+        <button class="btn primary" id="ws-newproj">＋ New project</button>
+      </div>
+    </div>
+    <div class="ws-cols">
+      <section class="ws-col">
+        <div class="ws-col-head"><h3>Saved conversations</h3><span class="tcount" id="ws-conv-count">0</span></div>
+        <div class="ws-list" id="ws-conv-list"><div class="ws-empty">No saved conversations yet. Start one in <a href="#" data-jump="provision">Provision Agent</a>.</div></div>
+      </section>
+      <section class="ws-col">
+        <div class="ws-col-head"><h3>Draft agents</h3><span class="tcount" id="ws-draft-count">0</span></div>
+        <div class="ws-list" id="ws-draft-list"><div class="ws-empty">In-progress agents auto-save here as you build them.</div></div>
+      </section>
     </div>
   </div>
 
@@ -1595,6 +1865,12 @@
       <!-- Chat -->
       <div class="prov-chat">
         <div class="stage-rail" id="stage-rail"></div>
+        <!-- Chat|Form toggle -->
+        <div class="prov-mode-toggle" id="prov-mode-toggle">
+          <button class="pmtoggle-btn active" id="pmtoggle-chat" data-mode="chat">Chat</button>
+          <button class="pmtoggle-btn" id="pmtoggle-form" data-mode="form">Form</button>
+        </div>
+        <!-- Chat view -->
         <div class="chat-scroll" id="chat-scroll">
           <div class="msg assistant">
             <div class="msg-role">AgentEye</div>
@@ -1603,7 +1879,9 @@
 To begin: <strong>what business problem do you want this agent to solve, and who would use it?</strong></div>
           </div>
         </div>
-        <div class="chat-input-wrap">
+        <!-- Form view -->
+        <div id="agent-form" style="display:none; flex:1; overflow-y:auto; min-height:0;"></div>
+        <div class="chat-input-wrap" id="chat-input-wrap">
           <div class="chat-input">
             <textarea id="chat-input" rows="1" placeholder="Describe your use case in plain language..."></textarea>
             <button class="chat-send" id="chat-send" disabled>↑</button>
@@ -1622,6 +1900,10 @@ To begin: <strong>what business problem do you want this agent to solve, and who
           <span class="mode-pill" id="mode-pill">Specialist</span>
           <button class="btn-sm" id="pick-collab-btn" style="display:none;">⇆ Pick from Library</button>
         </div>
+        <div class="seed-banner" id="seed-banner" style="display:none;">
+          <span class="seed-text" id="seed-text">Building an agent for your solution</span>
+          <button class="btn-sm" id="reuse-config-btn" title="Copy model, guardrails, memory & enterprise settings from an already-built agent">⎘ Reuse config</button>
+        </div>
         <div class="side-content" id="side-content">
           <div class="side-empty">
             <div class="se-icon">◉</div>
@@ -1635,6 +1917,25 @@ To begin: <strong>what business problem do you want this agent to solve, and who
   <!-- ─────── BUILD APP (Solution track) ─────── -->
   <div class="panel" id="panel-buildapp">
     <style>
+      /* ── Journey rail ── */
+      #appx-journey { display:none; padding:14px 20px 10px; border-bottom:1px solid var(--line,#2a2a32); background:var(--bg,#111115); }
+      #appx-journey.visible { display:block; }
+      .aj-rail { display:flex; align-items:center; flex-wrap:wrap; gap:0; }
+      .aj-step { display:flex; align-items:center; gap:0; }
+      .aj-dot-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+      .aj-dot { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; transition:box-shadow .15s,background .15s; flex-shrink:0; }
+      .aj-dot.done { background:#39d98a; color:#0a2018; }
+      .aj-dot.active { background:transparent; color:var(--accent,#A000FF); border:2px solid var(--accent,#A000FF); box-shadow:0 0 0 3px rgba(160,0,255,.18); }
+      .aj-dot.pending { background:var(--bg-soft,#1a1a20); color:var(--text-4,#9a9aa5); border:1.5px solid var(--line,#2a2a32); }
+      .aj-label { font-size:9.5px; color:var(--text-4,#9a9aa5); text-align:center; max-width:52px; line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .aj-label.active { color:var(--accent,#A000FF); font-weight:600; }
+      .aj-label.done { color:var(--text-3,#c8c8d0); }
+      .aj-bar { flex:1; min-width:10px; max-width:36px; height:2px; background:var(--line,#2a2a32); margin:0 2px; margin-bottom:18px; }
+      .aj-bar.done { background:#39d98a; }
+      .aj-bar.active { background:var(--accent,#A000FF); }
+      .aj-next { margin-top:7px; font-size:11.5px; color:var(--text-3,#c8c8d0); line-height:1.5; }
+      .aj-next strong { color:var(--accent,#A000FF); }
+    </style>
       #panel-buildapp .arch-gallery { display:flex; flex-direction:column; gap:14px; padding:24px; max-width:760px; margin:0 auto; }
       #panel-buildapp .arch-cards { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
       #panel-buildapp .arch-card { border:1px solid var(--line, #2a2a32); border-radius:10px; padding:16px; cursor:pointer; background:var(--bg-soft,#1a1a20); transition:transform .12s,border-color .12s; }
@@ -1648,11 +1949,61 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       #panel-buildapp .appx-summary { font-size:12.5px; line-height:1.7; }
       #panel-buildapp .appx-summary .k { color:var(--text-4,#9a9aa5); }
       #panel-buildapp .appx-pin { font-family:var(--mono,monospace); font-size:11px; color:var(--accent,#A000FF); }
+      #panel-buildapp .appx-agent { display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin:2px 0; }
+      #panel-buildapp .appx-aname { font-weight:600; }
+      #panel-buildapp .appx-arole { color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-target { font-size:9px; text-transform:uppercase; letter-spacing:.04em; padding:1px 6px; border-radius:8px; background:var(--bg,#2a2a32); color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-build { margin-left:auto; font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:7px; border:1px solid var(--accent,#A000FF); background:transparent; color:var(--accent,#A000FF); cursor:pointer; }
+      #panel-buildapp .appx-build:hover { background:var(--accent,#A000FF); color:#fff; }
       #panel-buildapp .appx-gen { width:100%; margin-top:14px; }
+      #panel-buildapp .appx-genhint { margin-top:7px; font-size:11px; line-height:1.5; color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-check { margin-top:14px; border-top:1px solid var(--line,#2a2a32); padding-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:5px 12px; }
+      #panel-buildapp .appx-ck { font-size:11.5px; color:var(--text-4,#9a9aa5); display:flex; align-items:center; gap:6px; }
+      #panel-buildapp .appx-ck.on { color:var(--text-2,#e6e6ee); }
+      #panel-buildapp .appx-ckmark { display:inline-flex; width:15px; justify-content:center; color:var(--text-4,#9a9aa5); }
+      #panel-buildapp .appx-ck.on .appx-ckmark { color:#39d98a; }
+      #panel-buildapp .appx-ckopt { opacity:.7; font-size:10px; }
       #panel-buildapp .appx-result { margin-top:12px; font-size:12px; font-family:var(--mono,monospace); white-space:pre-wrap; color:var(--text-3,#c8c8d0); }
+      /* live preview canvas — renders the dashboard schematic from the evolving SolutionSpec */
+      #panel-buildapp .appx-canvas { border:1px solid var(--line,#2a2a32); border-radius:10px; overflow:hidden; background:var(--cvs,#fff); color:var(--cvi,#000); margin-bottom:14px; }
+      #panel-buildapp .appx-canvas.empty { padding:22px 14px; text-align:center; color:var(--text-4,#9a9aa5); font-size:12px; background:var(--bg-soft,#1a1a20); }
+      #panel-buildapp .cv-top { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:2px solid var(--cvi,#000); font-size:12px; }
+      #panel-buildapp .cv-spacer { flex:1; }
+      #panel-buildapp .cv-env { border:1px solid var(--cvp,#A000FF); color:var(--cvp,#A000FF); font-size:9px; font-weight:700; padding:1px 7px; border-radius:10px; }
+      #panel-buildapp .cv-body { display:flex; min-height:150px; }
+      #panel-buildapp .cv-nav { width:72px; border-right:1px solid var(--line,#e6e6e6); padding:6px 4px; background:rgba(0,0,0,.03); }
+      #panel-buildapp .cv-navitem { font-size:9.5px; padding:4px 5px; border-radius:4px; opacity:.7; }
+      #panel-buildapp .cv-navitem.on { background:var(--cvp,#A000FF); color:#fff; opacity:1; }
+      #panel-buildapp .cv-main { flex:1; padding:8px; display:flex; flex-direction:column; gap:7px; }
+      #panel-buildapp .cv-kpis { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+      #panel-buildapp .cv-kpi { border:1px solid var(--line,#e6e6e6); border-radius:6px; padding:6px; }
+      #panel-buildapp .cv-kpiv { height:10px; width:60%; background:var(--cva,#C1A3FF); border-radius:3px; }
+      #panel-buildapp .cv-kpik { font-size:8.5px; opacity:.65; margin-top:4px; }
+      #panel-buildapp .cv-panel { border:1px solid var(--line,#e6e6e6); border-radius:6px; padding:7px; }
+      #panel-buildapp .cv-h { font-size:10px; font-weight:600; margin-bottom:5px; }
+      #panel-buildapp .cv-cols { display:flex; gap:6px; font-size:8px; opacity:.6; border-bottom:1px solid var(--line,#eee); padding-bottom:3px; margin-bottom:4px; }
+      #panel-buildapp .cv-cols span { flex:1; }
+      #panel-buildapp .cv-row { height:6px; background:rgba(0,0,0,.06); border-radius:2px; margin-bottom:3px; }
+      #panel-buildapp .cv-chart { height:52px; border-radius:4px; background:linear-gradient(180deg,var(--cva,#C1A3FF),transparent); border:1px solid var(--line,#eee); }
+      #panel-buildapp .cv-assist { background:rgba(0,0,0,.02); }
+      #panel-buildapp .cv-pin { font-family:var(--mono,monospace); font-size:8px; color:var(--cvp,#A000FF); }
+      #panel-buildapp .cv-bub { height:9px; border-radius:6px; margin-bottom:4px; }
+      #panel-buildapp .cv-bub.a { width:70%; background:rgba(0,0,0,.07); }
+      #panel-buildapp .cv-bub.u { width:55%; margin-left:auto; background:var(--cvp,#A000FF); }
+      /* keep the side panel a clean, self-scrolling column — the global sticky side-tabs
+         floats over content here (no spacer bar), so pin it in normal flow */
+      #panel-buildapp .side-tabs { position: static; top: auto; z-index: 1; }
+      #panel-buildapp .side-content { display: flex; flex-direction: column; min-height: 0; }
+      #panel-buildapp .appx-canvas { flex: 0 0 auto; }
     </style>
+    <div id="appx-journey" aria-label="Build journey"></div>
     <div class="prov-shell">
       <div class="prov-chat">
+        <!-- Chat|Form toggle -->
+        <div class="prov-mode-toggle" id="appx-mode-toggle">
+          <button class="pmtoggle-btn active" id="appx-pmtoggle-chat">Chat</button>
+          <button class="pmtoggle-btn" id="appx-pmtoggle-form">Form</button>
+        </div>
         <div class="chat-scroll" id="appx-scroll">
           <div class="arch-gallery" id="appx-gallery">
             <div>
@@ -1670,7 +2021,9 @@ To begin: <strong>what business problem do you want this agent to solve, and who
             </div>
           </div>
         </div>
-        <div class="chat-input-wrap">
+        <!-- Solution form (shown in Form mode) -->
+        <div id="solution-form" style="display:none;overflow-y:auto;flex:1;padding:20px 28px 28px;"></div>
+        <div class="chat-input-wrap" id="appx-input-wrap">
           <div class="chat-input">
             <textarea id="appx-input" rows="1" placeholder="Pick an archetype above to begin..." disabled></textarea>
             <button class="chat-send" id="appx-send" disabled>↑</button>
@@ -1679,7 +2032,7 @@ To begin: <strong>what business problem do you want this agent to solve, and who
         </div>
       </div>
       <div class="prov-side">
-        <div class="side-tabs"><button class="side-tab active">Solution</button></div>
+        <div class="side-tabs"><button class="side-tab active">Solution Canvas</button></div>
         <div class="side-content" id="appx-side">
           <div class="side-empty"><div class="se-icon">◧</div>Your solution profile will appear here as the conversation progresses.</div>
         </div>
@@ -1884,8 +2237,141 @@ To begin: <strong>what business problem do you want this agent to solve, and who
   </div>
 </div>
 
+<!-- ═════ REUSE-FROM-AGENT MODAL ═════ -->
+<div class="modal-bg" id="reuse-modal">
+  <div class="modal modal-xl">
+    <div class="lib-detail-head">
+      <div>
+        <h2>Reuse from an existing agent</h2>
+        <div class="lib-detail-sub">Pick a published agent, then choose which parts to carry over. This loads real context &amp; functionality — review the selections and confirm.</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="reuse-cancel">Cancel</button>
+        <button class="btn primary" id="reuse-confirm">Reuse selected</button>
+      </div>
+    </div>
+    <div class="reuse-pickrow">
+      <label for="reuse-source">Source agent</label>
+      <select id="reuse-source"></select>
+    </div>
+    <div class="reuse-sections" id="reuse-sections"></div>
+    <div class="reuse-hint">Only checked sections are copied. This agent keeps its own name. You'll be able to edit anything afterward in the conversation.</div>
+  </div>
+</div>
+<style>
+  /* relative + high z-index so it never paints behind the sticky Overview/Details tabs (z-index:12) */
+  .seed-banner { position:relative; z-index:13; flex-shrink:0; display:flex; align-items:center; gap:8px;
+    padding:8px 12px; border-bottom:1px solid var(--border-soft); background:rgba(160,0,255,.10); font-size:12px; }
+  .seed-banner .seed-text { color:var(--text-3,#c8c8d0); flex:1; }
+  .seed-banner .btn-sm { white-space:nowrap; }
+  /* reuse modal */
+  .reuse-pickrow { display:flex; align-items:center; gap:10px; padding:12px 18px; border-bottom:1px solid var(--border-soft); }
+  .reuse-pickrow label { font-size:12px; color:var(--text-4,#9a9aa5); }
+  .reuse-pickrow select { flex:1; background:var(--bg,#15151a); color:var(--text-2,#e6e6ee); border:1px solid var(--line,#2a2a32); border-radius:8px; padding:8px 10px; font-size:13px; }
+  .reuse-sections { padding:14px 18px; display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  @media (max-width:680px){ .reuse-sections { grid-template-columns:1fr; } }
+  .reuse-sec { display:flex; align-items:flex-start; gap:9px; border:1px solid var(--line,#2a2a32); border-radius:9px; padding:10px 12px; cursor:pointer; }
+  .reuse-sec.off { opacity:.45; }
+  .reuse-sec input { margin-top:2px; }
+  .reuse-sec .rs-l { font-weight:600; font-size:12.5px; }
+  .reuse-sec .rs-s { font-size:11px; color:var(--text-4,#9a9aa5); margin-top:2px; }
+  .reuse-hint { padding:0 18px 14px; font-size:11.5px; color:var(--text-4,#9a9aa5); }
+</style>
+
 <!-- ═════ TOAST ═════ -->
 <div class="toast" id="toast"></div>
+
+<!-- ═════ LOGIN / SIGNUP OVERLAY ═════ -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <img src="/assets/accenture_full_logo1.png?v=2" alt="Accenture" class="auth-logo">
+      <div class="auth-title">AgentEye</div>
+      <div class="auth-tagline">Sign in to your workspace</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="auth-tab-login" type="button">Log in</button>
+      <button class="auth-tab" id="auth-tab-signup" type="button">Sign up</button>
+    </div>
+    <form id="auth-form" autocomplete="on">
+      <label class="auth-field auth-only-signup" id="auth-display-wrap">
+        <span>Display name</span>
+        <input type="text" id="auth-display" autocomplete="name" placeholder="Alex Rivera">
+      </label>
+      <label class="auth-field">
+        <span>Username</span>
+        <input type="text" id="auth-username" autocomplete="username" placeholder="alex" required>
+      </label>
+      <label class="auth-field">
+        <span>Password</span>
+        <input type="password" id="auth-password" autocomplete="current-password" placeholder="••••••••" required>
+      </label>
+      <div class="auth-error" id="auth-error"></div>
+      <button class="auth-submit" id="auth-submit" type="submit">Log in</button>
+    </form>
+    <div class="auth-foot" id="auth-foot">First time here? <a href="#" id="auth-switch-link">Create an account</a> — the first account becomes the admin.</div>
+  </div>
+</div>
+
+<style>
+  /* topbar workspace controls */
+  .ws-control, .ws-user { display:inline-flex; align-items:center; gap:6px; }
+  .ws-control { margin-right:10px; }
+  .ws-icon { color:var(--text-4,#9a9aa5); font-size:13px; }
+  .ws-select { background:var(--bg-soft,#1a1a20); color:var(--text-2,#e6e6ee); border:1px solid var(--line,#2a2a32); border-radius:7px; padding:4px 8px; font-size:12px; max-width:200px; }
+  .ws-btn { background:var(--bg-soft,#1a1a20); color:var(--text-3,#c8c8d0); border:1px solid var(--line,#2a2a32); border-radius:7px; padding:3px 8px; font-size:13px; cursor:pointer; line-height:1; }
+  .ws-btn:hover { border-color:var(--accent,#A000FF); color:var(--accent,#A000FF); }
+  .ws-user { margin-right:12px; }
+  .ws-avatar { width:22px; height:22px; border-radius:50%; background:var(--accent,#A000FF); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; text-transform:uppercase; }
+  .ws-name { font-size:12px; color:var(--text-2,#e6e6ee); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* workspace panel */
+  .ws-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:22px 26px 10px; flex-wrap:wrap; }
+  .ws-head h2 { margin:0; }
+  .ws-sub { color:var(--text-4,#9a9aa5); font-size:12.5px; max-width:560px; margin-top:4px; }
+  .ws-head-actions { display:flex; gap:8px; flex-wrap:wrap; }
+  .ws-cols { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:8px 26px 26px; }
+  @media (max-width:820px){ .ws-cols { grid-template-columns:1fr; } }
+  .ws-col { border:1px solid var(--line,#2a2a32); border-radius:12px; background:var(--bg-soft,#1a1a20); overflow:hidden; }
+  .ws-col-head { display:flex; align-items:center; gap:8px; padding:13px 16px; border-bottom:1px solid var(--line,#2a2a32); }
+  .ws-col-head h3 { margin:0; font-size:14px; }
+  .ws-list { padding:10px; display:flex; flex-direction:column; gap:8px; min-height:120px; }
+  .ws-empty { color:var(--text-4,#9a9aa5); font-size:12.5px; padding:18px; text-align:center; }
+  .ws-empty a { color:var(--accent,#A000FF); }
+  .ws-item { border:1px solid var(--line,#2a2a32); border-radius:9px; padding:11px 13px; cursor:pointer; transition:border-color .12s, transform .12s; background:var(--bg,#15151a); }
+  .ws-item:hover { border-color:var(--accent,#A000FF); transform:translateY(-1px); }
+  .ws-item-top { display:flex; align-items:center; gap:8px; }
+  .ws-item-title { font-weight:600; font-size:13px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ws-item-badge { font-size:9.5px; padding:1px 7px; border-radius:9px; background:var(--bg-soft,#26262e); color:var(--text-4,#9a9aa5); text-transform:uppercase; letter-spacing:.04em; }
+  .ws-item-meta { font-size:11px; color:var(--text-4,#9a9aa5); margin-top:5px; display:flex; gap:10px; }
+  .ws-item-del { margin-left:auto; background:none; border:none; color:var(--text-4,#9a9aa5); cursor:pointer; font-size:14px; padding:0 2px; }
+  .ws-item-del:hover { color:#ff5c7a; }
+
+  /* auth overlay */
+  .auth-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
+    background:radial-gradient(1200px 600px at 50% -10%, rgba(160,0,255,.18), transparent 60%), var(--bg,#0e0e12); }
+  .auth-card { width:360px; max-width:92vw; background:var(--bg-soft,#1a1a20); border:1px solid var(--line,#2a2a32); border-radius:16px; padding:28px 26px; box-shadow:0 24px 80px rgba(0,0,0,.5); }
+  .auth-brand { text-align:center; margin-bottom:18px; }
+  .auth-logo { height:24px; opacity:.95; margin-bottom:12px; }
+  .auth-title { font-size:20px; font-weight:800; letter-spacing:-.02em; }
+  .auth-tagline { font-size:12.5px; color:var(--text-4,#9a9aa5); margin-top:3px; }
+  .auth-tabs { display:flex; gap:6px; background:var(--bg,#15151a); border:1px solid var(--line,#2a2a32); border-radius:9px; padding:4px; margin-bottom:16px; }
+  .auth-tab { flex:1; background:none; border:none; color:var(--text-3,#c8c8d0); padding:7px; border-radius:6px; font-size:13px; cursor:pointer; }
+  .auth-tab.active { background:var(--accent,#A000FF); color:#fff; font-weight:600; }
+  .auth-field { display:block; margin-bottom:12px; }
+  .auth-field span { display:block; font-size:11.5px; color:var(--text-4,#9a9aa5); margin-bottom:5px; }
+  .auth-field input { width:100%; box-sizing:border-box; background:#fff; color:#000; border:1px solid var(--line,#2a2a32); border-radius:8px; padding:10px 12px; font-size:13px; }
+  .auth-field input::placeholder { color:#888; }
+  .auth-field input:focus { outline:none; border-color:var(--accent,#A000FF); }
+  .auth-only-signup { display:none; }
+  .auth-overlay.signup .auth-only-signup { display:block; }
+  .auth-error { color:#ff5c7a; font-size:12px; min-height:16px; margin-bottom:8px; }
+  .auth-submit { width:100%; background:var(--accent,#A000FF); color:#fff; border:none; border-radius:9px; padding:11px; font-size:14px; font-weight:600; cursor:pointer; }
+  .auth-submit:hover { background:var(--accent-deep,#7a00c2); }
+  .auth-submit:disabled { opacity:.6; cursor:wait; }
+  .auth-foot { text-align:center; font-size:11.5px; color:var(--text-4,#9a9aa5); margin-top:14px; }
+  .auth-foot a { color:var(--accent,#A000FF); }
+</style>
 
 <script>
 // ═════════════════════════════════════════════════════════════════════
@@ -1897,6 +2383,377 @@ To begin: <strong>what business problem do you want this agent to solve, and who
 // only sends user messages and a session id.
 const STAGES = ["USE_CASE","PERSONA","MODEL","KNOWLEDGE","TOOLS","GUARDRAILS","MEMORY","ENTERPRISE","COMPLETE"];
 const STAGE_LABELS = ["Use case","Persona","Model","Knowledge","Tools","Guardrails","Memory","Enterprise","Ready"];
+
+// ═════════════════════════════════════════════════════════════════════
+// AUTH + WORKSPACE — login, per-user projects, draft/conversation save
+// ═════════════════════════════════════════════════════════════════════
+const gid = id => document.getElementById(id);
+const AUTH = {
+  token: localStorage.getItem('agenteye:token') || null,
+  user: null,
+  projects: [],
+  activeProject: localStorage.getItem('agenteye:activeProject') || null,
+  stores: { connectors:{}, agentcore:{}, cognitiveMemory:{}, finopsConn:null },
+};
+
+// Attach the bearer token to every same-origin request, and trap 401 → re-login.
+// Installed before any other code runs so existing fetch() call sites need no edits.
+const _origFetch = window.fetch.bind(window);
+window.fetch = (input, init = {}) => {
+  const u = typeof input === 'string' ? input : (input && input.url) || '';
+  const sameOrigin = u.startsWith('/') || u.startsWith(location.origin);
+  if (sameOrigin && AUTH.token) {
+    init = Object.assign({}, init, { headers: Object.assign({}, init.headers || {}, { Authorization: 'Bearer ' + AUTH.token }) });
+  }
+  return _origFetch(input, init).then(res => {
+    if (res.status === 401 && sameOrigin && !u.includes('/auth/')) { AUTH.token = null; localStorage.removeItem('agenteye:token'); showLogin(); }
+    return res;
+  });
+};
+
+// ───── login / signup overlay ─────
+function showLogin() {
+  const ov = gid('auth-overlay'); if (ov) ov.style.display = 'flex';
+  gid('ws-control').style.display = 'none';
+  gid('ws-user').style.display = 'none';
+}
+function hideLogin() { const ov = gid('auth-overlay'); if (ov) ov.style.display = 'none'; }
+
+let authIsSignup = false;
+function setAuthMode(signup) {
+  authIsSignup = signup;
+  gid('auth-overlay').classList.toggle('signup', signup);
+  gid('auth-tab-login').classList.toggle('active', !signup);
+  gid('auth-tab-signup').classList.toggle('active', signup);
+  gid('auth-submit').textContent = signup ? 'Create account' : 'Log in';
+  gid('auth-password').setAttribute('autocomplete', signup ? 'new-password' : 'current-password');
+  gid('auth-foot').innerHTML = signup
+    ? 'Already have an account? <a href="#" id="auth-switch-link">Log in</a>'
+    : 'First time here? <a href="#" id="auth-switch-link">Create an account</a> — the first account becomes the admin.';
+  gid('auth-switch-link').addEventListener('click', e => { e.preventDefault(); setAuthMode(!authIsSignup); });
+  gid('auth-error').textContent = '';
+}
+gid('auth-tab-login').addEventListener('click', () => setAuthMode(false));
+gid('auth-tab-signup').addEventListener('click', () => setAuthMode(true));
+gid('auth-switch-link').addEventListener('click', e => { e.preventDefault(); setAuthMode(!authIsSignup); });
+gid('auth-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const username = gid('auth-username').value.trim();
+  const password = gid('auth-password').value;
+  const displayName = gid('auth-display').value.trim();
+  if (!username || !password) { gid('auth-error').textContent = 'Username and password are required.'; return; }
+  const btn = gid('auth-submit'); btn.disabled = true; gid('auth-error').textContent = '';
+  try {
+    const ep = authIsSignup ? '/auth/signup' : '/auth/login';
+    const r = await _origFetch(ep, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, password, displayName }) });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'authentication failed');
+    AUTH.token = d.token; localStorage.setItem('agenteye:token', d.token);
+    gid('auth-password').value = '';
+    await onAuthed(d.user);
+  } catch (err) {
+    gid('auth-error').textContent = err.message || String(err);
+  } finally { btn.disabled = false; }
+});
+
+async function initAuth() {
+  if (!AUTH.token) { showLogin(); setAuthMode(false); return; }
+  try {
+    const r = await _origFetch('/auth/me', { headers:{ Authorization:'Bearer ' + AUTH.token } });
+    const d = await r.json();
+    if (d.ok) { await onAuthed(d.user); } else { showLogin(); setAuthMode(false); }
+  } catch { showLogin(); setAuthMode(false); }
+}
+
+async function onAuthed(user) {
+  AUTH.user = user;
+  hideLogin();
+  // user chip
+  gid('ws-user').style.display = 'inline-flex';
+  gid('ws-control').style.display = 'inline-flex';
+  gid('ws-name').textContent = user.displayName || user.username;
+  gid('ws-avatar').textContent = (user.displayName || user.username || '?').trim().charAt(0);
+  await loadProjects();
+  await restoreLastConversation();   // bring back the chat + session you were last working on
+  loadLibrary();   // refresh the shared Catalog now that we're authenticated
+}
+
+gid('ws-logout').addEventListener('click', async () => {
+  try { await fetch('/auth/logout', { method:'POST' }); } catch {}
+  AUTH.token = null; AUTH.user = null;
+  localStorage.removeItem('agenteye:token');
+  showLogin(); setAuthMode(false);
+});
+
+// ───── projects ─────
+async function loadProjects() {
+  try {
+    const r = await fetch('/projects'); const d = await r.json();
+    AUTH.projects = (d.ok && d.projects) || [];
+  } catch { AUTH.projects = []; }
+  if (!AUTH.projects.find(p => p.id === AUTH.activeProject)) {
+    AUTH.activeProject = AUTH.projects[0] ? AUTH.projects[0].id : null;
+  }
+  if (!AUTH.activeProject) {
+    try {
+      const r = await fetch('/projects', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name:'My Workspace' }) });
+      const d = await r.json();
+      if (d.ok) { AUTH.projects = [d.project]; AUTH.activeProject = d.project.id; }
+    } catch {}
+  }
+  localStorage.setItem('agenteye:activeProject', AUTH.activeProject || '');
+  renderProjectSwitcher();
+  await loadStores();
+  loadWorkspacePanel();
+}
+function renderProjectSwitcher() {
+  const sel = gid('ws-project');
+  sel.innerHTML = AUTH.projects.map(p => `<option value="${p.id}"${p.id === AUTH.activeProject ? ' selected' : ''}>${escAttr(p.name)}</option>`).join('');
+}
+function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+gid('ws-project').addEventListener('change', async e => {
+  AUTH.activeProject = e.target.value;
+  localStorage.setItem('agenteye:activeProject', AUTH.activeProject);
+  await loadStores();
+  loadWorkspacePanel();
+  await restoreLastConversation();   // load this project's most recent conversation into the chat
+  toast('Switched project — chat, connectors, AgentCore and memory now reflect this project.', 'success');
+});
+async function createProjectFlow() {
+  const name = prompt('New project name:', 'Untitled project');
+  if (name == null) return;
+  try {
+    const r = await fetch('/projects', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    AUTH.projects.push(d.project); AUTH.activeProject = d.project.id;
+    localStorage.setItem('agenteye:activeProject', AUTH.activeProject);
+    renderProjectSwitcher(); await loadStores(); loadWorkspacePanel();
+    toast('Project created.', 'success');
+  } catch (err) { toast('Could not create project: ' + err.message, 'error'); }
+}
+gid('ws-new').addEventListener('click', createProjectFlow);
+gid('ws-newproj').addEventListener('click', createProjectFlow);
+gid('ws-rename').addEventListener('click', async () => {
+  const cur = AUTH.projects.find(p => p.id === AUTH.activeProject); if (!cur) return;
+  const name = prompt('Rename project:', cur.name); if (name == null) return;
+  try {
+    const r = await fetch('/projects/' + AUTH.activeProject, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ name }) });
+    const d = await r.json(); if (!d.ok) throw new Error(d.error);
+    cur.name = d.project.name; renderProjectSwitcher(); loadWorkspacePanel();
+  } catch (err) { toast('Rename failed: ' + err.message, 'error'); }
+});
+gid('ws-delete').addEventListener('click', async () => {
+  if (AUTH.projects.length <= 1) { toast('You need at least one project. Create another before deleting this one.', 'error'); return; }
+  const cur = AUTH.projects.find(p => p.id === AUTH.activeProject); if (!cur) return;
+  if (!confirm(`Delete project "${cur.name}" and all its drafts and saved conversations? This cannot be undone.`)) return;
+  try {
+    const r = await fetch('/projects/' + AUTH.activeProject, { method:'DELETE' });
+    const d = await r.json(); if (!d.ok) throw new Error(d.error);
+    AUTH.projects = AUTH.projects.filter(p => p.id !== AUTH.activeProject);
+    AUTH.activeProject = AUTH.projects[0] ? AUTH.projects[0].id : null;
+    localStorage.setItem('agenteye:activeProject', AUTH.activeProject || '');
+    renderProjectSwitcher(); await loadStores(); loadWorkspacePanel();
+    toast('Project deleted.', 'success');
+  } catch (err) { toast('Delete failed: ' + err.message, 'error'); }
+});
+
+// ───── per-project stores (replaces browser-global localStorage) ─────
+async function loadStores() {
+  if (!AUTH.activeProject) return;
+  try {
+    const r = await fetch('/projects/' + AUTH.activeProject + '/stores'); const d = await r.json();
+    if (d.ok) AUTH.stores = Object.assign({ connectors:{}, agentcore:{}, cognitiveMemory:{}, finopsConn:null }, d.stores);
+  } catch {}
+}
+let _storeFlushTimer = null;
+function flushStores() {
+  if (!AUTH.token || !AUTH.activeProject) return;
+  clearTimeout(_storeFlushTimer);
+  _storeFlushTimer = setTimeout(() => {
+    fetch('/projects/' + AUTH.activeProject + '/stores', { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ stores: AUTH.stores }) }).catch(()=>{});
+  }, 400);
+}
+
+// ───── workspace panel (drafts + conversations) ─────
+async function loadWorkspacePanel() {
+  const cur = AUTH.projects.find(p => p.id === AUTH.activeProject);
+  if (gid('ws-proj-title')) gid('ws-proj-title').textContent = cur ? cur.name : 'Workspace';
+  if (!AUTH.activeProject) return;
+  let convs = [], drafts = [];
+  try { const r = await fetch('/projects/' + AUTH.activeProject + '/conversations'); const d = await r.json(); convs = (d.ok && d.items) || []; } catch {}
+  try { const r = await fetch('/projects/' + AUTH.activeProject + '/drafts');        const d = await r.json(); drafts = (d.ok && d.items) || []; } catch {}
+  renderWsConversations(convs);
+  renderWsDrafts(drafts);
+  const total = convs.length + drafts.length;
+  if (gid('tab-workspace-count')) gid('tab-workspace-count').textContent = total;
+}
+function fmtWhen(iso){ try { return new Date(iso).toLocaleString(); } catch { return '—'; } }
+function renderWsConversations(items) {
+  gid('ws-conv-count').textContent = items.length;
+  const list = gid('ws-conv-list');
+  if (!items.length) { list.innerHTML = `<div class="ws-empty">No saved conversations yet. Start one in <a href="#" data-jump="provision">Provision Agent</a>.</div>`; bindJumps(list); return; }
+  list.innerHTML = items.map(it => `
+    <div class="ws-item" data-conv="${it.id}">
+      <div class="ws-item-top">
+        <span class="ws-item-title">${escAttr(it.title || 'Untitled conversation')}</span>
+        <span class="ws-item-badge">${escAttr(it.track || 'chat')}</span>
+        <button class="ws-item-del" data-del-conv="${it.id}" title="Delete">×</button>
+      </div>
+      <div class="ws-item-meta"><span>${(it.display||[]).length} messages</span><span>${fmtWhen(it.updatedAt)}</span></div>
+    </div>`).join('');
+  list.querySelectorAll('[data-conv]').forEach(el => el.addEventListener('click', e => {
+    if (e.target.matches('[data-del-conv]')) return;
+    openConversation(el.dataset.conv);
+  }));
+  list.querySelectorAll('[data-del-conv]').forEach(el => el.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!confirm('Delete this saved conversation?')) return;
+    await fetch('/projects/' + AUTH.activeProject + '/conversations/' + el.dataset.delConv, { method:'DELETE' });
+    loadWorkspacePanel();
+  }));
+}
+function renderWsDrafts(items) {
+  gid('ws-draft-count').textContent = items.length;
+  const list = gid('ws-draft-list');
+  if (!items.length) { list.innerHTML = `<div class="ws-empty">In-progress agents auto-save here as you build them.</div>`; return; }
+  list.innerHTML = items.map(it => {
+    const a = it.agent || {};
+    return `
+    <div class="ws-item" data-draft="${it.id}">
+      <div class="ws-item-top">
+        <span class="ws-item-title">${escAttr(it.title || a.name || 'Untitled draft')}</span>
+        <span class="ws-item-badge">${escAttr(it.stage || 'draft')}</span>
+        <button class="ws-item-del" data-del-draft="${it.id}" title="Delete">×</button>
+      </div>
+      <div class="ws-item-meta"><span>${escAttr(a.foundationModel || a.agentMode || 'agent')}</span><span>${fmtWhen(it.updatedAt)}</span></div>
+    </div>`; }).join('');
+  list.querySelectorAll('[data-draft]').forEach(el => el.addEventListener('click', e => {
+    if (e.target.matches('[data-del-draft]')) return;
+    openDraft(el.dataset.draft);
+  }));
+  list.querySelectorAll('[data-del-draft]').forEach(el => el.addEventListener('click', async e => {
+    e.stopPropagation();
+    if (!confirm('Delete this draft agent?')) return;
+    await fetch('/projects/' + AUTH.activeProject + '/drafts/' + el.dataset.delDraft, { method:'DELETE' });
+    loadWorkspacePanel();
+  }));
+}
+function bindJumps(root){ root.querySelectorAll('[data-jump]').forEach(el => el.addEventListener('click', ev => { ev.preventDefault(); switchTab(el.dataset.jump); })); }
+
+// ───── draft + conversation autosave (provision track) ─────
+function ensureWorkspaceIds() {
+  if (!state.draftId) state.draftId = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+  if (!state.convId)  state.convId  = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+let _wsSaveTimer = null;
+function autosaveProvision() {
+  if (!AUTH.token || !AUTH.activeProject) return;
+  ensureWorkspaceIds();
+  clearTimeout(_wsSaveTimer);
+  _wsSaveTimer = setTimeout(async () => {
+    const pid = AUTH.activeProject;
+    const title = (state.agent && state.agent.name) || 'Untitled agent';
+    const track = state.seedMode ? 'seed' : state.forkMode ? 'fork' : 'provision';
+    try {
+      await fetch(`/projects/${pid}/drafts/${state.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ kind:'agent', agent: state.agent, stage: state.stage, title, convId: state.convId }) });
+      await fetch(`/projects/${pid}/conversations/${state.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ title, track, sessionId: state.sessionId, display: state.display, agentSnapshot: state.agent, stage: state.stage, draftId: state.draftId,
+          priorAgent: state.priorAgent, forkOrigin: state.forkOrigin }) });
+    } catch {}
+    if (panels.workspace.classList.contains('active')) loadWorkspacePanel();
+  }, 600);
+}
+function applyConversation(c, opts = {}) {
+  const { switchToTab = true, announce = true } = opts;
+  state.display = Array.isArray(c.display) && c.display.length ? c.display : state.display;
+  state.sessionId = c.sessionId || null;
+  state.stage = c.stage || state.stage;
+  state.convId = c.id; state.draftId = c.draftId || null;
+  state.forkMode = c.track === 'fork';
+  state.seedMode = c.track === 'seed';
+  state.priorAgent = c.priorAgent || null;
+  state.forkOrigin = c.forkOrigin || null;
+  if (c.agentSnapshot) state.agent = c.agentSnapshot;
+  state.ready = state.stage === 'COMPLETE' || state.forkMode;
+  if (state.ready && typeof unlockTest === 'function') unlockTest();
+  if (switchToTab) switchTab('provision');
+  renderChat(); renderStageRail(); renderSide();
+  refreshPublishButton(); if (typeof refreshModeStrip === 'function') refreshModeStrip();
+  if (announce) toast('Conversation restored.', 'success');
+}
+// Route a conversation to the right track (Build App vs Provision/Fork).
+function routeConversation(c, opts = {}) {
+  if (c.track === 'app' && typeof window.__restoreAppConversation === 'function') return window.__restoreAppConversation(c, opts);
+  return applyConversation(c, opts);
+}
+async function openConversation(convId) {
+  try {
+    const r = await fetch(`/projects/${AUTH.activeProject}/conversations/${convId}`); const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    routeConversation(d.item, { switchToTab: true, announce: true });
+  } catch (err) { toast('Could not open conversation: ' + err.message, 'error'); }
+}
+// On login / project-switch, silently rehydrate the most recently worked-on
+// conversation so the chat + its session/draft survive a re-login (instead of
+// resetting to the greeting and orphaning the saved record on the next turn).
+async function restoreLastConversation() {
+  if (!AUTH.activeProject) return false;
+  let convs = [];
+  try { const r = await fetch(`/projects/${AUTH.activeProject}/conversations`); const d = await r.json(); convs = (d.ok && d.items) || []; } catch {}
+  if (!convs.length) { state.convId = null; state.draftId = null; return false; }
+  convs.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+  routeConversation(convs[0], { switchToTab: false, announce: false });
+  return true;
+}
+async function openDraft(draftId) {
+  try {
+    const r = await fetch(`/projects/${AUTH.activeProject}/drafts/${draftId}`); const d = await r.json();
+    if (!d.ok) throw new Error(d.error); const dr = d.item;
+    if (dr.convId) return openConversation(dr.convId);   // prefer the full conversation if linked
+    state.agent = dr.agent || state.agent;
+    state.stage = dr.stage || state.stage;
+    state.draftId = dr.id; state.convId = null;
+    switchTab('provision');
+    renderStageRail(); renderSide(); refreshPublishButton();
+    toast('Draft loaded.', 'success');
+  } catch (err) { toast('Could not open draft: ' + err.message, 'error'); }
+}
+
+// Spin a Build-App TARGET agent off into the Provision Agent builder, pre-seeded.
+// Global (not inside the Build App IIFE) so it drives the GLOBAL provision state and
+// the global render functions. On publish, _origin lets us auto-pin it back.
+window.spinOffAgentToProvision = function (target, solutionDraftId) {
+  if (!target) return;
+  const suggested = target.suggestedTools || target.suggestedConnectors || [];
+  const name = target.agentName || target.name || 'New agent';
+  const partial = {
+    name,
+    description: target.description || target.useCase || null,
+    useCase: target.useCase || null,
+    targetUsers: null,
+    agentMode: 'specialist',
+    foundationModel: null, instruction: null,
+    knowledgeBases: [], actionGroups: [],
+    mcpConnectors: (suggested || []).map(t => ({ name: String(t), type: 'mcp', description: 'suggested from the solution — confirm or replace' })),
+    collaborators: [], guardrails: null, memory: null, enterprise: null,
+    _origin: { solutionDraftId: solutionDraftId || null, agentName: name, role: target.role || null, binding: target.binding || 'bff' },
+  };
+  // Reset the provision conversation into SEED mode (fresh draft + conversation).
+  state.sessionId = null; state.draftId = null; state.convId = null;
+  state.forkMode = false; state.forkOrigin = null; state.priorAgent = null;
+  state.seedMode = true;
+  state.agent = partial;
+  state.stage = 'MODEL';            // use case/persona carried over — continue from model onward
+  state.ready = false;
+  state.display = [{ role: 'assistant', content:
+    `Let's build **${name}** — one of the agents that powers your solution.\n\nI've carried over its purpose${suggested.length ? ` and the connectors it'll likely need (${suggested.join(', ')})` : ''}. We'll finish the rest together: foundation model, knowledge, tools & connectors, guardrails and memory.\n\nReady when you are — tell me the model to use (I'd suggest **Claude Sonnet 4**), or just say "continue" and I'll guide you.` }];
+  switchTab('provision');
+  renderChat(); renderStageRail(); renderSide();
+  refreshPublishButton(); if (typeof refreshModeStrip === 'function') refreshModeStrip();
+  toast('Agent spun off — finish it here, then Publish to pin it back into your solution.', 'success');
+};
 
 // ───── State ─────
 const state = {
@@ -1922,12 +2779,15 @@ const state = {
   forkMode: false,
   priorAgent: null,    // when forkMode, send /fork-chat with this attached
   forkOrigin: null,    // {slug, version} for display
+  seedMode: false,     // when true, agent was spun off from a Build App solution (/seed-chat)
+  draftId: null,       // workspace draft this conversation autosaves into
+  convId: null,        // workspace conversation record id
 };
 
 // ───── DOM ─────
 const $ = id => document.getElementById(id);
 const tabs = document.querySelectorAll('.tab');
-const panels = { home: $('panel-home'), library: $('panel-library'), graph: $('panel-graph'), finops: $('panel-finops'), provision: $('panel-provision'), buildapp: $('panel-buildapp'), config: $('panel-config'), connectors: $('panel-connectors'), agentcore: $('panel-agentcore'), memory: $('panel-memory'), deploy: $('panel-deploy'), test: $('panel-test') };
+const panels = { home: $('panel-home'), workspace: $('panel-workspace'), library: $('panel-library'), graph: $('panel-graph'), finops: $('panel-finops'), provision: $('panel-provision'), buildapp: $('panel-buildapp'), config: $('panel-config'), connectors: $('panel-connectors'), agentcore: $('panel-agentcore'), memory: $('panel-memory'), deploy: $('panel-deploy'), test: $('panel-test') };
 
 // ───── Tab routing ─────
 tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
@@ -1943,6 +2803,7 @@ function switchTab(name) {
   if (name === 'agentcore')  { renderAgentCore(); renderAgentCoreSide(); }
   if (name === 'memory')     { renderMemory(); renderMemorySide(); }
   if (name === 'library')    { loadLibrary(); }
+  if (name === 'workspace')  { loadWorkspacePanel(); }
   if (name === 'graph')      { loadGraph(); }
   if (name === 'finops')     { loadFinops(); }
   if (name === 'provision') setTimeout(() => $('chat-input').focus(), 80);
@@ -2058,6 +2919,16 @@ function refreshModeStrip() {
   const pill  = $('mode-pill');
   const btn   = $('pick-collab-btn');
   const a = state.agent;
+  // Reuse banner: always available while building an agent. In spin-off (seed) mode it
+  // also shows the solution context. The "Reuse config" button copies model/guardrails/
+  // memory/enterprise from an already-published agent.
+  const banner = $('seed-banner');
+  if (banner) {
+    banner.style.display = 'flex';
+    $('seed-text').textContent = state.seedMode
+      ? `Building “${a.name || 'agent'}” for your solution`
+      : 'Reuse settings from an already-built agent →';
+  }
   if (!a.agentMode) { strip.style.display = 'none'; return; }
   strip.style.display = 'flex';
   pill.textContent = a.agentMode === 'supervisor' ? 'Supervisor' : 'Specialist';
@@ -2150,6 +3021,29 @@ function listCard(label, items) {
 }
 renderSide();
 
+// ───── Agent readiness ─────
+function agentReadiness(a) {
+  const items = [
+    { label: 'Name',             required: true,  done: !!(a.name) },
+    { label: 'Use case',         required: true,  done: !!(a.useCase) },
+    { label: 'Foundation model', required: true,  done: !!(a.foundationModel) },
+    { label: 'Instruction',      required: true,  done: !!(a.instruction) },
+    { label: 'Knowledge bases',  required: false, done: !!(a.knowledgeBases && a.knowledgeBases.length) },
+    { label: 'Tools / MCP',      required: false, done: !!((a.actionGroups && a.actionGroups.length) || (a.mcpConnectors && a.mcpConnectors.length)) },
+    { label: 'Guardrails',       required: false, done: !!(a.guardrails && (a.guardrails.contentFiltering || (a.guardrails.piiHandling && a.guardrails.piiHandling !== 'NONE') || (a.guardrails.deniedTopics && a.guardrails.deniedTopics.length))) },
+    { label: 'Memory',           required: false, done: !!(a.memory || (a.cognitiveMemory && Object.values(a.cognitiveMemory).some(t => t && t.enabled))) },
+    { label: 'Enterprise',       required: false, done: !!(a.enterprise && a.enterprise.network && a.enterprise.network.mode) },
+  ];
+  const reqDone  = items.filter(i => i.required && i.done).length;
+  const reqTotal = items.filter(i => i.required).length;
+  return {
+    items,
+    doneCount: items.filter(i => i.done).length,
+    total: items.length,
+    complete: reqDone === reqTotal,
+  };
+}
+
 // ───── Full config tab ─────
 function renderFullConfig() {
   const a = state.agent;
@@ -2162,6 +3056,24 @@ function renderFullConfig() {
       </div>`;
     return;
   }
+  // Readiness checklist
+  const rd = agentReadiness(a);
+  const checklistHtml = `
+    <div class="ar-checklist">
+      <div class="ar-checklist-head">
+        Agent readiness
+        <span class="ar-checklist-score">${rd.doneCount} / ${rd.total} ${rd.complete ? '· Ready to deploy' : '· Required fields missing'}</span>
+      </div>
+      <div class="ar-items">
+        ${rd.items.map(it => {
+          const cls = it.done ? 'done' : it.required ? 'miss' : 'opt';
+          const mark = it.done ? '✓' : it.required ? '○' : '○';
+          const opt = it.required ? '' : '<span class="ar-opt-tag">(optional)</span>';
+          return `<div class="ar-item ${cls}"><span class="ar-mark">${mark}</span>${esc(it.label)}${opt}</div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
   const rows = [];
   if (a.name) rows.push(['Agent name', a.name]);
   if (a.description) rows.push(['Description', a.description]);
@@ -2181,12 +3093,430 @@ function renderFullConfig() {
   if (a.actionGroups.length) comps += listCard('Action groups', a.actionGroups.map(g => `${g.name}${g.description ? ' — ' + g.description : ''}`));
   if (a.mcpConnectors.length) comps += listCard('MCP connectors', a.mcpConnectors.map(c => `${c.name} (${c.type})`));
 
-  $('full-config').innerHTML = `
+  $('full-config').innerHTML = checklistHtml + `
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
       <div>${sections}</div>
       <div>${comps || `<div class="cfg-card"><div class="cl">Components</div><div class="cv" style="color:var(--text-4); font-style:italic;">Knowledge sources, tools and connectors will appear here as they're added.</div></div>`}</div>
     </div>
   `;
+}
+
+// ═════════════════════════════════════════════════════════════════════
+// AGENT FORM — smart Form UI for building state.agent (S1)
+// ═════════════════════════════════════════════════════════════════════
+
+let agentFormVisible = false;   // tracks whether Form view is shown
+
+// ── Chat|Form toggle wiring ──
+(function initProvModeToggle() {
+  const chatBtn = $('pmtoggle-chat');
+  const formBtn = $('pmtoggle-form');
+  const chatScroll = $('chat-scroll');
+  const formDiv    = $('agent-form');
+  const inputWrap  = $('chat-input-wrap');
+
+  function setMode(mode) {
+    agentFormVisible = (mode === 'form');
+    chatBtn.classList.toggle('active', mode === 'chat');
+    formBtn.classList.toggle('active', mode === 'form');
+    chatScroll.style.display = mode === 'chat' ? '' : 'none';
+    formDiv.style.display    = mode === 'form' ? '' : 'none';
+    inputWrap.style.display  = mode === 'chat' ? '' : 'none';
+    if (mode === 'form') renderAgentForm();
+  }
+
+  chatBtn.addEventListener('click', () => setMode('chat'));
+  formBtn.addEventListener('click', () => setMode('form'));
+})();
+
+// ── Suggest helper — call /suggest endpoint, parse raw JSON ──
+async function afSuggest(sectionLabel, prompt, sectionKeys) {
+  const btn = document.querySelector(`[data-af-suggest="${sectionLabel}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  try {
+    const res = await fetch('/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) throw new Error(d.error || 'suggest failed');
+    let raw = String(d.raw || '').trim();
+    // strip ```json fences if present (same as parseAI)
+    raw = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+    const parsed = JSON.parse(raw);
+    // pick only the expected keys
+    const patch = {};
+    sectionKeys.forEach(k => { if (parsed[k] !== undefined) patch[k] = parsed[k]; });
+    state.agent = mergeAgent(state.agent, patch);
+    renderAgentForm();
+    renderSide();
+    if (typeof refreshPublishButton === 'function') refreshPublishButton();
+    autosaveProvision();
+    toast('Suggested ' + sectionLabel + '.', 'success');
+  } catch (e) {
+    toast('Suggest failed: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Suggest'; }
+  }
+}
+
+// ── Main form renderer ──
+function renderAgentForm() {
+  const formEl = $('agent-form');
+  if (!formEl) return;
+  const a = state.agent;
+
+  // Helper: escape for HTML attribute values
+  const av = s => String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+  // MCP type options
+  const MCP_TYPES = ['salesforce','jira','confluence','slack','sap','rest','database','custom'];
+  const MODEL_OPTS = [
+    { v: 'claude-sonnet-4',  l: 'Claude Sonnet 4.6 (recommended)' },
+    { v: 'claude-haiku-4-5', l: 'Haiku 4.5 (cost)' },
+    { v: 'claude-opus-4',    l: 'Opus 4.8 (complex)' },
+    { v: 'claude-fable-5',   l: 'Fable 5 (most capable)' },
+  ];
+
+  const section = (id, title, bodyHtml) => `
+    <div class="af-section" id="afs-${id}">
+      <div class="af-section-head">
+        <span class="af-section-title">${title}</span>
+        <button class="af-suggest-btn" data-af-suggest="${id}" title="AI-suggest this section">✨ Suggest</button>
+      </div>
+      <div class="af-section-body">${bodyHtml}</div>
+    </div>`;
+
+  const field = (label, inputHtml) => `
+    <div class="af-field">
+      <label class="af-label">${label}</label>
+      ${inputHtml}
+    </div>`;
+
+  // ── Identity section ──
+  const identityHtml = [
+    field('Agent name', `<input class="af-input" data-af-bind="name" type="text" value="${av(a.name)}" placeholder="e.g. Customer Support Agent">`),
+    field('Description', `<textarea class="af-textarea" data-af-bind="description" placeholder="Brief description of what this agent does.">${av(a.description)}</textarea>`),
+    field('Use case', `<textarea class="af-textarea" data-af-bind="useCase" placeholder="Describe the business problem this agent solves.">${av(a.useCase)}</textarea>`),
+    field('Target users', `<input class="af-input" data-af-bind="targetUsers" type="text" value="${av(a.targetUsers)}" placeholder="e.g. Customer service reps, data analysts">`),
+    field('Agent mode', `
+      <div class="af-radio-row">
+        <label class="af-radio-opt${a.agentMode === 'specialist' || !a.agentMode ? ' selected' : ''}" data-af-radio="agentMode" data-af-radio-val="specialist">
+          <input type="radio" name="af-agentMode" value="specialist"${a.agentMode === 'specialist' || !a.agentMode ? ' checked' : ''}> Specialist
+        </label>
+        <label class="af-radio-opt${a.agentMode === 'supervisor' ? ' selected' : ''}" data-af-radio="agentMode" data-af-radio-val="supervisor">
+          <input type="radio" name="af-agentMode" value="supervisor"${a.agentMode === 'supervisor' ? ' checked' : ''}> Supervisor
+        </label>
+      </div>`),
+  ].join('');
+
+  // ── Model section ──
+  const modelHtml = field('Foundation model', `
+    <select class="af-select" data-af-bind="foundationModel">
+      ${MODEL_OPTS.map(o => `<option value="${av(o.v)}"${a.foundationModel === o.v ? ' selected' : ''}>${av(o.l)}</option>`).join('')}
+    </select>`);
+
+  // ── Knowledge bases section ──
+  const kbRows = (a.knowledgeBases || []).map((kb, i) => `
+    <div class="af-list-row" data-af-kb="${i}">
+      <input class="af-input" data-af-kb-name="${i}" type="text" value="${av(kb.name)}" placeholder="Name">
+      <input class="af-input" data-af-kb-desc="${i}" type="text" value="${av(kb.description)}" placeholder="Description">
+      <button class="af-rm-btn" data-af-rm-kb="${i}" title="Remove">×</button>
+    </div>`).join('');
+  const kbHtml = `<div class="af-list-rows" id="af-kb-rows">${kbRows}</div>
+    <button class="af-add-btn" id="af-kb-add">+ Add knowledge base</button>`;
+
+  // ── Tools section (action groups + MCP connectors) ──
+  const agRows = (a.actionGroups || []).map((ag, i) => `
+    <div class="af-list-row" data-af-ag="${i}">
+      <input class="af-input" data-af-ag-name="${i}" type="text" value="${av(ag.name)}" placeholder="Action group name">
+      <input class="af-input" data-af-ag-desc="${i}" type="text" value="${av(ag.description)}" placeholder="Description">
+      <button class="af-rm-btn" data-af-rm-ag="${i}" title="Remove">×</button>
+    </div>`).join('');
+  const mcpRows = (a.mcpConnectors || []).map((mc, i) => `
+    <div class="af-list-row" data-af-mcp="${i}">
+      <input class="af-input" data-af-mcp-name="${i}" type="text" value="${av(mc.name)}" placeholder="Connector name">
+      <select class="af-select" data-af-mcp-type="${i}">
+        ${MCP_TYPES.map(t => `<option value="${t}"${mc.type === t ? ' selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <input class="af-input" data-af-mcp-desc="${i}" type="text" value="${av(mc.description)}" placeholder="Description">
+      <button class="af-rm-btn" data-af-rm-mcp="${i}" title="Remove">×</button>
+    </div>`).join('');
+  const toolsHtml = `
+    <div class="af-label" style="margin-bottom:2px;">Action groups</div>
+    <div class="af-list-rows" id="af-ag-rows">${agRows}</div>
+    <button class="af-add-btn" id="af-ag-add">+ Add action group</button>
+    <div class="af-label" style="margin-top:8px;margin-bottom:2px;">MCP connectors</div>
+    <div class="af-list-rows" id="af-mcp-rows">${mcpRows}</div>
+    <button class="af-add-btn" id="af-mcp-add">+ Add MCP connector</button>`;
+
+  // ── Guardrails section ──
+  const gr = a.guardrails || {};
+  const deniedText = Array.isArray(gr.deniedTopics) ? gr.deniedTopics.join(', ')
+    : (Array.isArray(gr.topics) ? gr.topics.join(', ') : (gr.deniedTopics || ''));
+  const guardrailsHtml = [
+    field('Content filtering', `
+      <label class="af-check-opt">
+        <input type="checkbox" data-af-gr="contentFiltering"${gr.contentFiltering ? ' checked' : ''}> Enable content filtering
+      </label>`),
+    field('PII handling', `
+      <select class="af-select" data-af-gr="piiHandling">
+        <option value="NONE"${(!gr.piiHandling || gr.piiHandling === 'NONE') ? ' selected' : ''}>None</option>
+        <option value="anonymize"${gr.piiHandling === 'anonymize' ? ' selected' : ''}>Anonymize</option>
+        <option value="block"${gr.piiHandling === 'block' ? ' selected' : ''}>Block</option>
+      </select>`),
+    field('Denied topics (comma-separated)', `<input class="af-input" data-af-gr="deniedTopics" type="text" value="${av(deniedText)}" placeholder="violence, self-harm, competitor mentions">`),
+  ].join('');
+
+  // ── Memory section ──
+  const cm = a.cognitiveMemory || {};
+  const memTiers = ['working','semantic','procedural','episodic'];
+  const memoryHtml = field('Cognitive memory tiers', `
+    <div class="af-check-row">
+      ${memTiers.map(t => `
+        <label class="af-check-opt">
+          <input type="checkbox" data-af-mem="${t}"${(cm[t] && cm[t].enabled) ? ' checked' : ''}> ${t.charAt(0).toUpperCase() + t.slice(1)}
+        </label>`).join('')}
+    </div>`);
+
+  // ── Enterprise section ──
+  const ent = a.enterprise || {};
+  const entNet = (ent.network || {}).mode || 'public';
+  const entEnc = (ent.encryption || {}).mode || 'aws-managed';
+  const entApp = (ent.approvals || {}).mode || 'none';
+  const entDR  = (ent.dr || {}).posture || 'single-region';
+  const enterpriseHtml = [
+    field('Network mode', `
+      <select class="af-select" data-af-ent="network.mode">
+        <option value="public"${entNet === 'public' ? ' selected' : ''}>Public</option>
+        <option value="vpcEndpoints"${entNet === 'vpcEndpoints' ? ' selected' : ''}>VPC Endpoints</option>
+        <option value="privateLinkOnly"${entNet === 'privateLinkOnly' ? ' selected' : ''}>PrivateLink only</option>
+      </select>`),
+    field('Encryption', `
+      <select class="af-select" data-af-ent="encryption.mode">
+        <option value="aws-managed"${entEnc === 'aws-managed' ? ' selected' : ''}>AWS-managed keys</option>
+        <option value="customer-managed"${entEnc === 'customer-managed' ? ' selected' : ''}>Customer-managed keys (CMK)</option>
+      </select>`),
+    field('Human approval (HITL)', `
+      <select class="af-select" data-af-ent="approvals.mode">
+        <option value="none"${entApp === 'none' ? ' selected' : ''}>None</option>
+        <option value="writes-only"${entApp === 'writes-only' ? ' selected' : ''}>Writes only</option>
+        <option value="all-actions"${entApp === 'all-actions' ? ' selected' : ''}>All actions</option>
+      </select>`),
+    field('Disaster recovery posture', `
+      <select class="af-select" data-af-ent="dr.posture">
+        <option value="single-region"${entDR === 'single-region' ? ' selected' : ''}>Single-region</option>
+        <option value="active-passive"${entDR === 'active-passive' ? ' selected' : ''}>Active-passive</option>
+        <option value="active-active"${entDR === 'active-active' ? ' selected' : ''}>Active-active</option>
+      </select>`),
+  ].join('');
+
+  // ── Instruction section ──
+  const instrHtml = field('Agent instruction', `<textarea class="af-textarea" data-af-bind="instruction" style="min-height:120px;" placeholder="You are a helpful assistant...">${av(a.instruction)}</textarea>`);
+
+  formEl.innerHTML =
+    section('identity',   'Identity',       identityHtml) +
+    section('model',      'Model',          modelHtml) +
+    section('knowledge',  'Knowledge Bases', kbHtml) +
+    section('tools',      'Tools',          toolsHtml) +
+    section('guardrails', 'Guardrails',     guardrailsHtml) +
+    section('memory',     'Memory',         memoryHtml) +
+    section('enterprise', 'Enterprise',     enterpriseHtml) +
+    section('instruction','Instruction',    instrHtml);
+
+  // ── Wire two-way bindings — mutate state.agent in place, no re-render ──
+
+  // Simple scalar binds (input/textarea → state.agent[key])
+  formEl.querySelectorAll('[data-af-bind]').forEach(el => {
+    el.addEventListener('input', () => {
+      state.agent[el.dataset.afBind] = el.value;
+      renderSide();
+      if (typeof refreshPublishButton === 'function') refreshPublishButton();
+      autosaveProvision();
+    });
+  });
+
+  // Radio buttons (agentMode)
+  formEl.querySelectorAll('[data-af-radio]').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.afRadio;
+      const val = el.dataset.afRadioVal;
+      state.agent[key] = val;
+      formEl.querySelectorAll(`[data-af-radio="${key}"]`).forEach(r => r.classList.toggle('selected', r.dataset.afRadioVal === val));
+      renderSide();
+      if (typeof refreshPublishButton === 'function') refreshPublishButton();
+      autosaveProvision();
+    });
+  });
+
+  // Model select
+  const modelSel = formEl.querySelector('[data-af-bind="foundationModel"]');
+  if (modelSel) {
+    modelSel.addEventListener('change', () => {
+      state.agent.foundationModel = modelSel.value;
+      renderSide();
+      if (typeof refreshPublishButton === 'function') refreshPublishButton();
+      autosaveProvision();
+    });
+  }
+
+  // Knowledge bases
+  function wireKbRow(row, idx) {
+    const nameEl = row.querySelector(`[data-af-kb-name="${idx}"]`);
+    const descEl = row.querySelector(`[data-af-kb-desc="${idx}"]`);
+    if (nameEl) nameEl.addEventListener('input', () => { if (state.agent.knowledgeBases[idx]) { state.agent.knowledgeBases[idx].name = nameEl.value; autosaveProvision(); } });
+    if (descEl) descEl.addEventListener('input', () => { if (state.agent.knowledgeBases[idx]) { state.agent.knowledgeBases[idx].description = descEl.value; autosaveProvision(); } });
+    const rmBtn = row.querySelector(`[data-af-rm-kb="${idx}"]`);
+    if (rmBtn) rmBtn.addEventListener('click', () => { state.agent.knowledgeBases.splice(idx, 1); renderAgentForm(); renderSide(); if (typeof refreshPublishButton === 'function') refreshPublishButton(); autosaveProvision(); });
+  }
+  formEl.querySelectorAll('[data-af-kb]').forEach(row => wireKbRow(row, parseInt(row.dataset.afKb, 10)));
+  const kbAddBtn = $('af-kb-add');
+  if (kbAddBtn) kbAddBtn.addEventListener('click', () => { state.agent.knowledgeBases.push({ name: '', description: '' }); renderAgentForm(); });
+
+  // Action groups
+  function wireAgRow(row, idx) {
+    const nameEl = row.querySelector(`[data-af-ag-name="${idx}"]`);
+    const descEl = row.querySelector(`[data-af-ag-desc="${idx}"]`);
+    if (nameEl) nameEl.addEventListener('input', () => { if (state.agent.actionGroups[idx]) { state.agent.actionGroups[idx].name = nameEl.value; autosaveProvision(); } });
+    if (descEl) descEl.addEventListener('input', () => { if (state.agent.actionGroups[idx]) { state.agent.actionGroups[idx].description = descEl.value; autosaveProvision(); } });
+    const rmBtn = row.querySelector(`[data-af-rm-ag="${idx}"]`);
+    if (rmBtn) rmBtn.addEventListener('click', () => { state.agent.actionGroups.splice(idx, 1); renderAgentForm(); renderSide(); if (typeof refreshPublishButton === 'function') refreshPublishButton(); autosaveProvision(); });
+  }
+  formEl.querySelectorAll('[data-af-ag]').forEach(row => wireAgRow(row, parseInt(row.dataset.afAg, 10)));
+  const agAddBtn = $('af-ag-add');
+  if (agAddBtn) agAddBtn.addEventListener('click', () => { state.agent.actionGroups.push({ name: '', description: '' }); renderAgentForm(); });
+
+  // MCP connectors
+  function wireMcpRow(row, idx) {
+    const nameEl = row.querySelector(`[data-af-mcp-name="${idx}"]`);
+    const typeEl = row.querySelector(`[data-af-mcp-type="${idx}"]`);
+    const descEl = row.querySelector(`[data-af-mcp-desc="${idx}"]`);
+    if (nameEl) nameEl.addEventListener('input', () => { if (state.agent.mcpConnectors[idx]) { state.agent.mcpConnectors[idx].name = nameEl.value; autosaveProvision(); } });
+    if (typeEl) typeEl.addEventListener('change', () => { if (state.agent.mcpConnectors[idx]) { state.agent.mcpConnectors[idx].type = typeEl.value; autosaveProvision(); } });
+    if (descEl) descEl.addEventListener('input', () => { if (state.agent.mcpConnectors[idx]) { state.agent.mcpConnectors[idx].description = descEl.value; autosaveProvision(); } });
+    const rmBtn = row.querySelector(`[data-af-rm-mcp="${idx}"]`);
+    if (rmBtn) rmBtn.addEventListener('click', () => { state.agent.mcpConnectors.splice(idx, 1); renderAgentForm(); renderSide(); if (typeof refreshConnectorsTab === 'function') refreshConnectorsTab(); autosaveProvision(); });
+  }
+  formEl.querySelectorAll('[data-af-mcp]').forEach(row => wireMcpRow(row, parseInt(row.dataset.afMcp, 10)));
+  const mcpAddBtn = $('af-mcp-add');
+  if (mcpAddBtn) mcpAddBtn.addEventListener('click', () => { state.agent.mcpConnectors.push({ name: '', type: 'rest', description: '' }); renderAgentForm(); });
+
+  // Guardrails
+  const grCf = formEl.querySelector('[data-af-gr="contentFiltering"]');
+  if (grCf) grCf.addEventListener('change', () => {
+    if (!state.agent.guardrails) state.agent.guardrails = {};
+    state.agent.guardrails.contentFiltering = grCf.checked;
+    renderSide(); autosaveProvision();
+  });
+  const grPii = formEl.querySelector('[data-af-gr="piiHandling"]');
+  if (grPii) grPii.addEventListener('change', () => {
+    if (!state.agent.guardrails) state.agent.guardrails = {};
+    state.agent.guardrails.piiHandling = grPii.value;
+    renderSide(); autosaveProvision();
+  });
+  const grDenied = formEl.querySelector('[data-af-gr="deniedTopics"]');
+  if (grDenied) grDenied.addEventListener('input', () => {
+    if (!state.agent.guardrails) state.agent.guardrails = {};
+    state.agent.guardrails.deniedTopics = grDenied.value.split(',').map(s => s.trim()).filter(Boolean);
+    renderSide(); autosaveProvision();
+  });
+
+  // Memory tiers
+  formEl.querySelectorAll('[data-af-mem]').forEach(chk => {
+    chk.addEventListener('change', () => {
+      const tier = chk.dataset.afMem;
+      if (!state.agent.cognitiveMemory) state.agent.cognitiveMemory = {};
+      if (!state.agent.cognitiveMemory[tier]) state.agent.cognitiveMemory[tier] = {};
+      state.agent.cognitiveMemory[tier].enabled = chk.checked;
+      renderSide(); autosaveProvision();
+      if (typeof refreshMemoryCount === 'function') refreshMemoryCount();
+    });
+  });
+
+  // Enterprise selects
+  formEl.querySelectorAll('[data-af-ent]').forEach(sel => {
+    sel.addEventListener('change', () => {
+      const path = sel.dataset.afEnt.split('.');
+      if (!state.agent.enterprise) state.agent.enterprise = {};
+      if (!state.agent.enterprise[path[0]]) state.agent.enterprise[path[0]] = {};
+      state.agent.enterprise[path[0]][path[1]] = sel.value;
+      renderSide(); autosaveProvision();
+    });
+  });
+
+  // ── Wire Suggest buttons ──
+  formEl.querySelectorAll('[data-af-suggest]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.afSuggest;
+      const a = state.agent;
+      const ctx = JSON.stringify({ name: a.name, useCase: a.useCase, targetUsers: a.targetUsers, agentMode: a.agentMode });
+      let prompt = '', keys = [];
+      if (section === 'identity') {
+        prompt = `Given this partial agent context: ${ctx}. Suggest identity fields. Respond ONLY raw JSON with keys: name, description, useCase, targetUsers, agentMode.`;
+        keys = ['name','description','useCase','targetUsers','agentMode'];
+      } else if (section === 'model') {
+        prompt = `Given this agent: ${ctx}. Suggest a foundation model. Respond ONLY raw JSON with key: foundationModel (value must be one of: claude-sonnet-4, claude-haiku-4-5, claude-opus-4, claude-fable-5).`;
+        keys = ['foundationModel'];
+      } else if (section === 'knowledge') {
+        prompt = `Given this agent: ${ctx}. Suggest knowledge bases. Respond ONLY raw JSON with key: knowledgeBases (array of {name, description}).`;
+        keys = ['knowledgeBases'];
+      } else if (section === 'tools') {
+        prompt = `Given this agent: ${ctx}. Suggest action groups and MCP connectors. Respond ONLY raw JSON with keys: actionGroups (array of {name,description}), mcpConnectors (array of {name,type,description} where type is one of: salesforce,jira,confluence,slack,sap,rest,database,custom).`;
+        keys = ['actionGroups','mcpConnectors'];
+      } else if (section === 'guardrails') {
+        prompt = `Given this agent: ${ctx}. Suggest guardrails. Respond ONLY raw JSON with keys: contentFiltering (bool), piiHandling ("NONE"|"anonymize"|"block"), deniedTopics (array of strings).`;
+        keys = ['contentFiltering','piiHandling','deniedTopics'];
+      } else if (section === 'memory') {
+        prompt = `Given this agent: ${ctx}. Suggest cognitive memory configuration. Respond ONLY raw JSON with key: cognitiveMemory (object with keys working, semantic, procedural, episodic each {enabled: bool}).`;
+        keys = ['cognitiveMemory'];
+      } else if (section === 'enterprise') {
+        prompt = `Given this agent: ${ctx}. Suggest enterprise settings. Respond ONLY raw JSON with key: enterprise (object with network:{mode}, encryption:{mode}, approvals:{mode}, dr:{posture}).`;
+        keys = ['enterprise'];
+      } else if (section === 'instruction') {
+        prompt = `Given this agent: ${ctx}. Write a detailed agent instruction. Respond ONLY raw JSON with key: instruction (string).`;
+        keys = ['instruction'];
+      }
+      if (section === 'guardrails') {
+        // guardrails suggest patches sub-keys into guardrails object
+        afSuggestGuardrails(ctx);
+      } else {
+        afSuggest(section, prompt, keys);
+      }
+    });
+  });
+}
+
+// guardrails suggest needs to patch nested object
+async function afSuggestGuardrails(ctx) {
+  const btn = document.querySelector('[data-af-suggest="guardrails"]');
+  if (btn) { btn.disabled = true; btn.textContent = '…'; }
+  const prompt = `Given this agent: ${ctx}. Suggest guardrails. Respond ONLY raw JSON with keys: contentFiltering (bool), piiHandling ("NONE"|"anonymize"|"block"), deniedTopics (array of strings).`;
+  try {
+    const res = await fetch('/suggest', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) throw new Error(d.error || 'suggest failed');
+    let raw = String(d.raw || '').trim()
+      .replace(/^```json\s*/i,'').replace(/^```\s*/i,'').replace(/\s*```$/,'').trim();
+    const parsed = JSON.parse(raw);
+    if (!state.agent.guardrails) state.agent.guardrails = {};
+    if (parsed.contentFiltering !== undefined) state.agent.guardrails.contentFiltering = parsed.contentFiltering;
+    if (parsed.piiHandling !== undefined) state.agent.guardrails.piiHandling = parsed.piiHandling;
+    if (parsed.deniedTopics !== undefined) state.agent.guardrails.deniedTopics = Array.isArray(parsed.deniedTopics) ? parsed.deniedTopics : [];
+    renderAgentForm();
+    renderSide();
+    if (typeof refreshPublishButton === 'function') refreshPublishButton();
+    autosaveProvision();
+    toast('Suggested guardrails.', 'success');
+  } catch (e) {
+    toast('Suggest failed: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '✨ Suggest'; }
+  }
 }
 
 // ───── YAML generator ─────
@@ -2651,8 +3981,9 @@ function detectConnectorType(name, declaredType) {
 
 // ─── Connector value store (per agent, persisted) ──────────────────────────
 const CONN_STORE_KEY = 'agenteye:connectors';
-function loadConnStore() { try { return JSON.parse(localStorage.getItem(CONN_STORE_KEY) || '{}'); } catch { return {}; } }
-function saveConnStore(s) { localStorage.setItem(CONN_STORE_KEY, JSON.stringify(s)); }
+// Backed by the active project's server-side stores (per user, per project).
+function loadConnStore() { return AUTH.stores.connectors || {}; }
+function saveConnStore(s) { AUTH.stores.connectors = s || {}; flushStores(); }
 
 function agentKey() {
   return (state.agent.name || 'unnamed-agent').replace(/[^a-zA-Z0-9_-]/g, '-').toLowerCase();
@@ -3029,10 +4360,12 @@ async function send() {
   renderChat();
 
   try {
-    const endpoint = state.forkMode ? '/fork-chat' : '/chat';
-    const body = state.forkMode
-      ? { message: text, sessionId: state.sessionId, priorAgent: state.priorAgent }
-      : { message: text, sessionId: state.sessionId };
+    const endpoint = state.seedMode ? '/seed-chat' : state.forkMode ? '/fork-chat' : '/chat';
+    const body = state.seedMode
+      ? { message: text, sessionId: state.sessionId, seedAgent: state.agent }
+      : state.forkMode
+        ? { message: text, sessionId: state.sessionId, priorAgent: state.priorAgent }
+        : { message: text, sessionId: state.sessionId };
     const data = await callBridge(endpoint, body);
     if (data.sessionId) state.sessionId = data.sessionId;
     const parsed = parseAI(data.rawResult || '');
@@ -3050,6 +4383,9 @@ async function send() {
     renderStageRail();
     renderSide();
     sendBtn.disabled = !inputEl.value.trim();
+    autosaveProvision();   // persist the draft + conversation into the active project
+    // Sync form if it is currently visible so chat-turn field updates appear
+    if (typeof renderAgentForm === 'function' && agentFormVisible) renderAgentForm();
   }
 }
 
@@ -3092,8 +4428,11 @@ function renderLibrary() {
     const ts = it.timestamp ? new Date(it.timestamp).toLocaleString() : '—';
     const author = it.author ? esc(String(it.author).split('<')[0].trim() || it.author) : '—';
     const model = (it.foundationModel || '').replace(/^anthropic\./, '').replace(/:0$/, '');
+    const archivedClass = it.archived ? ' lib-card-archived' : '';
+    const archivedBadge = it.archived ? `<span class="lib-archived-badge">archived</span>` : '';
+    const archiveBtnLabel = it.archived ? 'Unarchive' : 'Archive';
     return `
-      <div class="lib-card" data-slug="${esc(it.slug)}" data-version="${esc(it.version)}">
+      <div class="lib-card${archivedClass}" data-slug="${esc(it.slug)}" data-version="${esc(it.version)}">
         <div class="lib-card-head">
           <div class="lib-card-name">${esc(it.agentName || it.slug)}</div>
           <span class="lib-version">${esc(it.version)}</span>
@@ -3105,17 +4444,65 @@ function renderLibrary() {
           <span class="lib-pill">${counts.knowledgeBases} kb</span>
           <span class="lib-pill">${counts.actionGroups} act</span>
           <span class="lib-pill">${counts.mcpConnectors} mcp</span>
+          ${archivedBadge}
           <span class="spacer"></span>
           <span>${author}</span>
           <span>·</span>
           <span>${esc(ts)}</span>
+          <button class="lib-archive-btn" data-archive-slug="${esc(it.slug)}" data-archive-version="${esc(it.version)}" data-archive-state="${it.archived ? '1' : '0'}">${archiveBtnLabel}</button>
         </div>
       </div>`;
   }).join('');
   grid.querySelectorAll('.lib-card').forEach(c => c.addEventListener('click', () => openLibraryDetail(c.dataset.slug, c.dataset.version)));
+  grid.querySelectorAll('.lib-archive-btn').forEach(btn => btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const slug = btn.dataset.archiveSlug;
+    const version = btn.dataset.archiveVersion;
+    const isArchived = btn.dataset.archiveState === '1';
+    archiveLibraryVersion(slug, version, !isArchived);
+  }));
 }
 
 $('lib-search').addEventListener('input', e => { libState.filter = e.target.value; renderLibrary(); });
+
+async function archiveLibraryVersion(slug, version, archive) {
+  const action = archive ? 'archive' : 'unarchive';
+  if (archive) {
+    const ok = confirm(`Archive ${slug}:${version}? It stays in git history but is hidden from pickers.`);
+    if (!ok) return;
+  }
+  try {
+    const r = await fetch(`/library/${encodeURIComponent(slug)}/${encodeURIComponent(version)}/${action}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (r.status === 409) {
+      const d = await r.json();
+      if (d.blocked) {
+        const depList = (d.dependents || []).map(x => x.slug + ':' + x.version).join(', ');
+        const forceOk = confirm(`${(d.dependents || []).length} agent(s) still pin this: ${depList}. Archive anyway?`);
+        if (!forceOk) return;
+        const r2 = await fetch(`/library/${encodeURIComponent(slug)}/${encodeURIComponent(version)}/${action}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ force: true })
+        });
+        const d2 = await r2.json();
+        if (!d2.ok) { toast(d2.error || 'Failed to archive', 'error'); return; }
+        toast(`Archived ${slug}:${version}`, 'success');
+        loadLibrary();
+        return;
+      }
+    }
+    const d = await r.json();
+    if (!d.ok) { toast(d.error || `Failed to ${action}`, 'error'); return; }
+    toast(archive ? `Archived ${slug}:${version}` : `Unarchived ${slug}:${version}`, 'success');
+    loadLibrary();
+  } catch (err) {
+    toast(err.message, 'error');
+  }
+}
 
 // ═════════════════════════════════════════════════════════════════════
 // AGENT GRAPH — dependency + impact + cognitive-context visualization
@@ -3505,6 +4892,9 @@ async function propagateUpdates(supervisorId) {
 
 function seedPropagation(agent, slug, version, changes) {
   state.sessionId = null;
+  state.draftId   = null;
+  state.convId    = null;
+  state.seedMode  = false;
   state.history = [];
   state.stage = 'COMPLETE';
   state.agent = JSON.parse(JSON.stringify(agent));
@@ -3551,7 +4941,7 @@ async function loadFinops() {
   $('finops-table').innerHTML = `<div class="lib-empty"><div class="ce-icon">⟲</div>Loading…</div>`;
   $('finops-suggestions').innerHTML = '';
   try {
-    finopsState.conn = JSON.parse(localStorage.getItem('agenteye:finops-conn') || 'null');
+    finopsState.conn = AUTH.stores.finopsConn || null;
     const src = finopsState.conn ? finopsState.conn.provider : 'dummy';
     const r = await fetch('/finops?source=' + encodeURIComponent(src), { cache: 'no-store' });
     const d = await r.json();
@@ -3612,7 +5002,7 @@ function renderFinops() {
 
 $('finops-refresh').addEventListener('click', loadFinops);
 $('finops-connect').addEventListener('click', () => {
-  const c = JSON.parse(localStorage.getItem('agenteye:finops-conn') || 'null');
+  const c = AUTH.stores.finopsConn || null;
   if (c) { $('fc-provider').value = c.provider || 'cloudwatch'; $('fc-region').value = c.region || ''; $('fc-group').value = c.group || ''; $('fc-role').value = c.role || ''; }
   $('finops-modal').classList.add('show');
 });
@@ -3620,7 +5010,7 @@ $('fc-cancel').addEventListener('click', () => $('finops-modal').classList.remov
 $('finops-modal').addEventListener('click', e => { if (e.target.id === 'finops-modal') $('finops-modal').classList.remove('show'); });
 $('fc-save').addEventListener('click', () => {
   const conn = { provider: $('fc-provider').value, region: $('fc-region').value.trim(), group: $('fc-group').value.trim(), role: $('fc-role').value.trim() };
-  localStorage.setItem('agenteye:finops-conn', JSON.stringify(conn));
+  AUTH.stores.finopsConn = conn; flushStores();
   $('finops-modal').classList.remove('show');
   toast('Runtime connection saved (stub) — dashboard stays on dummy data until the backend connector is wired.', 'success');
   loadFinops();
@@ -3913,6 +5303,9 @@ function forkLoadSummary(a, histLen, connCount) {
 function forkFromVersion(priorAgent, slug, version, bundle) {
   // reseed state
   state.sessionId   = null;
+  state.draftId     = null;   // a fork starts a fresh workspace draft + conversation
+  state.convId      = null;
+  state.seedMode    = false;
   state.history     = [];
   state.stage       = 'COMPLETE';
   state.agent       = JSON.parse(JSON.stringify(priorAgent));   // deep clone
@@ -3972,7 +5365,7 @@ function refreshPublishButton() {
 }
 $('publish-yaml').addEventListener('click', () => {
   if (!state.ready || !state.agent.name) return;
-  $('publish-author').value = localStorage.getItem('agenteye:author') || '';
+  $('publish-author').value = (AUTH.user && (AUTH.user.displayName || AUTH.user.username)) || localStorage.getItem('agenteye:author') || '';
   $('publish-msg').value = state.forkMode && state.forkOrigin
     ? `Fork ${state.forkOrigin.slug}:${state.forkOrigin.version} → ${state.agent.name}`
     : `Publish ${state.agent.name}`;
@@ -4027,6 +5420,10 @@ $('publish-confirm').addEventListener('click', async () => {
     if (!d.ok) throw new Error(d.error || 'publish failed');
     publishModal.classList.remove('show');
     toast(`Published ${d.slug} ${d.version}${d.hash ? ' · ' + d.hash.slice(0,7) : ''}`, 'success');
+    // If this agent was spun off from a solution, pin it back into that solution's draft.
+    if (state.agent && state.agent._origin && state.agent._origin.solutionDraftId) {
+      try { await pinAgentBackToSolution(state.agent._origin, d.slug, d.version); } catch (e) { /* non-fatal */ }
+    }
     // refresh library count + grid if open
     loadLibrary();
   } catch (err) {
@@ -4035,6 +5432,43 @@ $('publish-confirm').addEventListener('click', async () => {
     btn.disabled = false; btn.textContent = orig;
   }
 });
+
+// Auto-pin a freshly published spun-off agent back into its origin solution draft,
+// matching by agentName, so the Build App side panel shows it as pinned (slug:vNNN).
+async function pinAgentBackToSolution(origin, slug, version) {
+  if (!AUTH.activeProject || !origin || !origin.solutionDraftId) return;
+  const r = await fetch(`/projects/${AUTH.activeProject}/drafts/${origin.solutionDraftId}`);
+  const d = await r.json();
+  if (!d.ok || !d.item || !d.item.solution) return;
+  const sol = d.item.solution;
+  sol.agents = sol.agents || [];
+  const idx = sol.agents.findIndex(a => (a.agentName || a.name) === origin.agentName);
+  const pinned = { agentName: origin.agentName, role: origin.role || (idx >= 0 ? sol.agents[idx].role : null) || 'support', binding: origin.binding || 'bff', slug, version, status: 'pinned' };
+  if (idx >= 0) sol.agents[idx] = { ...sol.agents[idx], ...pinned }; else sol.agents.push(pinned);
+  await fetch(`/projects/${AUTH.activeProject}/drafts/${origin.solutionDraftId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...d.item, solution: sol }),
+  });
+  // The Build App track restores its solution from the linked CONVERSATION's snapshot,
+  // so patch that too (the draft and conversation are two copies of the spec).
+  if (d.item.convId) {
+    try {
+      const cr = await fetch(`/projects/${AUTH.activeProject}/conversations/${d.item.convId}`);
+      const cd = await cr.json();
+      if (cd.ok && cd.item && cd.item.agentSnapshot) {
+        cd.item.agentSnapshot.agents = sol.agents;
+        await fetch(`/projects/${AUTH.activeProject}/conversations/${d.item.convId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cd.item),
+        });
+      }
+    } catch { /* non-fatal */ }
+  }
+  // Reflect the new pin live in the Build App canvas/side (in-memory solution).
+  if (typeof window.__applyAgentPinToSolution === 'function') {
+    try { window.__applyAgentPinToSolution(origin, slug, version); } catch {}
+  }
+  toast(`Pinned ${slug}:${version} back into your solution — updated on the canvas.`, 'success');
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────
 let toastTimer = null;
@@ -4066,7 +5500,7 @@ async function renderCollabPicker() {
   try {
     const r = await fetch('/library', { cache: 'no-store' });
     const d = await r.json();
-    const items = (d.items || []).filter(it => it.agentName !== state.agent.name);  // can't fork into self
+    const items = (d.items || []).filter(it => it.agentName !== state.agent.name && !it.archived);  // can't fork into self; exclude archived
     if (!items.length) {
       grid.innerHTML = `<div class="lib-empty"><div class="ce-icon">◉</div>No published agents yet — publish at least one specialist before forming a supervisor team.</div>`;
       $('collab-count').textContent = '0';
@@ -4129,6 +5563,112 @@ $('collab-confirm').addEventListener('click', async () => {
   send();
 });
 
+// ─── Reuse from an existing agent (selectable sections + confirmation) ─────
+// The user picks a published source agent and chooses which parts to carry over —
+// persona/instruction, model, knowledge, tools, guardrails, memory, enterprise.
+// Each selected section's fields are copied into state.agent (this agent keeps its name).
+const REUSE_SECTIONS = [
+  { key:'persona',    label:'Persona & instruction', fields:['description','targetUsers','instruction'],
+    summary:a => a.instruction ? 'persona + full instruction' : (a.description ? 'description' : '—') },
+  { key:'model',      label:'Foundation model',      fields:['foundationModel'],
+    summary:a => a.foundationModel ? String(a.foundationModel).replace(/^anthropic\./,'') : '—' },
+  { key:'knowledge',  label:'Knowledge bases',       fields:['knowledgeBases'],
+    summary:a => (a.knowledgeBases||[]).length ? `${a.knowledgeBases.length} base(s)` : '—' },
+  { key:'tools',      label:'Tools & connectors',    fields:['actionGroups','mcpConnectors'],
+    summary:a => { const n=(a.actionGroups||[]).length+(a.mcpConnectors||[]).length; return n ? `${n} item(s)` : '—'; } },
+  { key:'guardrails', label:'Guardrails',            fields:['guardrails'],
+    summary:a => a.guardrails ? 'configured' : '—' },
+  { key:'memory',     label:'Memory',                fields:['memory','cognitiveMemory'],
+    summary:a => { const t=a.cognitiveMemory?['working','semantic','procedural','episodic'].filter(k=>a.cognitiveMemory[k]&&a.cognitiveMemory[k].enabled):[]; return t.length ? t.join(', ') : (a.memory ? 'session memory' : '—'); } },
+  { key:'enterprise', label:'Enterprise hardening',  fields:['enterprise','agentCore'],
+    summary:a => a.enterprise ? 'network / encryption / tags …' : '—' },
+];
+const reuseModal = $('reuse-modal');
+let reuseSourceAgent = null;
+const hasContent = v => v != null && !(Array.isArray(v) && !v.length);
+function sectionAvailable(sec, a) { return sec.fields.some(f => hasContent(a[f])); }
+
+$('reuse-config-btn').addEventListener('click', () => { reuseModal.classList.add('show'); openReusePicker(); });
+$('reuse-cancel').addEventListener('click', () => reuseModal.classList.remove('show'));
+reuseModal.addEventListener('click', e => { if (e.target === reuseModal) reuseModal.classList.remove('show'); });
+
+async function openReusePicker() {
+  const sel = $('reuse-source');
+  const sections = $('reuse-sections');
+  sel.innerHTML = `<option>Loading…</option>`;
+  sections.innerHTML = '';
+  reuseSourceAgent = null;
+  try {
+    const r = await fetch('/library', { cache: 'no-store' });
+    const d = await r.json();
+    const items = (d.items || []).filter(it => it.agentName !== state.agent.name && !it.archived);
+    if (!items.length) {
+      sel.innerHTML = `<option value="">(no published agents yet)</option>`;
+      sections.innerHTML = `<div class="reuse-hint">No published agents to reuse from. Build &amp; publish one agent first, then its persona, tools, guardrails and the rest become available to carry over.</div>`;
+      return;
+    }
+    sel.innerHTML = items.map(it => `<option value="${esc(it.slug)}::${esc(it.version)}" data-name="${esc(it.agentName || it.slug)}">${esc(it.agentName || it.slug)} · ${esc(it.version)}</option>`).join('');
+    sel.onchange = () => loadReuseSource(sel);
+    await loadReuseSource(sel);
+  } catch (err) {
+    sections.innerHTML = `<div class="reuse-hint">Could not load the Library: ${esc(err.message)}</div>`;
+  }
+}
+
+async function loadReuseSource(sel) {
+  const opt = sel.selectedOptions[0]; if (!opt || !opt.value) return;
+  const [slug, version] = opt.value.split('::');
+  const sections = $('reuse-sections');
+  sections.innerHTML = `<div class="reuse-hint">Loading ${esc(opt.dataset.name)}…</div>`;
+  try {
+    const rr = await fetch(`/library/${slug}/${version}`);
+    const dd = await rr.json();
+    if (!dd.ok || !dd.meta || !dd.meta.agent) throw new Error('could not load that agent');
+    reuseSourceAgent = dd.meta.agent;
+    sections.innerHTML = REUSE_SECTIONS.map(sec => {
+      const avail = sectionAvailable(sec, reuseSourceAgent);
+      const sum = avail ? sec.summary(reuseSourceAgent) : 'nothing set';
+      return `<label class="reuse-sec ${avail ? '' : 'off'}">
+        <input type="checkbox" data-sec="${sec.key}" ${avail ? 'checked' : 'disabled'}>
+        <span><span class="rs-l">${sec.label}</span><span class="rs-s">${esc(sum)}</span></span>
+      </label>`;
+    }).join('');
+  } catch (err) {
+    sections.innerHTML = `<div class="reuse-hint">${esc(err.message)}</div>`;
+  }
+}
+
+$('reuse-confirm').addEventListener('click', () => {
+  if (!reuseSourceAgent) { toast('Pick a source agent first.', 'error'); return; }
+  const checked = Array.from($('reuse-sections').querySelectorAll('input[data-sec]:checked')).map(i => i.dataset.sec);
+  if (!checked.length) { toast('Select at least one section to reuse.', 'error'); return; }
+  const srcName = $('reuse-source').selectedOptions[0]?.dataset.name || 'another agent';
+  applyReusedSections(reuseSourceAgent, srcName, checked);
+  reuseModal.classList.remove('show');
+});
+
+function applyReusedSections(src, srcName, sectionKeys) {
+  const copied = [];
+  REUSE_SECTIONS.filter(s => sectionKeys.includes(s.key)).forEach(sec => {
+    let any = false;
+    sec.fields.forEach(f => { if (hasContent(src[f])) { state.agent[f] = JSON.parse(JSON.stringify(src[f])); any = true; } });
+    if (any) copied.push(sec.label);
+  });
+  // Mirror cognitive memory into the Memory tab store so it shows there too.
+  if (sectionKeys.includes('memory') && src.cognitiveMemory && typeof setMemAgentBlock === 'function') {
+    try { setMemAgentBlock(JSON.parse(JSON.stringify(src.cognitiveMemory))); } catch {}
+  }
+  renderSide(); renderStageRail(); refreshPublishButton();
+  if (typeof refreshMemoryCount === 'function') refreshMemoryCount();
+  if (typeof refreshAgentCoreCount === 'function') refreshAgentCoreCount();
+  if (typeof refreshConnectorsTab === 'function') refreshConnectorsTab();
+  if (!copied.length) { toast(`Nothing to copy from ${srcName}.`, 'error'); return; }
+  state.display.push({ role: 'assistant', content: `✓ Reused from **${srcName}**: ${copied.join(', ')}. These are now set for this agent (see the side panel) — review them, tell me what's different for *this* agent, or say "continue".` });
+  renderChat();
+  autosaveProvision();
+  toast(`Reused ${copied.length} section(s) from ${srcName}.`, 'success');
+}
+
 // ─── YAML supervisor patch ────────────────────────────────────────────
 // Wrap the original generateYAML to inject AgentCollaboration + AgentCollaborators.
 const _supervisorBaseGenerate = generateYAML;
@@ -4163,8 +5703,8 @@ generateYAML = function(cfg) {
 // AGENTCORE — Identity / Memory / Observability
 // ═════════════════════════════════════════════════════════════════════
 const AC_STORE_KEY = 'agenteye:agentcore';
-function loadAcStore() { try { return JSON.parse(localStorage.getItem(AC_STORE_KEY) || '{}'); } catch { return {}; } }
-function saveAcStore(s) { localStorage.setItem(AC_STORE_KEY, JSON.stringify(s)); }
+function loadAcStore() { return AUTH.stores.agentcore || {}; }
+function saveAcStore(s) { AUTH.stores.agentcore = s || {}; flushStores(); }
 function getAcAgentBlock() {
   const s = loadAcStore();
   return s[agentKey()] || null;
@@ -4393,8 +5933,8 @@ generateYAML = function(cfg) {
 // + wikilinks) and lifted onto Bedrock AgentCore Memory + S3.
 // ═════════════════════════════════════════════════════════════════════
 const MEM_STORE_KEY = 'agenteye:cognitive-memory';
-function loadMemStore() { try { return JSON.parse(localStorage.getItem(MEM_STORE_KEY) || '{}'); } catch { return {}; } }
-function saveMemStore(s) { localStorage.setItem(MEM_STORE_KEY, JSON.stringify(s)); }
+function loadMemStore() { return AUTH.stores.cognitiveMemory || {}; }
+function saveMemStore(s) { AUTH.stores.cognitiveMemory = s || {}; flushStores(); }
 function getMemAgentBlock() { return loadMemStore()[agentKey()] || null; }
 function setMemAgentBlock(block) {
   const s = loadMemStore();
@@ -4776,8 +6316,9 @@ generateYAML = function(cfg) {
   return yaml + extra;
 };
 
-// initial load — pull library count so the tab badge is correct from boot
-loadLibrary();
+// initial load — gate behind auth; onAuthed() loads the shared Catalog + the
+// user's projects. Until then the login overlay (visible by default) blocks the UI.
+initAuth();
 refreshPublishButton();
 refreshModeStrip();
 refreshAgentCoreCount();
@@ -4787,7 +6328,7 @@ refreshMemoryCount();
 // BUILD APP — dashboard-portal solution track (reuses callBridge/parseAI/mergeAgent)
 // ═════════════════════════════════════════════════════════════════════
 (function () {
-  const appState = { sessionId: null, solution: {}, display: [], busy: false, started: false, ready: false, result: null };
+  const appState = { sessionId: null, solution: {}, display: [], busy: false, started: false, ready: false, result: null, stage: null, draftId: null, convId: null };
   const scroll  = $('appx-scroll');
   const gallery = $('appx-gallery');
   const input   = $('appx-input');
@@ -4796,6 +6337,55 @@ refreshMemoryCount();
   if (!scroll || !input || !sendBtn) return;
   const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const fmt = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+  // Persist the Build App activity into the active project (track 'app'), the same
+  // way the Provision track saves — so every activity lives in the workspace.
+  let _appSaveTimer = null;
+  function autosaveApp() {
+    if (!AUTH.token || !AUTH.activeProject) return;
+    if (!appState.draftId) appState.draftId = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    if (!appState.convId)  appState.convId  = 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+    clearTimeout(_appSaveTimer);
+    _appSaveTimer = setTimeout(async () => {
+      const pid = AUTH.activeProject;
+      const title = (appState.solution && (appState.solution.name || (appState.solution.app && appState.solution.app.name))) || 'Solution app';
+      try {
+        await fetch(`/projects/${pid}/drafts/${appState.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ kind:'solution', solution: appState.solution, stage: appState.stage, title, convId: appState.convId }) });
+        await fetch(`/projects/${pid}/conversations/${appState.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ title, track:'app', sessionId: appState.sessionId, display: appState.display, agentSnapshot: appState.solution, stage: appState.stage, draftId: appState.draftId, result: appState.result, ready: appState.ready }) });
+      } catch {}
+      if (panels.workspace.classList.contains('active')) loadWorkspacePanel();
+    }, 600);
+  }
+
+  // Global hook so login/Workspace restore can rehydrate an 'app' conversation here.
+  window.__restoreAppConversation = function (c, opts = {}) {
+    const { switchToTab = true } = opts;
+    appState.started = true;
+    appState.display = Array.isArray(c.display) && c.display.length ? c.display : appState.display;
+    appState.sessionId = c.sessionId || null;
+    appState.solution = c.agentSnapshot || appState.solution || {};
+    appState.stage = c.stage || null;
+    appState.ready = !!c.ready;
+    appState.result = c.result || null;
+    appState.convId = c.id; appState.draftId = c.draftId || null;
+    if (gallery) gallery.style.display = 'none';
+    input.disabled = false; input.placeholder = 'Describe the portal you want to build…';
+    renderChat(); renderSide();
+    if (switchToTab) switchTab('buildapp');
+  };
+
+  // Live status: when a spun-off agent is published & pinned, reflect it in the
+  // in-memory solution and re-render the canvas/side so the agent shows as pinned.
+  window.__applyAgentPinToSolution = function (origin, slug, version) {
+    if (!appState.solution) appState.solution = {};
+    const agents = appState.solution.agents = appState.solution.agents || [];
+    const idx = agents.findIndex(a => (a.agentName || a.name) === origin.agentName);
+    const pin = { agentName: origin.agentName, role: origin.role || (idx >= 0 ? agents[idx].role : null) || 'support', binding: origin.binding || 'bff', slug, version, status: 'pinned' };
+    if (idx >= 0) agents[idx] = { ...agents[idx], ...pin }; else agents.push(pin);
+    renderSide();
+  };
 
   document.querySelectorAll('#panel-buildapp .arch-card[data-arch]').forEach(card => {
     card.addEventListener('click', () => startArchetype(card.dataset.arch));
@@ -4807,7 +6397,7 @@ refreshMemoryCount();
     if (gallery) gallery.style.display = 'none';
     input.disabled = false; input.placeholder = 'Describe the portal you want to build…'; input.focus();
     appState.display.push({ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" });
-    renderChat();
+    renderChat(); renderJourney();
   }
 
   function renderChat() {
@@ -4817,14 +6407,163 @@ refreshMemoryCount();
     scroll.scrollTop = scroll.scrollHeight;
   }
 
+  // Live schematic of the dashboard, driven by the evolving SolutionSpec (theme tokens applied).
+  function renderCanvas(s) {
+    const app = s.app || {};
+    const t = (app.theme && app.theme.tokens) || {};
+    const style = `--cvp:${t.primary || '#A000FF'};--cva:${t.accent || '#C1A3FF'};--cvs:${t.surface || '#ffffff'};--cvi:${t.ink || '#000000'}`;
+    const pages = app.pages || [];
+    const widgets = app.widgets || [];
+    if (!widgets.length) {
+      return `<div class="appx-canvas empty" style="${style}">◧ Live preview — your dashboard builds here as you add pages &amp; widgets.</div>`;
+    }
+    const byId = Object.fromEntries(widgets.map(w => [w.id, w]));
+    const env = (s.environments && s.environments[s.environments.length - 1]) || 'dev';
+    const ids = (pages[0] && pages[0].widgets && pages[0].widgets.length) ? pages[0].widgets : widgets.map(w => w.id);
+    const tile = w => {
+      if (!w) return '';
+      if (w.type === 'kpi') return `<div class="cv-kpis">${(w.metrics || ['', '', '', '']).slice(0, 4).map(m => `<div class="cv-kpi"><div class="cv-kpiv"></div><div class="cv-kpik">${esc(m) || '&nbsp;'}</div></div>`).join('')}</div>`;
+      if (w.type === 'table') return `<div class="cv-panel"><div class="cv-h">${esc(w.title || 'Table')}</div><div class="cv-cols">${(w.columns || ['', '', '']).map(c => `<span>${esc(c) || '&nbsp;'}</span>`).join('')}</div><div class="cv-row"></div><div class="cv-row"></div><div class="cv-row"></div></div>`;
+      if (w.type === 'chart') return `<div class="cv-panel"><div class="cv-h">${esc(w.title || 'Chart')}</div><div class="cv-chart"></div></div>`;
+      if (w.type === 'agent-chat') return `<div class="cv-panel cv-assist"><div class="cv-h">${esc(w.title || 'Assistant')} <span class="cv-pin">${esc(w.agentRef || '')}</span></div><div class="cv-bub a"></div><div class="cv-bub u"></div></div>`;
+      return `<div class="cv-panel"><div class="cv-h">${esc(w.title || w.type)}</div></div>`;
+    };
+    return `<div class="appx-canvas" style="${style}">
+      <div class="cv-top"><b>${esc(s.name || 'Portal')}</b><span class="cv-spacer"></span><span class="cv-env">${esc(String(env).toUpperCase())}</span></div>
+      <div class="cv-body">
+        <div class="cv-nav">${(pages.length ? pages : [{ title: 'Overview' }]).map((p, i) => `<div class="cv-navitem${i === 0 ? ' on' : ''}">${esc(p.title || p.id || 'Page')}</div>`).join('')}</div>
+        <div class="cv-main">${ids.map(id => tile(byId[id])).join('')}</div>
+      </div>
+    </div>`;
+  }
+
+  // ── Journey state machine — derives 7-stage build status from appState ──
+  function journeyState() {
+    const s = appState.solution || {}, app = s.app || {};
+    const rd = solutionReadiness(s);
+    const generated = !!appState.result && !/^✗/.test(String(appState.result));
+    const allPinned = (s.agents||[]).length > 0 && (s.agents||[]).every(a => a.slug && a.version);
+    const done = {
+      discover:  !!(s.name && (s.description || s.slug)),
+      shape:     (app.pages||[]).length > 0 && (s.agents||[]).length > 0,
+      configure: !!(app.identity && app.identity.provider) && !!((app.data && (app.data.sources||[]).length) || app.guardrails || (app.enterprise && app.enterprise.network && app.enterprise.network.mode)),
+      review:    rd.complete,
+      generate:  generated,
+      deploy:    false,
+      handover:  generated,
+    };
+    const defs = [
+      { id:'discover',  label:'Discover',  hint:'Name the solution and who logs in (Discover stage).' },
+      { id:'shape',     label:'Shape',     hint:'Add pages, the agents that power them, and capabilities/rules/workflows.' },
+      { id:'configure', label:'Configure', hint:'Set sign-in, data sources, branding, guardrails, enterprise.' },
+      { id:'review',    label:'Review',    hint:'Resolve the readiness checklist ('+rd.doneCount+'/'+rd.total+').' },
+      { id:'generate',  label:'Generate',  hint:'Generate the runnable repo + IaC + handover pack.' },
+      { id:'deploy',    label:'Deploy',    hint: generated ? (allPinned ? 'Deploy via the deploy/ bundle (see RUNBOOK).' : 'Pin the agents to produce the deploy bundle, then deploy.') : 'Generate first, then deploy.' },
+      { id:'handover',  label:'Handover',  hint:'Hand over docs/ (ARCHITECTURE, RUNBOOK, THREAT-MODEL, COST) + manifest.' },
+    ];
+    let activeAssigned = false;
+    const states = defs.map(d => {
+      let status = done[d.id] ? 'done' : 'pending';
+      if (d.id === 'deploy' && generated && !done.deploy) status = 'active';
+      if (status !== 'done' && !activeAssigned && status !== 'active') { status = 'active'; }
+      if (status === 'active') activeAssigned = true;
+      return { ...d, status };
+    });
+    const active = states.find(x => x.status === 'active') || states[states.length-1];
+    return { states, active };
+  }
+
+  // ── Render the journey rail into #appx-journey ──
+  function renderJourney() {
+    const jEl = document.getElementById('appx-journey');
+    if (!jEl) return;
+    if (!appState.started) { jEl.classList.remove('visible'); return; }
+    jEl.classList.add('visible');
+    const { states, active } = journeyState();
+    const dots = states.map((st, i) => {
+      const icon = st.status === 'done' ? '✓' : String(i + 1);
+      const barStatus = i < states.length - 1
+        ? (st.status === 'done' ? 'done' : st.status === 'active' ? 'active' : 'pending')
+        : '';
+      const bar = i < states.length - 1
+        ? `<div class="aj-bar ${barStatus}"></div>`
+        : '';
+      return `<div class="aj-step">
+        <div class="aj-dot-wrap" data-journey-id="${st.id}" title="${esc(st.hint)}">
+          <div class="aj-dot ${st.status}">${icon}</div>
+          <div class="aj-label ${st.status}">${esc(st.label)}</div>
+        </div>${bar}
+      </div>`;
+    }).join('');
+    jEl.innerHTML = `<div class="aj-rail">${dots}</div>
+      <div class="aj-next"><strong>Next:</strong> ${esc(active.hint)}</div>`;
+    jEl.querySelectorAll('[data-journey-id]').forEach(el => {
+      el.addEventListener('click', () => handleJourneyClick(el.dataset.journeyId));
+    });
+  }
+
+  // ── Journey click navigation ──
+  function handleJourneyClick(id) {
+    const formBtn = document.getElementById('appx-pmtoggle-form');
+    if (id === 'discover' || id === 'shape' || id === 'configure') {
+      if (formBtn) formBtn.click();
+    } else if (id === 'review') {
+      const rd = solutionReadiness(appState.solution || {});
+      toast('Review: ' + rd.doneCount + '/' + rd.total + ' required complete.');
+    } else if (id === 'generate') {
+      const gb = document.getElementById('appx-gen-btn');
+      if (gb && !gb.disabled) { gb.scrollIntoView({ behavior:'smooth', block:'nearest' }); gb.focus(); }
+      else toast('Finish the checklist, then Generate.');
+    } else if (id === 'deploy') {
+      const { active } = journeyState();
+      const deployDef = journeyState().states.find(x => x.id === 'deploy');
+      toast(deployDef ? deployDef.hint : 'Generate first, then deploy.');
+    } else if (id === 'handover') {
+      toast('Handover pack is in docs/ once generated.');
+    }
+  }
+
+  // Client-computed completeness — the source of truth for the Generate button,
+  // instead of relying on the model to flip readyToGenerate. Required items must be
+  // present for a "full" solution; optional ones don't block (they're stubbed/defaulted).
+  function solutionReadiness(s) {
+    const app = s.app || {};
+    const items = [
+      { label: 'Name', required: true,  done: !!(s.name || s.slug) },
+      { label: 'Pages & widgets', required: true, done: (app.pages || []).length > 0 },
+      { label: 'Agent(s)', required: true, done: (s.agents || []).length > 0 },
+      { label: 'Sign-in (identity)', required: true, done: !!(app.identity && app.identity.provider) },
+      { label: 'Data sources', required: false, done: !!(app.data && (app.data.sources || []).length) },
+      { label: 'Guardrails', required: false, done: !!app.guardrails },
+      { label: 'Branding/theme', required: false, done: !!(app.theme && app.theme.palette) },
+      { label: 'Enterprise', required: false, done: !!(app.enterprise && app.enterprise.network && app.enterprise.network.mode) },
+    ];
+    const reqDone = items.filter(i => i.required && i.done).length;
+    const reqTotal = items.filter(i => i.required).length;
+    return {
+      items,
+      doneCount: items.filter(i => i.done).length,
+      total: items.length,
+      complete: reqDone === reqTotal,     // all REQUIRED sections present
+      canGen: !!(s.name || s.slug),       // enough to attempt a preview
+    };
+  }
+
   function renderSide() {
+    renderJourney();
     const s = appState.solution || {};
     const app = s.app || {};
     if (!s.name && !(s.agents || []).length && !(app.pages || []).length) {
       side.innerHTML = `<div class="side-empty"><div class="se-icon">◧</div>Your solution profile will appear here as the conversation progresses.</div>`;
       return;
     }
-    const agents = (s.agents || []).map(a => `<span class="appx-pin">${esc(a.slug)}:${esc(a.version)}</span>${a.role ? ' (' + esc(a.role) + ')' : ''}`).join('<br>') || '—';
+    const agentList = (s.agents || []);
+    const agentsHtml = agentList.length ? agentList.map((a, i) => {
+      const pinned = a.slug && a.version;
+      const role = a.role ? ` <span class="appx-arole">(${esc(a.role)})</span>` : '';
+      if (pinned) return `<div class="appx-agent">✓ <span class="appx-pin">${esc(a.slug)}:${esc(a.version)}</span>${role}</div>`;
+      return `<div class="appx-agent"><span class="appx-aname">${esc(a.agentName || a.name || 'agent')}</span>${role} <span class="appx-target">target</span> <button class="appx-build" data-agent-idx="${i}" title="Build this agent in the Provision Agent builder">Build →</button></div>`;
+    }).join('') : '—';
     const rows = [
       ['Solution', esc(s.name) || '—'],
       ['Archetype', esc(s.archetype) || 'dashboard-portal'],
@@ -4834,13 +6573,30 @@ refreshMemoryCount();
       ['Widgets', String((app.widgets || []).length || 0)],
       ['Theme', esc(app.theme && app.theme.palette) || '—'],
       ['Identity', esc(app.identity && app.identity.provider) || '—'],
-      ['Pinned agents', agents],
+      ['Agents', agentsHtml],
     ];
-    side.innerHTML = `<div class="appx-summary">${rows.map(([k, v]) => `<div><span class="k">${k}:</span> ${v}</div>`).join('')}</div>` +
-      `<button class="btn primary appx-gen" id="appx-gen-btn" ${appState.ready ? '' : 'disabled'}>${appState.ready ? '⚙ Generate solution' : 'Generate (finish the conversation first)'}</button>` +
+    // Client-side readiness (don't depend on the model flipping readyToGenerate).
+    const rd = solutionReadiness(s);
+    const checklistHtml = `<div class="appx-check">${rd.items.map(it =>
+      `<div class="appx-ck ${it.done ? 'on' : ''}"><span class="appx-ckmark">${it.done ? '✓' : '○'}</span>${esc(it.label)}${it.required ? '' : ' <span class="appx-ckopt">(optional)</span>'}</div>`
+    ).join('')}</div>`;
+    const canGen = rd.canGen;             // minimal: a name/slug exists
+    const complete = appState.ready || rd.complete;
+    const genLabel = !canGen ? '⚙ Name your solution to generate'
+      : complete ? '⚙ Generate solution'
+      : `⚙ Generate preview (${rd.doneCount}/${rd.total})`;
+    side.innerHTML = renderCanvas(s) + `<div class="appx-summary">${rows.map(([k, v]) => `<div><span class="k">${k}:</span> ${v}</div>`).join('')}</div>` +
+      checklistHtml +
+      `<button class="btn primary appx-gen" id="appx-gen-btn" ${canGen ? '' : 'disabled'} data-complete="${complete ? '1' : '0'}">${genLabel}</button>` +
+      (canGen && !complete ? `<div class="appx-genhint">You can generate a preview now (anything unfinished is stubbed). Finish the checklist above for the full deploy bundle.</div>` : '') +
       (appState.result ? `<div class="appx-result">${esc(appState.result)}</div>` : '');
     const gb = $('appx-gen-btn');
     if (gb) gb.addEventListener('click', generate);
+    // "Build →" spins a target agent off into the Provision Agent builder (global helper,
+    // so it drives the global provision state, not this IIFE's shadowed render fns).
+    side.querySelectorAll('.appx-build').forEach(b => b.addEventListener('click', () => {
+      window.spinOffAgentToProvision(agentList[+b.dataset.agentIdx], appState.draftId);
+    }));
   }
 
   input.addEventListener('input', () => {
@@ -4870,21 +6626,551 @@ refreshMemoryCount();
     } finally {
       appState.busy = false; renderChat(); renderSide();
       sendBtn.disabled = !input.value.trim();
+      if (solutionFormVisible) renderSolutionForm();
+      autosaveApp();
     }
   }
 
+  // ── Solution Form (Chat|Form toggle) ──────────────────────────────────────
+  let solutionFormVisible = false;
+
+  (function initAppModeToggle() {
+    const chatBtn  = $('appx-pmtoggle-chat');
+    const formBtn  = $('appx-pmtoggle-form');
+    const chatDiv  = $('appx-scroll');
+    const formDiv  = $('solution-form');
+    const inputWrp = $('appx-input-wrap');
+    if (!chatBtn || !formBtn || !chatDiv || !formDiv || !inputWrp) return;
+
+    function setAppMode(mode) {
+      solutionFormVisible = (mode === 'form');
+      chatBtn.classList.toggle('active', mode === 'chat');
+      formBtn.classList.toggle('active', mode === 'form');
+      chatDiv.style.display   = mode === 'chat' ? '' : 'none';
+      formDiv.style.display   = mode === 'form' ? '' : 'none';
+      inputWrp.style.display  = mode === 'chat' ? '' : 'none';
+      if (mode === 'form') renderSolutionForm();
+      renderJourney();
+    }
+
+    chatBtn.addEventListener('click', () => setAppMode('chat'));
+    formBtn.addEventListener('click', () => setAppMode('form'));
+  })();
+
+  // ── solSuggest — per-section AI suggest for solution form ──────────────────
+  async function solSuggest(sectionId, prompt, applyFn) {
+    const btn = document.querySelector(`#solution-form [data-sf-suggest="${sectionId}"]`);
+    if (btn) { btn.disabled = true; btn.textContent = '…'; }
+    try {
+      const res = await fetch('/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok || !d.ok) throw new Error(d.error || 'suggest failed');
+      let raw = String(d.raw || '').trim()
+        .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/\s*```$/, '').trim();
+      const parsed = JSON.parse(raw);
+      applyFn(parsed);
+      renderSolutionForm();
+      renderSide();
+      autosaveApp();
+      toast('Suggested ' + sectionId + '.', 'success');
+    } catch (e) {
+      toast('Suggest failed: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '✨ Suggest'; }
+    }
+  }
+
+  // ── renderSolutionForm — full form renderer (re-render on toggle/suggest/add-remove) ──
+  function renderSolutionForm() {
+    const formEl = $('solution-form');
+    if (!formEl) return;
+    const s   = appState.solution || {};
+    const app = s.app || {};
+
+    const av = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+    const section = (id, title, bodyHtml) => `
+      <div class="af-section" id="sfs-${id}">
+        <div class="af-section-head">
+          <span class="af-section-title">${title}</span>
+          <button class="af-suggest-btn" data-sf-suggest="${id}" title="AI-suggest this section">✨ Suggest</button>
+        </div>
+        <div class="af-section-body">${bodyHtml}</div>
+      </div>`;
+
+    const field = (label, inputHtml) => `
+      <div class="af-field">
+        <label class="af-label">${label}</label>
+        ${inputHtml}
+      </div>`;
+
+    // ── Identity ──
+    const tenancy = s.tenancy || {};
+    const identityHtml = [
+      field('Solution name', `<input class="af-input" data-sf-bind="name" type="text" value="${av(s.name)}" placeholder="e.g. Customer Analytics Portal">`),
+      field('Slug', `<input class="af-input" data-sf-bind="slug" type="text" value="${av(s.slug)}" placeholder="e.g. customer-analytics-portal">`),
+      field('Description', `<textarea class="af-textarea" data-sf-bind="description" placeholder="Brief description of this solution.">${av(s.description)}</textarea>`),
+      field('Tenancy scope', `
+        <select class="af-select" data-sf-tenancy="scope">
+          <option value="client-workspace"${(tenancy.scope || 'client-workspace') === 'client-workspace' ? ' selected' : ''}>Client workspace</option>
+          <option value="catalog"${tenancy.scope === 'catalog' ? ' selected' : ''}>Catalog (multi-tenant)</option>
+        </select>`),
+    ].join('');
+
+    // ── Pages ──
+    const pages = app.pages || [];
+    const pageRows = pages.map((p, i) => `
+      <div class="af-list-row" data-sf-page="${i}">
+        <input class="af-input" data-sf-page-id="${i}" type="text" value="${av(p.id)}" placeholder="Page ID">
+        <input class="af-input" data-sf-page-title="${i}" type="text" value="${av(p.title)}" placeholder="Page title">
+        <button class="af-rm-btn" data-sf-rm-page="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const pagesHtml = `<div class="af-list-rows" id="sf-page-rows">${pageRows}</div>
+      <button class="af-add-btn" id="sf-page-add">+ Add page</button>`;
+
+    // ── Widgets ──
+    const widgets = app.widgets || [];
+    const widgetRows = widgets.map((w, i) => `
+      <div class="af-list-row" data-sf-widget="${i}">
+        <input class="af-input" data-sf-widget-id="${i}" type="text" value="${av(w.id)}" placeholder="Widget ID">
+        <select class="af-select" data-sf-widget-type="${i}">
+          ${['kpi','chart','table','agent-chat'].map(t => `<option value="${t}"${w.type === t ? ' selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <input class="af-input" data-sf-widget-title="${i}" type="text" value="${av(w.title)}" placeholder="Title">
+        <input class="af-input" data-sf-widget-ref="${i}" type="text" value="${av(w.agentRef)}" placeholder="agentRef (optional)">
+        <button class="af-rm-btn" data-sf-rm-widget="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const widgetsHtml = `<div class="af-list-rows" id="sf-widget-rows">${widgetRows}</div>
+      <button class="af-add-btn" id="sf-widget-add">+ Add widget</button>`;
+
+    // ── Capabilities (NEW) ──
+    const caps = app.capabilities || [];
+    const capRows = caps.map((c, i) => `
+      <div class="af-list-row" data-sf-cap="${i}">
+        <input class="af-input" data-sf-cap-label="${i}" type="text" value="${av(c.label)}" placeholder="Label">
+        <input class="af-input" data-sf-cap-desc="${i}" type="text" value="${av(c.description)}" placeholder="Description">
+        <input class="af-input" data-sf-cap-ref="${i}" type="text" value="${av(c.agentRef)}" placeholder="agentRef">
+        <input class="af-input" data-sf-cap-page="${i}" type="text" value="${av(c.page)}" placeholder="Page ID">
+        <button class="af-rm-btn" data-sf-rm-cap="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const capsHtml = `<div class="af-list-rows" id="sf-cap-rows">${capRows}</div>
+      <button class="af-add-btn" id="sf-cap-add">+ Add capability</button>`;
+
+    // ── Rules (NEW) ──
+    const rules = app.rules || [];
+    const ruleRows = rules.map((r, i) => `
+      <div class="af-list-row" data-sf-rule="${i}">
+        <input class="af-input" data-sf-rule-name="${i}" type="text" value="${av(r.name)}" placeholder="Rule name">
+        <input class="af-input" data-sf-rule-desc="${i}" type="text" value="${av(r.description)}" placeholder="Description">
+        <select class="af-select" data-sf-rule-binding="${i}">
+          <option value="action-group"${(r.binding || 'action-group') === 'action-group' ? ' selected' : ''}>action-group</option>
+          <option value="bff"${r.binding === 'bff' ? ' selected' : ''}>bff</option>
+        </select>
+        <button class="af-rm-btn" data-sf-rm-rule="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const rulesHtml = `<div class="af-list-rows" id="sf-rule-rows">${ruleRows}</div>
+      <button class="af-add-btn" id="sf-rule-add">+ Add rule</button>`;
+
+    // ── Workflows (NEW) ──
+    const workflows = app.workflows || [];
+    const wfRows = workflows.map((w, i) => `
+      <div class="af-list-row" data-sf-wf="${i}">
+        <input class="af-input" data-sf-wf-name="${i}" type="text" value="${av(w.name)}" placeholder="Workflow name">
+        <input class="af-input" data-sf-wf-desc="${i}" type="text" value="${av(w.description)}" placeholder="Description">
+        <button class="af-rm-btn" data-sf-rm-wf="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const workflowsHtml = `<div class="af-list-rows" id="sf-wf-rows">${wfRows}</div>
+      <button class="af-add-btn" id="sf-wf-add">+ Add workflow</button>`;
+
+    // ── Data sources ──
+    const sources = (app.data && app.data.sources) || [];
+    const srcRows = sources.map((src, i) => `
+      <div class="af-list-row" data-sf-src="${i}">
+        <input class="af-input" data-sf-src-id="${i}" type="text" value="${av(src.id)}" placeholder="Source ID">
+        <input class="af-input" data-sf-src-type="${i}" type="text" value="${av(src.type)}" placeholder="Type (e.g. rds, s3)">
+        <input class="af-input" data-sf-src-desc="${i}" type="text" value="${av(src.description)}" placeholder="Description">
+        <button class="af-rm-btn" data-sf-rm-src="${i}" title="Remove">×</button>
+      </div>`).join('');
+    const sourcesHtml = `<div class="af-list-rows" id="sf-src-rows">${srcRows}</div>
+      <button class="af-add-btn" id="sf-src-add">+ Add data source</button>`;
+
+    // ── Identity provider ──
+    const identity = app.identity || {};
+    const rolesStr = Array.isArray(identity.rbacRoles) ? identity.rbacRoles.join(', ') : (identity.rbacRoles || '');
+    const idpHtml = [
+      field('Provider', `
+        <select class="af-select" data-sf-idp="provider">
+          ${['none','cognito','entra','okta','saml'].map(p => `<option value="${p}"${(identity.provider || 'none') === p ? ' selected' : ''}>${p}</option>`).join('')}
+        </select>`),
+      field('RBAC roles (comma-separated)', `<input class="af-input" data-sf-idp="rbacRoles" type="text" value="${av(rolesStr)}" placeholder="admin, viewer, editor">`),
+    ].join('');
+
+    // ── Branding ──
+    const theme = app.theme || {};
+    const brandHtml = [
+      field('Palette', `
+        <select class="af-select" data-sf-theme="palette">
+          ${['accenture','neutral','material'].map(p => `<option value="${p}"${(theme.palette || 'accenture') === p ? ' selected' : ''}>${p}</option>`).join('')}
+        </select>`),
+      field('Mode', `
+        <select class="af-select" data-sf-theme="mode">
+          <option value="light"${(theme.mode || 'light') === 'light' ? ' selected' : ''}>Light</option>
+          <option value="dark"${theme.mode === 'dark' ? ' selected' : ''}>Dark</option>
+        </select>`),
+    ].join('');
+
+    // ── Enterprise ──
+    const ent   = app.enterprise || {};
+    const entNet = (ent.network || {}).mode || 'public';
+    const entEnc = (ent.encryption || {}).mode || 'aws-managed';
+    const entApp = (ent.approvals || {}).mode || 'none';
+    const entDR  = (ent.dr || {}).posture || 'single-region';
+    const enterpriseHtml = [
+      field('Network mode', `
+        <select class="af-select" data-sf-ent="network.mode">
+          <option value="public"${entNet === 'public' ? ' selected' : ''}>Public</option>
+          <option value="vpcEndpoints"${entNet === 'vpcEndpoints' ? ' selected' : ''}>VPC Endpoints</option>
+          <option value="privateLinkOnly"${entNet === 'privateLinkOnly' ? ' selected' : ''}>PrivateLink only</option>
+        </select>`),
+      field('Encryption', `
+        <select class="af-select" data-sf-ent="encryption.mode">
+          <option value="aws-managed"${entEnc === 'aws-managed' ? ' selected' : ''}>AWS-managed keys</option>
+          <option value="customer-managed"${entEnc === 'customer-managed' ? ' selected' : ''}>Customer-managed keys (CMK)</option>
+        </select>`),
+      field('Human approval (HITL)', `
+        <select class="af-select" data-sf-ent="approvals.mode">
+          <option value="none"${entApp === 'none' ? ' selected' : ''}>None</option>
+          <option value="writes-only"${entApp === 'writes-only' ? ' selected' : ''}>Writes only</option>
+          <option value="all-actions"${entApp === 'all-actions' ? ' selected' : ''}>All actions</option>
+        </select>`),
+      field('Disaster recovery posture', `
+        <select class="af-select" data-sf-ent="dr.posture">
+          <option value="single-region"${entDR === 'single-region' ? ' selected' : ''}>Single-region</option>
+          <option value="active-passive"${entDR === 'active-passive' ? ' selected' : ''}>Active-passive</option>
+          <option value="active-active"${entDR === 'active-active' ? ' selected' : ''}>Active-active</option>
+        </select>`),
+    ].join('');
+
+    // ── Render all sections ──
+    formEl.innerHTML =
+      section('sf-identity',    'Identity',           identityHtml) +
+      section('sf-pages',       'Pages',              pagesHtml) +
+      section('sf-widgets',     'Widgets',            widgetsHtml) +
+      section('sf-caps',        'Capabilities',       capsHtml) +
+      section('sf-rules',       'Rules',              rulesHtml) +
+      section('sf-workflows',   'Workflows',          workflowsHtml) +
+      section('sf-sources',     'Data Sources',       sourcesHtml) +
+      section('sf-idp',         'Identity Provider',  idpHtml) +
+      section('sf-branding',    'Branding',           brandHtml) +
+      section('sf-enterprise',  'Enterprise',         enterpriseHtml);
+
+    // ── Two-way bindings — mutate appState.solution in place, NO re-render while typing ──
+
+    // Top-level scalar binds (name, slug, description)
+    formEl.querySelectorAll('[data-sf-bind]').forEach(el => {
+      el.addEventListener('input', () => {
+        appState.solution[el.dataset.sfBind] = el.value;
+        renderSide(); autosaveApp();
+      });
+    });
+
+    // Tenancy scope
+    const tenancySel = formEl.querySelector('[data-sf-tenancy="scope"]');
+    if (tenancySel) tenancySel.addEventListener('change', () => {
+      if (!appState.solution.tenancy) appState.solution.tenancy = {};
+      appState.solution.tenancy.scope = tenancySel.value;
+      renderSide(); autosaveApp();
+    });
+
+    // Pages — wire rows
+    function sfEnsureApp() {
+      if (!appState.solution.app) appState.solution.app = {};
+      return appState.solution.app;
+    }
+    function wireSfPageRow(row, i) {
+      const idEl    = row.querySelector(`[data-sf-page-id="${i}"]`);
+      const titleEl = row.querySelector(`[data-sf-page-title="${i}"]`);
+      if (idEl) idEl.addEventListener('input', () => {
+        const pg = (sfEnsureApp().pages || [])[i]; if (pg) { pg.id = idEl.value; renderSide(); autosaveApp(); }
+      });
+      if (titleEl) titleEl.addEventListener('input', () => {
+        const pg = (sfEnsureApp().pages || [])[i]; if (pg) { pg.title = titleEl.value; renderSide(); autosaveApp(); }
+      });
+      const rmBtn = row.querySelector(`[data-sf-rm-page="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        sfEnsureApp().pages = (sfEnsureApp().pages || []); sfEnsureApp().pages.splice(i, 1);
+        renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-page]').forEach(r => wireSfPageRow(r, parseInt(r.dataset.sfPage, 10)));
+    const pageAddBtn = $('sf-page-add');
+    if (pageAddBtn) pageAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.pages) a.pages = [];
+      a.pages.push({ id: '', title: '', widgets: [] }); renderSolutionForm();
+    });
+
+    // Widgets — wire rows
+    function wireSfWidgetRow(row, i) {
+      const idEl    = row.querySelector(`[data-sf-widget-id="${i}"]`);
+      const typeEl  = row.querySelector(`[data-sf-widget-type="${i}"]`);
+      const titleEl = row.querySelector(`[data-sf-widget-title="${i}"]`);
+      const refEl   = row.querySelector(`[data-sf-widget-ref="${i}"]`);
+      const save = () => { renderSide(); autosaveApp(); };
+      if (idEl)    idEl.addEventListener('input', () => { const w = (sfEnsureApp().widgets||[])[i]; if(w){w.id=idEl.value;save();} });
+      if (typeEl)  typeEl.addEventListener('change', () => { const w = (sfEnsureApp().widgets||[])[i]; if(w){w.type=typeEl.value;save();} });
+      if (titleEl) titleEl.addEventListener('input', () => { const w = (sfEnsureApp().widgets||[])[i]; if(w){w.title=titleEl.value;save();} });
+      if (refEl)   refEl.addEventListener('input', () => { const w = (sfEnsureApp().widgets||[])[i]; if(w){w.agentRef=refEl.value;save();} });
+      const rmBtn = row.querySelector(`[data-sf-rm-widget="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const a = sfEnsureApp(); if (!a.widgets) a.widgets = []; a.widgets.splice(i, 1);
+        renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-widget]').forEach(r => wireSfWidgetRow(r, parseInt(r.dataset.sfWidget, 10)));
+    const widgetAddBtn = $('sf-widget-add');
+    if (widgetAddBtn) widgetAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.widgets) a.widgets = [];
+      a.widgets.push({ id: '', type: 'kpi', title: '', agentRef: '' }); renderSolutionForm();
+    });
+
+    // Capabilities — wire rows
+    function wireSfCapRow(row, i) {
+      const labelEl = row.querySelector(`[data-sf-cap-label="${i}"]`);
+      const descEl  = row.querySelector(`[data-sf-cap-desc="${i}"]`);
+      const refEl   = row.querySelector(`[data-sf-cap-ref="${i}"]`);
+      const pageEl  = row.querySelector(`[data-sf-cap-page="${i}"]`);
+      const save = () => { renderSide(); autosaveApp(); };
+      if (labelEl) labelEl.addEventListener('input', () => { const c=(sfEnsureApp().capabilities||[])[i]; if(c){c.label=labelEl.value;save();} });
+      if (descEl)  descEl.addEventListener('input',  () => { const c=(sfEnsureApp().capabilities||[])[i]; if(c){c.description=descEl.value;save();} });
+      if (refEl)   refEl.addEventListener('input',   () => { const c=(sfEnsureApp().capabilities||[])[i]; if(c){c.agentRef=refEl.value;save();} });
+      if (pageEl)  pageEl.addEventListener('input',  () => { const c=(sfEnsureApp().capabilities||[])[i]; if(c){c.page=pageEl.value;save();} });
+      const rmBtn = row.querySelector(`[data-sf-rm-cap="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const a = sfEnsureApp(); if (!a.capabilities) a.capabilities = []; a.capabilities.splice(i, 1);
+        renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-cap]').forEach(r => wireSfCapRow(r, parseInt(r.dataset.sfCap, 10)));
+    const capAddBtn = $('sf-cap-add');
+    if (capAddBtn) capAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.capabilities) a.capabilities = [];
+      a.capabilities.push({ label: '', description: '', agentRef: '', page: '' }); renderSolutionForm();
+    });
+
+    // Rules — wire rows
+    function wireSfRuleRow(row, i) {
+      const nameEl    = row.querySelector(`[data-sf-rule-name="${i}"]`);
+      const descEl    = row.querySelector(`[data-sf-rule-desc="${i}"]`);
+      const bindingEl = row.querySelector(`[data-sf-rule-binding="${i}"]`);
+      const save = () => { renderSide(); autosaveApp(); };
+      if (nameEl)    nameEl.addEventListener('input',    () => { const r=(sfEnsureApp().rules||[])[i]; if(r){r.name=nameEl.value;save();} });
+      if (descEl)    descEl.addEventListener('input',    () => { const r=(sfEnsureApp().rules||[])[i]; if(r){r.description=descEl.value;save();} });
+      if (bindingEl) bindingEl.addEventListener('change',() => { const r=(sfEnsureApp().rules||[])[i]; if(r){r.binding=bindingEl.value;save();} });
+      const rmBtn = row.querySelector(`[data-sf-rm-rule="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const a = sfEnsureApp(); if (!a.rules) a.rules = []; a.rules.splice(i, 1);
+        renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-rule]').forEach(r => wireSfRuleRow(r, parseInt(r.dataset.sfRule, 10)));
+    const ruleAddBtn = $('sf-rule-add');
+    if (ruleAddBtn) ruleAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.rules) a.rules = [];
+      a.rules.push({ name: '', description: '', binding: 'action-group' }); renderSolutionForm();
+    });
+
+    // Workflows — wire rows
+    function wireSfWfRow(row, i) {
+      const nameEl = row.querySelector(`[data-sf-wf-name="${i}"]`);
+      const descEl = row.querySelector(`[data-sf-wf-desc="${i}"]`);
+      const save = () => { renderSide(); autosaveApp(); };
+      if (nameEl) nameEl.addEventListener('input', () => { const w=(sfEnsureApp().workflows||[])[i]; if(w){w.name=nameEl.value;save();} });
+      if (descEl) descEl.addEventListener('input', () => { const w=(sfEnsureApp().workflows||[])[i]; if(w){w.description=descEl.value;save();} });
+      const rmBtn = row.querySelector(`[data-sf-rm-wf="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const a = sfEnsureApp(); if (!a.workflows) a.workflows = []; a.workflows.splice(i, 1);
+        renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-wf]').forEach(r => wireSfWfRow(r, parseInt(r.dataset.sfWf, 10)));
+    const wfAddBtn = $('sf-wf-add');
+    if (wfAddBtn) wfAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.workflows) a.workflows = [];
+      a.workflows.push({ name: '', description: '', steps: [] }); renderSolutionForm();
+    });
+
+    // Data sources — wire rows
+    function wireSfSrcRow(row, i) {
+      const idEl   = row.querySelector(`[data-sf-src-id="${i}"]`);
+      const typeEl = row.querySelector(`[data-sf-src-type="${i}"]`);
+      const descEl = row.querySelector(`[data-sf-src-desc="${i}"]`);
+      const save = () => { renderSide(); autosaveApp(); };
+      if (idEl)   idEl.addEventListener('input',   () => { const d=(sfEnsureApp().data&&sfEnsureApp().data.sources||[])[i]; if(d){d.id=idEl.value;save();} });
+      if (typeEl) typeEl.addEventListener('input',  () => { const d=(sfEnsureApp().data&&sfEnsureApp().data.sources||[])[i]; if(d){d.type=typeEl.value;save();} });
+      if (descEl) descEl.addEventListener('input',  () => { const d=(sfEnsureApp().data&&sfEnsureApp().data.sources||[])[i]; if(d){d.description=descEl.value;save();} });
+      const rmBtn = row.querySelector(`[data-sf-rm-src="${i}"]`);
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const a = sfEnsureApp(); if (!a.data) a.data = {}; if (!a.data.sources) a.data.sources = [];
+        a.data.sources.splice(i, 1); renderSolutionForm(); renderSide(); autosaveApp();
+      });
+    }
+    formEl.querySelectorAll('[data-sf-src]').forEach(r => wireSfSrcRow(r, parseInt(r.dataset.sfSrc, 10)));
+    const srcAddBtn = $('sf-src-add');
+    if (srcAddBtn) srcAddBtn.addEventListener('click', () => {
+      const a = sfEnsureApp(); if (!a.data) a.data = {}; if (!a.data.sources) a.data.sources = [];
+      a.data.sources.push({ id: '', type: '', description: '' }); renderSolutionForm();
+    });
+
+    // Identity provider
+    const idpProvSel = formEl.querySelector('[data-sf-idp="provider"]');
+    if (idpProvSel) idpProvSel.addEventListener('change', () => {
+      const a = sfEnsureApp(); if (!a.identity) a.identity = {};
+      a.identity.provider = idpProvSel.value; renderSide(); autosaveApp();
+    });
+    const idpRolesEl = formEl.querySelector('[data-sf-idp="rbacRoles"]');
+    if (idpRolesEl) idpRolesEl.addEventListener('input', () => {
+      const a = sfEnsureApp(); if (!a.identity) a.identity = {};
+      a.identity.rbacRoles = idpRolesEl.value.split(',').map(r => r.trim()).filter(Boolean);
+      renderSide(); autosaveApp();
+    });
+
+    // Branding/theme
+    formEl.querySelectorAll('[data-sf-theme]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const a = sfEnsureApp(); if (!a.theme) a.theme = {};
+        a.theme[sel.dataset.sfTheme] = sel.value; renderSide(); autosaveApp();
+      });
+    });
+
+    // Enterprise selects
+    formEl.querySelectorAll('[data-sf-ent]').forEach(sel => {
+      sel.addEventListener('change', () => {
+        const path = sel.dataset.sfEnt.split('.');
+        const a = sfEnsureApp(); if (!a.enterprise) a.enterprise = {};
+        if (!a.enterprise[path[0]]) a.enterprise[path[0]] = {};
+        a.enterprise[path[0]][path[1]] = sel.value; renderSide(); autosaveApp();
+      });
+    });
+
+    // ── Wire Suggest buttons ──
+    formEl.querySelectorAll('[data-sf-suggest]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const sec = btn.dataset.sfSuggest;
+        const sol = appState.solution || {};
+        const name = sol.name || sol.slug || '';
+        const pagesCtx = ((sol.app || {}).pages || []).map(p => p.title || p.id).join(', ');
+        const ctx = JSON.stringify({ name, pages: pagesCtx });
+
+        if (sec === 'sf-identity') {
+          solSuggest(sec,
+            `Given this partial solution context: ${ctx}. Suggest identity fields. Respond ONLY raw JSON: {"name":"...","slug":"...","description":"...","tenancy":{"scope":"client-workspace"}}`,
+            parsed => {
+              if (parsed.name) appState.solution.name = parsed.name;
+              if (parsed.slug) appState.solution.slug = parsed.slug;
+              if (parsed.description) appState.solution.description = parsed.description;
+              if (parsed.tenancy) appState.solution.tenancy = Object.assign(appState.solution.tenancy || {}, parsed.tenancy);
+            });
+        } else if (sec === 'sf-pages') {
+          solSuggest(sec,
+            `Given this portal named "${name}", suggest 3-5 pages. Respond ONLY raw JSON: {"pages":[{"id":"...","title":"..."}]}`,
+            parsed => {
+              if (Array.isArray(parsed.pages)) {
+                const a = sfEnsureApp(); if (!a.pages) a.pages = [];
+                parsed.pages.forEach(p => { if (!a.pages.find(x => x.id === p.id)) a.pages.push({ id: p.id||'', title: p.title||'', widgets: [] }); });
+              }
+            });
+        } else if (sec === 'sf-widgets') {
+          solSuggest(sec,
+            `Given portal "${name}" with pages: ${pagesCtx}. Suggest 3-6 widgets. Respond ONLY raw JSON: {"widgets":[{"id":"...","type":"kpi|chart|table|agent-chat","title":"...","agentRef":""}]}`,
+            parsed => {
+              if (Array.isArray(parsed.widgets)) {
+                const a = sfEnsureApp(); if (!a.widgets) a.widgets = [];
+                parsed.widgets.forEach(w => a.widgets.push({ id: w.id||'', type: w.type||'kpi', title: w.title||'', agentRef: w.agentRef||'' }));
+              }
+            });
+        } else if (sec === 'sf-caps') {
+          solSuggest(sec,
+            `Given portal "${name}" with pages: ${pagesCtx}. Suggest 3-5 capabilities (soft/agent-backed). Respond ONLY raw JSON: {"capabilities":[{"label":"...","description":"...","agentRef":"","page":""}]}`,
+            parsed => {
+              if (Array.isArray(parsed.capabilities)) {
+                const a = sfEnsureApp(); if (!a.capabilities) a.capabilities = [];
+                parsed.capabilities.forEach(c => a.capabilities.push({ label: c.label||'', description: c.description||'', agentRef: c.agentRef||'', page: c.page||'' }));
+              }
+            });
+        } else if (sec === 'sf-rules') {
+          solSuggest(sec,
+            `Given portal "${name}" with pages: ${pagesCtx}. Suggest 3-5 deterministic rules. Respond ONLY raw JSON: {"rules":[{"name":"...","description":"...","binding":"action-group"}]}`,
+            parsed => {
+              if (Array.isArray(parsed.rules)) {
+                const a = sfEnsureApp(); if (!a.rules) a.rules = [];
+                parsed.rules.forEach(r => a.rules.push({ name: r.name||'', description: r.description||'', binding: r.binding||'action-group' }));
+              }
+            });
+        } else if (sec === 'sf-workflows') {
+          solSuggest(sec,
+            `Given portal "${name}" with pages: ${pagesCtx}. Suggest 2-4 stateful workflows. Respond ONLY raw JSON: {"workflows":[{"name":"...","description":"..."}]}`,
+            parsed => {
+              if (Array.isArray(parsed.workflows)) {
+                const a = sfEnsureApp(); if (!a.workflows) a.workflows = [];
+                parsed.workflows.forEach(w => a.workflows.push({ name: w.name||'', description: w.description||'', steps: [] }));
+              }
+            });
+        } else if (sec === 'sf-sources') {
+          solSuggest(sec,
+            `Given portal "${name}" with pages: ${pagesCtx}. Suggest 2-4 data sources. Respond ONLY raw JSON: {"sources":[{"id":"...","type":"...","description":"..."}]}`,
+            parsed => {
+              if (Array.isArray(parsed.sources)) {
+                const a = sfEnsureApp(); if (!a.data) a.data = {}; if (!a.data.sources) a.data.sources = [];
+                parsed.sources.forEach(src => a.data.sources.push({ id: src.id||'', type: src.type||'', description: src.description||'' }));
+              }
+            });
+        } else if (sec === 'sf-enterprise') {
+          solSuggest(sec,
+            `Given portal "${name}". Suggest enterprise settings. Respond ONLY raw JSON: {"enterprise":{"network":{"mode":"public"},"encryption":{"mode":"aws-managed"},"approvals":{"mode":"none"},"dr":{"posture":"single-region"}}}`,
+            parsed => {
+              if (parsed.enterprise) {
+                const a = sfEnsureApp(); a.enterprise = mergeAgent(a.enterprise || {}, parsed.enterprise);
+              }
+            });
+        }
+        // identity, branding sections: no suggest (values are simple enums)
+      });
+    });
+  }
+
   async function generate() {
-    if (!appState.ready || appState.busy) return;
+    if (appState.busy) return;
+    const s = appState.solution || {};
+    if (!s.name && !s.slug) { toast('Give your solution a name first.', 'error'); return; }
+    // The model sometimes fills name but not slug — derive one so the server (which keys
+    // off slug) always has it. Won't overwrite an existing slug.
+    if (!s.slug && s.name) s.slug = String(s.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60);
+    const rd = solutionReadiness(s);
+    const complete = appState.ready || rd.complete;
+    if (!complete) {
+      const pending = rd.items.filter(i => i.required && !i.done).map(i => i.label).join(', ');
+      if (!confirm(`Your solution isn’t fully configured yet${pending ? ` (still pending: ${pending})` : ''}.\n\nGenerate a PREVIEW anyway? The runnable repo + canvas are produced now with safe stubs for anything unfinished — you can regenerate after finishing.`)) return;
+    }
     const gb = $('appx-gen-btn'); if (gb) { gb.disabled = true; gb.textContent = '⚙ Generating…'; }
     try {
       const data = await callBridge('/app/generate', { solution: appState.solution });
-      appState.result = `✓ Generated ${data.fileCount} files\n  repo:   ${data.appRepo}\n  deploy: ${data.deployBundle}\n  order:  ${data.deployOrder.join(' → ')}\n\nRun locally: cd ${data.appRepo} && npm install && npm run dev`;
-      appState.display.push({ role: 'assistant', content: `Done — your solution repo is generated.\n\n**${data.fileCount} files** at \`${data.appRepo}\`, with a deploy bundle wiring **${data.deployOrder.join(' → ')}**. See CLAUDE.md for the remaining build tasks.` });
+      if (data.deploySkipped) {
+        appState.result = `✓ Generated ${data.fileCount} files\n  repo:   ${data.appRepo}\n  deploy: (skipped — agents not pinned yet)\n\nRun locally: cd ${data.appRepo} && npm install && npm run dev`;
+        appState.display.push({ role: 'assistant', content: `Done — your runnable repo is generated.\n\n**${data.fileCount} files** at \`${data.appRepo}\`. The assistant uses a safe **stub** for any agent that isn't pinned yet — Build & publish the target agents (the "Build →" buttons), and I'll produce the deploy bundle once they're all pinned. See CLAUDE.md for the build tasks.` });
+      } else {
+        appState.result = `✓ Generated ${data.fileCount} files\n  repo:   ${data.appRepo}\n  deploy: ${data.deployBundle}\n  order:  ${(data.deployOrder || []).join(' → ')}\n\nRun locally: cd ${data.appRepo} && npm install && npm run dev`;
+        appState.display.push({ role: 'assistant', content: `Done — your solution repo is generated.\n\n**${data.fileCount} files** at \`${data.appRepo}\`, with a deploy bundle wiring **${(data.deployOrder || []).join(' → ')}**. See CLAUDE.md for the remaining build tasks.` });
+      }
     } catch (err) {
       appState.result = '✗ ' + err.message;
       appState.display.push({ role: 'assistant', content: 'Generation failed: ' + err.message });
     } finally {
       renderChat(); renderSide();
+      autosaveApp();
     }
   }
 })();
