@@ -66,12 +66,17 @@ function getDb() {
     CREATE TABLE IF NOT EXISTS stores (
       project_id TEXT PRIMARY KEY, data TEXT
     );
+    CREATE TABLE IF NOT EXISTS project_members (
+      project_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL,
+      created_at TEXT, PRIMARY KEY (project_id, user_id)
+    );
     CREATE TABLE IF NOT EXISTS audit (
       id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, user_id TEXT,
       action TEXT, target TEXT, detail TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_projects_user ON projects(user_id);
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_members_user ON project_members(user_id);
   `);
   migrateFromJson();           // one-time import of any pre-existing flat-JSON data
   return db;
@@ -103,14 +108,42 @@ function deleteSession(token)        { getDb().prepare('DELETE FROM sessions WHE
 function pruneExpiredSessions(nowMs) { getDb().prepare('DELETE FROM sessions WHERE expires_at < ?').run(nowMs); }
 function touchSession(token, exp)    { getDb().prepare('UPDATE sessions SET expires_at=? WHERE token=?').run(exp, token); }
 
-// ── projects (store.js calls these; ownership enforced by user_id) ─────────────
+// ── RBAC (S8): the project owner is implicit admin; others get a shared role ─────
+const ROLE_RANK = { viewer: 1, reviewer: 2, architect: 3, admin: 4 };
+function isRole(r) { return Object.prototype.hasOwnProperty.call(ROLE_RANK, r); }
+// Returns the actor's role on a project ('admin' for the owner, the membership role for
+// a shared user, or null if no access). Owner identity is projects.user_id.
+function roleFor(userId, projectId) {
+  const p = getDb().prepare('SELECT user_id FROM projects WHERE id=?').get(projectId);
+  if (!p) return null;
+  if (p.user_id === userId) return 'admin';
+  const m = getDb().prepare('SELECT role FROM project_members WHERE project_id=? AND user_id=?').get(projectId, userId);
+  return m ? m.role : null;
+}
+// Throws 'project not found' if no access (hides existence), or a forbidden error if the
+// role rank is below minRole. Returns the actor's role on success.
+function requireAccess(userId, projectId, minRole) {
+  const r = roleFor(userId, projectId);
+  if (r == null) throw new Error('project not found');
+  if (ROLE_RANK[r] < ROLE_RANK[minRole]) { const e = new Error(`forbidden: this action requires '${minRole}' (you are '${r}')`); e.forbidden = true; throw e; }
+  return r;
+}
+
+// ── projects (role-aware: owned OR shared) ─────────────────────────────────────
+function projectRow(projectId) {
+  return getDb().prepare('SELECT id,user_id,name,description,created_at createdAt,updated_at updatedAt FROM projects WHERE id=?').get(projectId) || null;
+}
+function shape(p, role, userId) { return p && { id: p.id, name: p.name, description: p.description, createdAt: p.createdAt, updatedAt: p.updatedAt, role, owner: p.user_id === userId, ownerId: p.user_id }; }
 function listProjects(userId) {
-  return getDb().prepare('SELECT id,name,description,created_at createdAt,updated_at updatedAt FROM projects WHERE user_id=? ORDER BY updated_at DESC')
-    .all(userId);
+  const owned  = getDb().prepare('SELECT id,user_id,name,description,created_at createdAt,updated_at updatedAt FROM projects WHERE user_id=?').all(userId);
+  const shared = getDb().prepare('SELECT p.id,p.user_id,p.name,p.description,p.created_at createdAt,p.updated_at updatedAt, m.role role FROM project_members m JOIN projects p ON p.id=m.project_id WHERE m.user_id=?').all(userId);
+  const out = owned.map(p => shape(p, 'admin', userId)).concat(shared.map(p => shape(p, p.role, userId)));
+  return out.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
 }
 function getProject(userId, projectId) {
-  return getDb().prepare('SELECT id,name,description,created_at createdAt,updated_at updatedAt FROM projects WHERE user_id=? AND id=?')
-    .get(userId, projectId) || null;
+  const role = roleFor(userId, projectId);
+  if (!role) return null;
+  return shape(projectRow(projectId), role, userId);
 }
 function createProject(userId, { name, description } = {}) {
   const proj = {
@@ -122,83 +155,124 @@ function createProject(userId, { name, description } = {}) {
   getDb().prepare('INSERT INTO projects (id,user_id,org_id,name,description,created_at,updated_at) VALUES (?,?,?,?,?,?,?)')
     .run(proj.id, userId, null, proj.name, proj.description, proj.createdAt, proj.updatedAt);
   audit(userId, 'project.create', proj.id, proj.name);
-  return proj;
+  return { ...proj, role: 'admin', owner: true, ownerId: userId };
 }
 function renameProject(userId, projectId, { name, description } = {}) {
-  const p = getProject(userId, projectId);
-  if (!p) throw new Error('project not found');
-  if (name != null) p.name = String(name).trim().slice(0, 120) || p.name;
-  if (description != null) p.description = String(description).trim().slice(0, 500);
-  p.updatedAt = now();
-  getDb().prepare('UPDATE projects SET name=?,description=?,updated_at=? WHERE user_id=? AND id=?')
-    .run(p.name, p.description, p.updatedAt, userId, projectId);
-  audit(userId, 'project.rename', projectId, p.name);
-  return p;
+  requireAccess(userId, projectId, 'admin');
+  const p = projectRow(projectId);
+  const name2 = name != null ? (String(name).trim().slice(0, 120) || p.name) : p.name;
+  const desc2 = description != null ? String(description).trim().slice(0, 500) : p.description;
+  const ts = now();
+  getDb().prepare('UPDATE projects SET name=?,description=?,updated_at=? WHERE id=?').run(name2, desc2, ts, projectId);
+  audit(userId, 'project.rename', projectId, name2);
+  return shape(projectRow(projectId), 'admin', userId);
 }
 function deleteProject(userId, projectId) {
+  if (!roleFor(userId, projectId)) return true;
+  requireAccess(userId, projectId, 'admin');   // owner/admin only
   const d = getDb();
-  const owned = getProject(userId, projectId);
-  if (!owned) return true;
-  d.prepare('DELETE FROM drafts WHERE project_id=?').run(projectId);
-  d.prepare('DELETE FROM conversations WHERE project_id=?').run(projectId);
-  d.prepare('DELETE FROM stores WHERE project_id=?').run(projectId);
-  d.prepare('DELETE FROM projects WHERE user_id=? AND id=?').run(userId, projectId);
-  audit(userId, 'project.delete', projectId, owned.name);
+  const p = projectRow(projectId);
+  ['drafts', 'conversations', 'stores', 'project_members'].forEach(t => d.prepare(`DELETE FROM ${t} WHERE project_id=?`).run(projectId));
+  d.prepare('DELETE FROM projects WHERE id=?').run(projectId);
+  audit(userId, 'project.delete', projectId, p && p.name);
   return true;
 }
-function touchProject(userId, projectId) {
-  getDb().prepare('UPDATE projects SET updated_at=? WHERE user_id=? AND id=?').run(now(), userId, projectId);
-}
-function assertProject(userId, projectId) { if (!getProject(userId, projectId)) throw new Error('project not found'); }
+function touchProject(projectId) { getDb().prepare('UPDATE projects SET updated_at=? WHERE id=?').run(now(), projectId); }
 
-// ── items: drafts / conversations (table chosen by `kind`) ─────────────────────
+// ── project members (S8) ───────────────────────────────────────────────────────
+function listMembers(userId, projectId) {
+  requireAccess(userId, projectId, 'viewer');
+  const p = projectRow(projectId);
+  const owner = getUserById(p.user_id);
+  const members = [{ userId: p.user_id, username: owner && owner.username, displayName: owner && owner.display_name, role: 'admin', owner: true }];
+  getDb().prepare('SELECT m.user_id, m.role, u.username, u.display_name FROM project_members m JOIN users u ON u.id=m.user_id WHERE m.project_id=?').all(projectId)
+    .forEach(m => members.push({ userId: m.user_id, username: m.username, displayName: m.display_name, role: m.role, owner: false }));
+  return members;
+}
+function addMember(userId, projectId, username, role) {
+  requireAccess(userId, projectId, 'admin');
+  if (!isRole(role) || role === 'admin') throw new Error('role must be one of: viewer, reviewer, architect');
+  const target = getUserByUsername(String(username || '').trim().toLowerCase());
+  if (!target) throw new Error('no such user: ' + username);
+  const p = projectRow(projectId);
+  if (target.id === p.user_id) throw new Error('that user is the owner');
+  getDb().prepare(`INSERT INTO project_members (project_id,user_id,role,created_at) VALUES (?,?,?,?)
+                   ON CONFLICT(project_id,user_id) DO UPDATE SET role=excluded.role`)
+    .run(projectId, target.id, role, now());
+  audit(userId, 'project.member.add', projectId, `${target.username}:${role}`);
+  return { userId: target.id, username: target.username, displayName: target.display_name, role, owner: false };
+}
+function setMemberRole(userId, projectId, targetUserId, role) {
+  requireAccess(userId, projectId, 'admin');
+  if (!isRole(role) || role === 'admin') throw new Error('role must be one of: viewer, reviewer, architect');
+  const r = getDb().prepare('UPDATE project_members SET role=? WHERE project_id=? AND user_id=?').run(role, projectId, targetUserId);
+  if (!r.changes) throw new Error('not a member');
+  audit(userId, 'project.member.role', projectId, `${targetUserId}:${role}`);
+  return true;
+}
+function removeMember(userId, projectId, targetUserId) {
+  requireAccess(userId, projectId, 'admin');
+  getDb().prepare('DELETE FROM project_members WHERE project_id=? AND user_id=?').run(projectId, targetUserId);
+  audit(userId, 'project.member.remove', projectId, targetUserId);
+  return true;
+}
+
+// ── items: drafts / conversations (role-gated; optimistic concurrency via version) ─
 const TABLES = { drafts: 'drafts', conversations: 'conversations' };
 function itemTable(kind) { const t = TABLES[kind]; if (!t) throw new Error('bad item kind'); return t; }
 
 function listItems(userId, projectId, kind) {
-  assertProject(userId, projectId);
+  requireAccess(userId, projectId, 'viewer');
   const rows = getDb().prepare(`SELECT data FROM ${itemTable(kind)} WHERE project_id=? ORDER BY updated_at DESC`).all(projectId);
   return rows.map(r => { try { return JSON.parse(r.data); } catch { return null; } }).filter(Boolean);
 }
 function getItem(userId, projectId, kind, itemId) {
+  requireAccess(userId, projectId, 'viewer');
   const r = getDb().prepare(`SELECT data FROM ${itemTable(kind)} WHERE project_id=? AND id=?`).get(projectId, itemId);
   if (!r) return null;
   try { return JSON.parse(r.data); } catch { return null; }
 }
 function putItem(userId, projectId, kind, itemId, data) {
-  assertProject(userId, projectId);
+  requireAccess(userId, projectId, 'architect');
   const id = String(itemId || newId());
-  const existing = getItem(userId, projectId, kind, id) || {};
-  const merged = { ...existing, ...data, id, updatedAt: now() };
+  const existing = getDb().prepare(`SELECT data FROM ${itemTable(kind)} WHERE project_id=? AND id=?`).get(projectId, id);
+  const prev = existing ? (() => { try { return JSON.parse(existing.data); } catch { return {}; } })() : {};
+  const { expectedVersion, ...rest } = data || {};
+  // optimistic concurrency: reject a stale write so concurrent editors don't clobber each other
+  if (expectedVersion != null && prev.version != null && prev.version !== expectedVersion) {
+    const e = new Error('conflict: this was updated by someone else — reload before saving'); e.conflict = true; e.currentVersion = prev.version; throw e;
+  }
+  const merged = { ...prev, ...rest, id, updatedAt: now(), version: (prev.version || 0) + 1 };
   if (!merged.createdAt) merged.createdAt = merged.updatedAt;
   getDb().prepare(`INSERT INTO ${itemTable(kind)} (id,project_id,data,created_at,updated_at)
                    VALUES (?,?,?,?,?)
                    ON CONFLICT(project_id,id) DO UPDATE SET data=excluded.data, updated_at=excluded.updated_at`)
     .run(id, projectId, JSON.stringify(merged), merged.createdAt, merged.updatedAt);
-  touchProject(userId, projectId);
+  touchProject(projectId);
   return merged;
 }
 function deleteItem(userId, projectId, kind, itemId) {
+  requireAccess(userId, projectId, 'architect');
   getDb().prepare(`DELETE FROM ${itemTable(kind)} WHERE project_id=? AND id=?`).run(projectId, itemId);
-  touchProject(userId, projectId);
+  touchProject(projectId);
   return true;
 }
 
 // ── per-project stores (migrated browser localStorage) ─────────────────────────
 const STORES_DEFAULT = { connectors: {}, agentcore: {}, cognitiveMemory: {}, finopsConn: null };
 function getStores(userId, projectId) {
-  assertProject(userId, projectId);
+  requireAccess(userId, projectId, 'viewer');
   const r = getDb().prepare('SELECT data FROM stores WHERE project_id=?').get(projectId);
   let v = {}; if (r) { try { v = JSON.parse(r.data); } catch {} }
   return { ...STORES_DEFAULT, ...v };
 }
 function putStores(userId, projectId, stores) {
-  assertProject(userId, projectId);
+  requireAccess(userId, projectId, 'architect');
   const merged = { ...STORES_DEFAULT, ...(stores || {}) };
   getDb().prepare(`INSERT INTO stores (project_id,data) VALUES (?,?)
                    ON CONFLICT(project_id) DO UPDATE SET data=excluded.data`)
     .run(projectId, JSON.stringify(merged));
-  touchProject(userId, projectId);
+  touchProject(projectId);
   return merged;
 }
 
@@ -266,4 +340,6 @@ module.exports = {
   // projects + items + stores
   listProjects, getProject, createProject, renameProject, deleteProject,
   listItems, getItem, putItem, deleteItem, getStores, putStores,
+  // RBAC + members (S8)
+  roleFor, listMembers, addMember, setMemberRole, removeMember,
 };

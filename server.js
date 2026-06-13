@@ -544,6 +544,24 @@ const server = http.createServer(async (req, res) => {
           return sendJSON(res, 200, { ok: true, stores: ws.putStores(userId, projectId, stores) });
         }
       }
+      // /projects/:id/members  (collaboration / RBAC — S8)
+      if (parts[1] === 'members') {
+        if (parts.length === 2) {
+          if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, members: ws.listMembers(userId, projectId) });
+          if (req.method === 'POST') {
+            const { username, role } = JSON.parse((await readBody(req)) || '{}');
+            return sendJSON(res, 200, { ok: true, member: ws.addMember(userId, projectId, username, role) });
+          }
+        }
+        if (parts.length === 3) {
+          const targetUserId = parts[2];
+          if (req.method === 'PATCH') {
+            const { role } = JSON.parse((await readBody(req)) || '{}');
+            ws.setMemberRole(userId, projectId, targetUserId, role); return sendJSON(res, 200, { ok: true });
+          }
+          if (req.method === 'DELETE') { ws.removeMember(userId, projectId, targetUserId); return sendJSON(res, 200, { ok: true }); }
+        }
+      }
       // /projects/:id/drafts  and  /projects/:id/conversations
       if (parts[1] === 'drafts' || parts[1] === 'conversations') {
         const kind = parts[1];
@@ -569,7 +587,8 @@ const server = http.createServer(async (req, res) => {
       }
       return sendJSON(res, 404, { ok: false, error: 'unknown workspace route' });
     } catch (e) {
-      return sendJSON(res, 400, { ok: false, error: String(e.message || e) });
+      const status = e.forbidden ? 403 : e.conflict ? 409 : 400;
+      return sendJSON(res, status, { ok: false, error: String(e.message || e), forbidden: !!e.forbidden, conflict: !!e.conflict, currentVersion: e.currentVersion });
     }
   }
 

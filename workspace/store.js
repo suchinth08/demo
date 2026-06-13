@@ -28,10 +28,18 @@ const deleteConversation = (u, p, id)    => db.deleteItem(u, p, 'conversations',
 const getStores = (u, p)    => db.getStores(u, p);
 const putStores = (u, p, s) => db.putStores(u, p, s);
 
+// collaboration / RBAC (S8)
+const roleFor       = (u, p)          => db.roleFor(u, p);
+const listMembers   = (u, p)          => db.listMembers(u, p);
+const addMember     = (u, p, un, r)   => db.addMember(u, p, un, r);
+const setMemberRole = (u, p, tu, r)   => db.setMemberRole(u, p, tu, r);
+const removeMember  = (u, p, tu)      => db.removeMember(u, p, tu);
+
 module.exports = {
   listProjects, createProject, getProject, renameProject, deleteProject,
   listDrafts, getDraft, putDraft, deleteDraft,
   listConversations, getConversation, putConversation, deleteConversation,
   getStores, putStores,
+  roleFor, listMembers, addMember, setMemberRole, removeMember,
   newId: db.newId,
 };

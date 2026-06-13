@@ -1678,6 +1678,7 @@
     <div class="ws-control" id="ws-control" style="display:none;">
       <span class="ws-icon" title="Active project">▦</span>
       <select id="ws-project" class="ws-select" title="Active project"></select>
+      <span id="ws-role-badge"></span>
       <button id="ws-new" class="ws-btn" title="New project">＋</button>
     </div>
     <span class="ws-user" id="ws-user" style="display:none;">
@@ -1785,6 +1786,7 @@
         <div class="ws-list" id="ws-draft-list"><div class="ws-empty">In-progress agents auto-save here as you build them.</div></div>
       </section>
     </div>
+    <div id="ws-members"></div>
   </div>
 
   <!-- ─────── LIBRARY ─────── -->
@@ -2347,6 +2349,23 @@ To begin: <strong>what business problem do you want this agent to solve, and who
   .ws-item-del { margin-left:auto; background:none; border:none; color:var(--text-4,#9a9aa5); cursor:pointer; font-size:14px; padding:0 2px; }
   .ws-item-del:hover { color:#ff5c7a; }
 
+  /* workspace members section */
+  .ws-members-section { padding:10px 26px 20px; border-top:1px solid var(--border); }
+  .ws-members-head { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .ws-members-head h3 { margin:0; font-size:14px; }
+  .ws-member-row { display:flex; align-items:center; gap:8px; padding:7px 10px; border-radius:8px; background:var(--bg-soft); margin-bottom:4px; font-size:13px; }
+  .ws-member-name { flex:1; font-weight:500; }
+  .ws-member-owner { font-size:10px; padding:1px 6px; border-radius:8px; background:var(--accent-soft); color:var(--accent-deep); font-weight:600; letter-spacing:.03em; }
+  .ws-member-role-txt { font-size:12px; color:var(--text-3); }
+  .ws-member-role-sel { font-size:12px; border:1px solid var(--border); border-radius:6px; padding:2px 6px; background:var(--bg); color:var(--text); cursor:pointer; }
+  .ws-member-rm { background:none; border:none; color:var(--text-4); cursor:pointer; font-size:15px; padding:0 3px; line-height:1; }
+  .ws-member-rm:hover { color:var(--risk); }
+  .ws-add-member { display:flex; gap:6px; margin-top:10px; flex-wrap:wrap; }
+  .ws-add-member input { flex:1; min-width:110px; padding:5px 9px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text); font-size:13px; }
+  .ws-add-member select { padding:5px 7px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--text); font-size:13px; }
+  /* role badge next to project switcher */
+  #ws-role-badge { font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:10px; background:var(--info-bg); color:var(--info); letter-spacing:.04em; display:none; }
+
   /* auth overlay */
   .auth-overlay { position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center;
     background:radial-gradient(1200px 600px at 50% -10%, rgba(160,0,255,.18), transparent 60%), var(--bg,#0e0e12); }
@@ -2509,6 +2528,23 @@ async function loadProjects() {
 function renderProjectSwitcher() {
   const sel = gid('ws-project');
   sel.innerHTML = AUTH.projects.map(p => `<option value="${p.id}"${p.id === AUTH.activeProject ? ' selected' : ''}>${escAttr(p.name)}</option>`).join('');
+  // Role badge + admin-gate buttons
+  const myRole = (AUTH.projects.find(p => p.id === AUTH.activeProject) || {}).role || '';
+  const badge = gid('ws-role-badge');
+  if (badge) {
+    if (myRole) {
+      badge.textContent = myRole;
+      badge.style.display = 'inline-block';
+      badge.title = 'Your role on this project';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+  const isAdmin = myRole === 'admin';
+  const renameBtn = gid('ws-rename');
+  const deleteBtn = gid('ws-delete');
+  if (renameBtn) renameBtn.style.display = isAdmin ? '' : 'none';
+  if (deleteBtn) deleteBtn.style.display = isAdmin ? '' : 'none';
 }
 function escAttr(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 gid('ws-project').addEventListener('change', async e => {
@@ -2575,16 +2611,18 @@ function flushStores() {
   }, 400);
 }
 
-// ───── workspace panel (drafts + conversations) ─────
+// ───── workspace panel (drafts + conversations + members) ─────
 async function loadWorkspacePanel() {
   const cur = AUTH.projects.find(p => p.id === AUTH.activeProject);
   if (gid('ws-proj-title')) gid('ws-proj-title').textContent = cur ? cur.name : 'Workspace';
   if (!AUTH.activeProject) return;
-  let convs = [], drafts = [];
+  let convs = [], drafts = [], members = [];
   try { const r = await fetch('/projects/' + AUTH.activeProject + '/conversations'); const d = await r.json(); convs = (d.ok && d.items) || []; } catch {}
   try { const r = await fetch('/projects/' + AUTH.activeProject + '/drafts');        const d = await r.json(); drafts = (d.ok && d.items) || []; } catch {}
+  try { const r = await fetch('/projects/' + AUTH.activeProject + '/members');       const d = await r.json(); members = (d.ok && d.members) || []; } catch {}
   renderWsConversations(convs);
   renderWsDrafts(drafts);
+  renderWsMembers(members);
   const total = convs.length + drafts.length;
   if (gid('tab-workspace-count')) gid('tab-workspace-count').textContent = total;
 }
@@ -2641,6 +2679,100 @@ function renderWsDrafts(items) {
 }
 function bindJumps(root){ root.querySelectorAll('[data-jump]').forEach(el => el.addEventListener('click', ev => { ev.preventDefault(); switchTab(el.dataset.jump); })); }
 
+// ───── workspace members panel ─────
+function renderWsMembers(members) {
+  const el = gid('ws-members');
+  if (!el) return;
+  const myRole = (AUTH.projects.find(p => p.id === AUTH.activeProject) || {}).role || '';
+  const isAdmin = myRole === 'admin';
+  const pid = AUTH.activeProject;
+
+  const rolesHtml = `<option value="viewer">viewer</option><option value="reviewer">reviewer</option><option value="architect">architect</option>`;
+
+  const rows = members.map(m => {
+    const label = escAttr(m.displayName || m.username);
+    const roleCell = isAdmin && !m.owner
+      ? `<select class="ws-member-role-sel" data-member-role="${escAttr(m.userId)}" data-current="${escAttr(m.role)}">
+           <option value="viewer"${m.role==='viewer'?' selected':''}>viewer</option>
+           <option value="reviewer"${m.role==='reviewer'?' selected':''}>reviewer</option>
+           <option value="architect"${m.role==='architect'?' selected':''}>architect</option>
+         </select>`
+      : `<span class="ws-member-role-txt">${escAttr(m.role)}</span>`;
+    const ownerBadge = m.owner ? `<span class="ws-member-owner">owner</span>` : '';
+    const rmBtn = isAdmin && !m.owner
+      ? `<button class="ws-member-rm" data-member-rm="${escAttr(m.userId)}" title="Remove member">×</button>`
+      : '';
+    return `<div class="ws-member-row">${ownerBadge}<span class="ws-member-name">${label}</span>${roleCell}${rmBtn}</div>`;
+  }).join('');
+
+  const addSection = isAdmin ? `
+    <div class="ws-add-member">
+      <input id="ws-member-username" placeholder="Username to add" autocomplete="off">
+      <select id="ws-member-role">${rolesHtml}</select>
+      <button class="btn primary" id="ws-member-add">Add</button>
+    </div>` : '';
+
+  el.innerHTML = `
+    <div class="ws-members-section">
+      <div class="ws-members-head"><h3>Members</h3><span class="tcount">${members.length}</span></div>
+      ${rows || '<div class="ws-empty">No members found.</div>'}
+      ${addSection}
+    </div>`;
+
+  // Wire role-change selects (admin only)
+  el.querySelectorAll('[data-member-role]').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const userId = sel.dataset.memberRole;
+      const role = sel.value;
+      try {
+        const r = await fetch(`/projects/${pid}/members/${userId}`, { method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ role }) });
+        const d = await r.json();
+        if (d.forbidden) { toast('Only admins can change roles.', 'error'); sel.value = sel.dataset.current; return; }
+        if (!d.ok) throw new Error(d.error || 'Failed');
+        sel.dataset.current = role;
+        toast('Role updated.', 'success');
+      } catch (err) { toast('Role update failed: ' + err.message, 'error'); sel.value = sel.dataset.current; }
+    });
+  });
+
+  // Wire remove buttons (admin only)
+  el.querySelectorAll('[data-member-rm]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const userId = btn.dataset.memberRm;
+      if (!confirm('Remove this member from the project?')) return;
+      try {
+        const r = await fetch(`/projects/${pid}/members/${userId}`, { method:'DELETE' });
+        const d = await r.json();
+        if (d.forbidden) { toast('Only admins can remove members.', 'error'); return; }
+        if (!d.ok) throw new Error(d.error || 'Failed');
+        toast('Member removed.', 'success');
+        loadWorkspacePanel();
+      } catch (err) { toast('Remove failed: ' + err.message, 'error'); }
+    });
+  });
+
+  // Wire add-member button (admin only)
+  const addBtn = gid('ws-member-add');
+  if (addBtn) {
+    addBtn.addEventListener('click', async () => {
+      const username = (gid('ws-member-username').value || '').trim();
+      const role = gid('ws-member-role').value;
+      if (!username) { toast('Enter a username to add.', 'error'); return; }
+      addBtn.disabled = true;
+      try {
+        const r = await fetch(`/projects/${pid}/members`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ username, role }) });
+        const d = await r.json();
+        if (d.forbidden) { toast('Only admins can add members.', 'error'); return; }
+        if (!d.ok) throw new Error(d.error || 'Failed');
+        toast('Member added.', 'success');
+        gid('ws-member-username').value = '';
+        loadWorkspacePanel();
+      } catch (err) { toast('Add member failed: ' + err.message, 'error'); }
+      finally { addBtn.disabled = false; }
+    });
+  }
+}
+
 // ───── draft + conversation autosave (provision track) ─────
 function ensureWorkspaceIds() {
   if (!state.draftId) state.draftId = 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
@@ -2656,11 +2788,28 @@ function autosaveProvision() {
     const title = (state.agent && state.agent.name) || 'Untitled agent';
     const track = state.seedMode ? 'seed' : state.forkMode ? 'fork' : 'provision';
     try {
-      await fetch(`/projects/${pid}/drafts/${state.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ kind:'agent', agent: state.agent, stage: state.stage, title, convId: state.convId }) });
-      await fetch(`/projects/${pid}/conversations/${state.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ title, track, sessionId: state.sessionId, display: state.display, agentSnapshot: state.agent, stage: state.stage, draftId: state.draftId,
-          priorAgent: state.priorAgent, forkOrigin: state.forkOrigin }) });
+      const draftBody = { kind:'agent', agent: state.agent, stage: state.stage, title, convId: state.convId };
+      if (state._draftVer != null) draftBody.expectedVersion = state._draftVer;
+      const dr = await fetch(`/projects/${pid}/drafts/${state.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(draftBody) });
+      if (dr.status === 409) {
+        toast('Draft was changed by someone else — reloading.', 'error');
+        state._draftVer = null;
+        if (state.convId) openConversation(state.convId);
+        return;
+      }
+      if (dr.ok) { try { const dd = await dr.json(); if (dd.item && dd.item.version != null) state._draftVer = dd.item.version; } catch {} }
+
+      const convBody = { title, track, sessionId: state.sessionId, display: state.display, agentSnapshot: state.agent, stage: state.stage, draftId: state.draftId,
+        priorAgent: state.priorAgent, forkOrigin: state.forkOrigin };
+      if (state._convVer != null) convBody.expectedVersion = state._convVer;
+      const cr = await fetch(`/projects/${pid}/conversations/${state.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(convBody) });
+      if (cr.status === 409) {
+        toast('This conversation was changed by someone else — reloading.', 'error');
+        state._convVer = null;
+        openConversation(state.convId);
+        return;
+      }
+      if (cr.ok) { try { const cd = await cr.json(); if (cd.item && cd.item.version != null) state._convVer = cd.item.version; } catch {} }
     } catch {}
     if (panels.workspace.classList.contains('active')) loadWorkspacePanel();
   }, 600);
@@ -2677,6 +2826,8 @@ function applyConversation(c, opts = {}) {
   state.forkOrigin = c.forkOrigin || null;
   if (c.agentSnapshot) state.agent = c.agentSnapshot;
   state.ready = state.stage === 'COMPLETE' || state.forkMode;
+  // Reset version tracking on a fresh load — next autosave will discover the current version
+  state._convVer = null; state._draftVer = null;
   if (state.ready && typeof unlockTest === 'function') unlockTest();
   if (switchToTab) switchTab('provision');
   renderChat(); renderStageRail(); renderSide();
@@ -2782,6 +2933,8 @@ const state = {
   seedMode: false,     // when true, agent was spun off from a Build App solution (/seed-chat)
   draftId: null,       // workspace draft this conversation autosaves into
   convId: null,        // workspace conversation record id
+  _draftVer: null,     // last-known draft version for optimistic concurrency
+  _convVer: null,      // last-known conversation version for optimistic concurrency
 };
 
 // ───── DOM ─────
@@ -6328,7 +6481,7 @@ refreshMemoryCount();
 // BUILD APP — dashboard-portal solution track (reuses callBridge/parseAI/mergeAgent)
 // ═════════════════════════════════════════════════════════════════════
 (function () {
-  const appState = { sessionId: null, solution: {}, display: [], busy: false, started: false, ready: false, result: null, stage: null, draftId: null, convId: null };
+  const appState = { sessionId: null, solution: {}, display: [], busy: false, started: false, ready: false, result: null, stage: null, draftId: null, convId: null, _draftVer: null, _convVer: null };
   const scroll  = $('appx-scroll');
   const gallery = $('appx-gallery');
   const input   = $('appx-input');
@@ -6350,10 +6503,28 @@ refreshMemoryCount();
       const pid = AUTH.activeProject;
       const title = (appState.solution && (appState.solution.name || (appState.solution.app && appState.solution.app.name))) || 'Solution app';
       try {
-        await fetch(`/projects/${pid}/drafts/${appState.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ kind:'solution', solution: appState.solution, stage: appState.stage, title, convId: appState.convId }) });
-        await fetch(`/projects/${pid}/conversations/${appState.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ title, track:'app', sessionId: appState.sessionId, display: appState.display, agentSnapshot: appState.solution, stage: appState.stage, draftId: appState.draftId, result: appState.result, ready: appState.ready }) });
+        const draftBody = { kind:'solution', solution: appState.solution, stage: appState.stage, title, convId: appState.convId };
+        if (appState._draftVer != null) draftBody.expectedVersion = appState._draftVer;
+        const dr = await fetch(`/projects/${pid}/drafts/${appState.draftId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(draftBody) });
+        if (dr.status === 409) {
+          toast('Draft was changed by someone else — reloading.', 'error');
+          appState._draftVer = null;
+          if (appState.convId) { const r2 = await fetch(`/projects/${pid}/conversations/${appState.convId}`); const d2 = await r2.json(); if (d2.ok) window.__restoreAppConversation(d2.item, { switchToTab: false }); }
+          return;
+        }
+        if (dr.ok) { try { const dd = await dr.json(); if (dd.item && dd.item.version != null) appState._draftVer = dd.item.version; } catch {} }
+
+        const convBody = { title, track:'app', sessionId: appState.sessionId, display: appState.display, agentSnapshot: appState.solution, stage: appState.stage, draftId: appState.draftId, result: appState.result, ready: appState.ready };
+        if (appState._convVer != null) convBody.expectedVersion = appState._convVer;
+        const cr = await fetch(`/projects/${pid}/conversations/${appState.convId}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(convBody) });
+        if (cr.status === 409) {
+          toast('This conversation was changed by someone else — reloading.', 'error');
+          appState._convVer = null;
+          const r2 = await fetch(`/projects/${pid}/conversations/${appState.convId}`); const d2 = await r2.json();
+          if (d2.ok) window.__restoreAppConversation(d2.item, { switchToTab: false });
+          return;
+        }
+        if (cr.ok) { try { const cd = await cr.json(); if (cd.item && cd.item.version != null) appState._convVer = cd.item.version; } catch {} }
       } catch {}
       if (panels.workspace.classList.contains('active')) loadWorkspacePanel();
     }, 600);
@@ -6370,6 +6541,8 @@ refreshMemoryCount();
     appState.ready = !!c.ready;
     appState.result = c.result || null;
     appState.convId = c.id; appState.draftId = c.draftId || null;
+    // Reset version tracking on a fresh load
+    appState._convVer = null; appState._draftVer = null;
     if (gallery) gallery.style.display = 'none';
     input.disabled = false; input.placeholder = 'Describe the portal you want to build…';
     renderChat(); renderSide();
