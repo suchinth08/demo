@@ -10,3 +10,7 @@ generated/
 
 # stray local memory (project memory lives under ~/.claude/projects/.../memory)
 memory/
+
+# private workspace data — accounts, sessions, per-user projects/drafts/conversations
+.auth/
+workspaces/

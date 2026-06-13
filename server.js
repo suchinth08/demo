@@ -17,6 +17,8 @@ const { buildAgentCfn } = require('./cfn/agent-cfn');
 const { buildDeployBundle } = require('./cfn/deploy-manifest');
 const { generateApp } = require('./appgen/generate');
 const { buildSolutionDeploy } = require('./cfn/solution-deploy');
+const auth = require('./workspace/auth');
+const ws   = require('./workspace/store');
 
 const PORT       = parseInt(process.env.PORT, 10) || 7860;
 const ROOT       = __dirname;
@@ -27,6 +29,7 @@ const PREVIEW_PROMPT_PATH   = path.join(PROMPT_DIR, 'preview.txt');
 const SUGGEST_PROMPT_PATH   = path.join(PROMPT_DIR, 'suggest.txt');
 const GIST_PROMPT_PATH      = path.join(PROMPT_DIR, 'gist.txt');
 const FORK_PROMPT_PATH      = path.join(PROMPT_DIR, 'fork.txt');
+const SEED_PROMPT_PATH      = path.join(PROMPT_DIR, 'seed.txt');
 const APP_PROMPT_PATH       = path.join(PROMPT_DIR, 'app.txt');
 const LIBRARY_DIR           = path.join(ROOT, 'library');
 let GIT_AVAILABLE = false;
@@ -134,13 +137,26 @@ fs.writeFileSync(GIST_PROMPT_PATH,      GIST_PROMPT,      'utf8');
 // ─────────────────────────────────────────────────────────────────────────────
 const DEFAULT_TIMEOUT_MS = parseInt(process.env.CLAUDE_TIMEOUT_MS, 10) || 600000;  // 10 min
 
-function callClaude({ message, sessionId, systemPromptPath, timeoutMs = DEFAULT_TIMEOUT_MS }) {
+// ── Model-per-task routing (C1: cost moderation) ─────────────────────────────
+// Route each task to the cheapest model that fits — Haiku for structured/extraction,
+// Sonnet for conversation — instead of one premium model for everything. Each is
+// env-overridable, and a global AGENTEYE_MODEL forces one model for all routes.
+const MODEL_ROUTES = {
+  chat:    process.env.AGENTEYE_CHAT_MODEL    || 'claude-sonnet-4-6',  // provision/app/fork/seed chat
+  preview: process.env.AGENTEYE_PREVIEW_MODEL || 'claude-sonnet-4-6',  // test-agent sandbox
+  suggest: process.env.AGENTEYE_SUGGEST_MODEL || 'claude-haiku-4-5',   // structured suggest / connector defaults
+  gist:    process.env.AGENTEYE_GIST_MODEL    || 'claude-haiku-4-5',   // gist + memory recap (summarization)
+};
+function modelFor(route) { return process.env.AGENTEYE_MODEL || MODEL_ROUTES[route] || null; }
+
+function callClaude({ message, sessionId, systemPromptPath, model, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   return new Promise((resolve, reject) => {
     const args = [
       '-p',
       '--output-format', 'json',
       '--system-prompt-file', systemPromptPath,
     ];
+    if (model)     args.push('--model', model);
     if (sessionId) args.push('--resume', sessionId);
 
     const proc = spawn('claude', args, {
@@ -348,7 +364,7 @@ function buildConnectorsYaml(connectorValues) {
 
 async function generateGist(agent) {
   const message = `Agent JSON:\n${JSON.stringify(agent, null, 2)}`;
-  const result = await callClaude({ message, sessionId: null, systemPromptPath: GIST_PROMPT_PATH, timeoutMs: 90000 });
+  const result = await callClaude({ message, sessionId: null, systemPromptPath: GIST_PROMPT_PATH, model: modelFor('gist'), timeoutMs: 90000 });
   return (result.result || '').trim();
 }
 
@@ -422,13 +438,26 @@ function readBody(req) {
   });
 }
 
+// Pull the bearer token from the Authorization header (or ?token= fallback).
+function bearerToken(req, url) {
+  const h = req.headers['authorization'] || req.headers['Authorization'];
+  if (h && /^Bearer\s+/i.test(h)) return h.replace(/^Bearer\s+/i, '').trim();
+  return (url && url.searchParams.get('token')) || null;
+}
+// Returns the authenticated userId, or null. Routes that need auth should
+// `const userId = requireAuth(req, url); if (!userId) return unauthorized(res);`
+function requireAuth(req, url) {
+  try { return auth.verifyToken(bearerToken(req, url)); } catch { return null; }
+}
+function unauthorized(res) { return sendJSON(res, 401, { ok: false, error: 'authentication required' }); }
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
   // Permissive CORS — bridge only listens on 127.0.0.1
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
   // ── GET / → serve UI ──
@@ -441,9 +470,118 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ── GET /health → readiness probe ──
+  // ── GET /health → readiness probe (public) ──
   if (req.method === 'GET' && url.pathname === '/health') {
     return sendJSON(res, 200, { ok: true, bridge: 'claude-cli', port: PORT });
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // AUTH — builder-tool login (simple username/password + bearer-token sessions)
+  // ───────────────────────────────────────────────────────────────────────────
+  // ── POST /auth/signup (public) ──
+  if (req.method === 'POST' && url.pathname === '/auth/signup') {
+    try {
+      const { username, password, displayName } = JSON.parse((await readBody(req)) || '{}');
+      const { token, user } = auth.signup({ username, password, displayName });
+      return sendJSON(res, 200, { ok: true, token, user });
+    } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
+  }
+  // ── POST /auth/login (public) ──
+  if (req.method === 'POST' && url.pathname === '/auth/login') {
+    try {
+      const { username, password } = JSON.parse((await readBody(req)) || '{}');
+      const { token, user } = auth.login({ username, password });
+      return sendJSON(res, 200, { ok: true, token, user });
+    } catch (e) { return sendJSON(res, 401, { ok: false, error: String(e.message || e) }); }
+  }
+  // ── POST /auth/logout ──
+  if (req.method === 'POST' && url.pathname === '/auth/logout') {
+    try { auth.logout(bearerToken(req, url)); } catch {}
+    return sendJSON(res, 200, { ok: true });
+  }
+  // ── GET /auth/me → validate token, return the account ──
+  if (req.method === 'GET' && url.pathname === '/auth/me') {
+    const userId = requireAuth(req, url);
+    if (!userId) return unauthorized(res);
+    return sendJSON(res, 200, { ok: true, user: auth.getUser(userId) });
+  }
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // WORKSPACE — per-user projects, draft agents, saved conversations, stores
+  // (all require a valid session; users only ever touch their own workspace)
+  // ───────────────────────────────────────────────────────────────────────────
+  if (url.pathname === '/projects' || url.pathname.startsWith('/projects/')) {
+    const userId = requireAuth(req, url);
+    if (!userId) return unauthorized(res);
+    try {
+      const parts = url.pathname.replace(/^\/projects\/?/, '').split('/').filter(Boolean);
+      // /projects
+      if (parts.length === 0) {
+        if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, projects: ws.listProjects(userId) });
+        if (req.method === 'POST') {
+          const { name, description } = JSON.parse((await readBody(req)) || '{}');
+          return sendJSON(res, 200, { ok: true, project: ws.createProject(userId, { name, description }) });
+        }
+      }
+      const projectId = parts[0];
+      // /projects/:id
+      if (parts.length === 1) {
+        if (req.method === 'GET') {
+          const p = ws.getProject(userId, projectId);
+          return p ? sendJSON(res, 200, { ok: true, project: p }) : sendJSON(res, 404, { ok: false, error: 'project not found' });
+        }
+        if (req.method === 'PATCH') {
+          const { name, description } = JSON.parse((await readBody(req)) || '{}');
+          return sendJSON(res, 200, { ok: true, project: ws.renameProject(userId, projectId, { name, description }) });
+        }
+        if (req.method === 'DELETE') { ws.deleteProject(userId, projectId); return sendJSON(res, 200, { ok: true }); }
+      }
+      // /projects/:id/stores
+      if (parts.length === 2 && parts[1] === 'stores') {
+        if (req.method === 'GET') return sendJSON(res, 200, { ok: true, stores: ws.getStores(userId, projectId) });
+        if (req.method === 'PUT') {
+          const { stores } = JSON.parse((await readBody(req)) || '{}');
+          return sendJSON(res, 200, { ok: true, stores: ws.putStores(userId, projectId, stores) });
+        }
+      }
+      // /projects/:id/drafts  and  /projects/:id/conversations
+      if (parts[1] === 'drafts' || parts[1] === 'conversations') {
+        const kind = parts[1];
+        const list   = kind === 'drafts' ? ws.listDrafts   : ws.listConversations;
+        const getOne = kind === 'drafts' ? ws.getDraft      : ws.getConversation;
+        const putOne = kind === 'drafts' ? ws.putDraft       : ws.putConversation;
+        const delOne = kind === 'drafts' ? ws.deleteDraft    : ws.deleteConversation;
+        // collection
+        if (parts.length === 2 && req.method === 'GET') return sendJSON(res, 200, { ok: true, items: list(userId, projectId) });
+        // item
+        if (parts.length === 3) {
+          const itemId = parts[2];
+          if (req.method === 'GET') {
+            const it = getOne(userId, projectId, itemId);
+            return it ? sendJSON(res, 200, { ok: true, item: it }) : sendJSON(res, 404, { ok: false, error: 'not found' });
+          }
+          if (req.method === 'PUT') {
+            const data = JSON.parse((await readBody(req)) || '{}');
+            return sendJSON(res, 200, { ok: true, item: putOne(userId, projectId, itemId, data) });
+          }
+          if (req.method === 'DELETE') { delOne(userId, projectId, itemId); return sendJSON(res, 200, { ok: true }); }
+        }
+      }
+      return sendJSON(res, 404, { ok: false, error: 'unknown workspace route' });
+    } catch (e) {
+      return sendJSON(res, 400, { ok: false, error: String(e.message || e) });
+    }
+  }
+
+  // ── AUTH GATE ──
+  // Everything below (the claude-spawning routes, publish, and the shared Catalog
+  // reads) requires a valid session. Only static /assets/* stays public so the
+  // login page can render its images. Public routes (/, /health, /auth/*) and the
+  // per-user /projects/* routes already returned above.
+  if (!url.pathname.startsWith('/assets/')) {
+    const userId = requireAuth(req, url);
+    if (!userId) return unauthorized(res);
+    req._userId = userId;   // stashed for handlers that need the account (e.g. /publish)
   }
 
   // ── POST /chat → provisioner conversation ──
@@ -457,6 +595,7 @@ const server = http.createServer(async (req, res) => {
         message,
         sessionId: sessionId || null,
         systemPromptPath: PROVISION_PROMPT_PATH,
+        model: modelFor('chat'),
       });
       return sendJSON(res, 200, {
         ok: true,
@@ -476,7 +615,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       const { message, sessionId } = JSON.parse(body || '{}');
       if (!message || typeof message !== 'string') return sendJSON(res, 400, { ok: false, error: 'message required' });
-      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: APP_PROMPT_PATH });
+      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: APP_PROMPT_PATH, model: modelFor('chat') });
       return sendJSON(res, 200, {
         ok: true,
         rawResult: result.result || '',
@@ -497,17 +636,50 @@ const server = http.createServer(async (req, res) => {
       if (!solution || !solution.slug) return sendJSON(res, 400, { ok: false, error: 'solution.slug required' });
       if (solution.archetype !== 'dashboard-portal') return sendJSON(res, 400, { ok: false, error: `archetype "${solution.archetype}" not supported (v1 = dashboard-portal)` });
 
-      const { root, fileCount } = generateApp(solution);                 // Tier-1 repo (frontend + BFF + CLAUDE.md)
-      const { deployDir, manifest } = buildSolutionDeploy(solution, root); // Tier-2 IaC + solution deploy bundle
       const rel = p => path.relative(ROOT, p).replace(/\\/g, '/');
-      return sendJSON(res, 200, {
-        ok: true,
-        slug: solution.slug,
-        appRepo: rel(root),
-        fileCount,
-        deployBundle: rel(deployDir),
-        deployOrder: manifest.deployOrder,
-      });
+      const { root, fileCount } = generateApp(solution);                 // Tier-1 repo (frontend + BFF + CLAUDE.md)
+
+      // Tier-2 deploy bundle needs real Library pins (slug:vNNN) to resolve the agent
+      // closure. If any agent is still an unpinned target, generate the runnable repo
+      // with BFF stubs and skip the bundle until the agents are published & pinned.
+      const agents = solution.agents || [];
+      const allPinned = agents.length > 0 && agents.every(a => a && a.slug && a.version);
+      if (!allPinned) {
+        return sendJSON(res, 200, {
+          ok: true,
+          slug: solution.slug,
+          appRepo: rel(root),
+          fileCount,
+          deployBundle: null,
+          deployOrder: [],
+          deploySkipped: true,
+          reason: 'agents not yet pinned — generated the runnable repo with BFF stubs; publish & pin the agents to produce the deploy bundle',
+        });
+      }
+
+      try {
+        const { deployDir, manifest } = buildSolutionDeploy(solution, root); // Tier-2 IaC + solution deploy bundle
+        return sendJSON(res, 200, {
+          ok: true,
+          slug: solution.slug,
+          appRepo: rel(root),
+          fileCount,
+          deployBundle: rel(deployDir),
+          deployOrder: manifest.deployOrder,
+        });
+      } catch (deployErr) {
+        // Don't let a deploy-bundle failure discard the successfully generated Tier-1 repo.
+        return sendJSON(res, 200, {
+          ok: true,
+          slug: solution.slug,
+          appRepo: rel(root),
+          fileCount,
+          deployBundle: null,
+          deployOrder: [],
+          deploySkipped: true,
+          reason: 'deploy bundle skipped: ' + String(deployErr.message || deployErr),
+        });
+      }
     } catch (e) {
       return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
     }
@@ -529,6 +701,7 @@ const server = http.createServer(async (req, res) => {
         message,
         sessionId: sessionId || null,
         systemPromptPath: PREVIEW_PROMPT_PATH,
+        model: modelFor('preview'),
       });
       return sendJSON(res, 200, {
         ok: true,
@@ -544,8 +717,14 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && url.pathname === '/publish') {
     try {
       const body = await readBody(req);
-      const { agent, transcript, connectorValues, cognitiveMemory, memoryProtocol, author, message } = JSON.parse(body || '{}');
+      const { agent, transcript, connectorValues, cognitiveMemory, memoryProtocol, author: authorOverride, message } = JSON.parse(body || '{}');
       if (!agent || !agent.name) return sendJSON(res, 400, { ok: false, error: 'agent.name required' });
+
+      // Author/provenance comes from the logged-in account; the client may pass a
+      // display override but the real userId is always recorded for the Catalog.
+      const sessionUser = auth.getUser(req._userId);
+      const author = (authorOverride && String(authorOverride).trim())
+        || (sessionUser ? (sessionUser.displayName || sessionUser.username) : null);
 
       const slug = slugify(agent.name);
       if (!slug) return sendJSON(res, 400, { ok: false, error: 'agent.name produced an empty slug' });
@@ -585,6 +764,7 @@ const server = http.createServer(async (req, res) => {
         targetUsers: agent.targetUsers || null,
         foundationModel: agent.foundationModel || null,
         author: author || null,
+        userId: req._userId || null,
         timestamp: new Date().toISOString(),
         counts: {
           knowledgeBases: (agent.knowledgeBases || []).length,
@@ -652,6 +832,71 @@ const server = http.createServer(async (req, res) => {
       });
       items.sort((a, b) => (b.timestamp || '').localeCompare(a.timestamp || ''));
       return sendJSON(res, 200, { ok: true, items, git: GIT_AVAILABLE });
+    } catch (e) {
+      return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
+    }
+  }
+
+  // ── POST /library/:slug/:version/(archive|unarchive) → soft retire a Catalog version ──
+  // Provenance is never destroyed: artifacts + git history stay on disk; archiving only
+  // sets a flag (hidden from pickers, dimmed in the list). Blocks if another published
+  // agent still pins this exact version, unless { force: true }.
+  if (req.method === 'POST' && url.pathname.startsWith('/library/')) {
+    try {
+      const parts = url.pathname.replace(/^\/library\//, '').split('/').filter(Boolean).map(safePart);
+      if (parts.length !== 3 || !/^(archive|unarchive)$/.test(parts[2])) {
+        return sendJSON(res, 400, { ok: false, error: 'expected /library/<slug>/<version>/(archive|unarchive)' });
+      }
+      const [slug, version, action] = parts;
+      const verDir = path.join(LIBRARY_DIR, slug, version);
+      if (!verDir.startsWith(LIBRARY_DIR + path.sep) || !fs.existsSync(verDir)) return sendJSON(res, 404, { ok: false, error: 'not found' });
+      const metaPath = path.join(verDir, 'meta.json');
+      let meta = {}; try { meta = JSON.parse(fs.readFileSync(metaPath, 'utf8')); } catch {}
+
+      const { force } = JSON.parse((await readBody(req)) || '{}');
+
+      if (action === 'archive') {
+        // Find published agents that pin this EXACT version as a collaborator.
+        const dependents = [];
+        const slugs = fs.readdirSync(LIBRARY_DIR).filter(s => {
+          if (s.startsWith('.') || s === 'README.md') return false;
+          try { return fs.statSync(path.join(LIBRARY_DIR, s)).isDirectory(); } catch { return false; }
+        });
+        slugs.forEach(s => {
+          fs.readdirSync(path.join(LIBRARY_DIR, s)).filter(d => /^v\d+$/.test(d)).forEach(v => {
+            if (s === slug && v === version) return;
+            let m = {}; try { m = JSON.parse(fs.readFileSync(path.join(LIBRARY_DIR, s, v, 'meta.json'), 'utf8')); } catch {}
+            const collabs = (m.agent && m.agent.collaborators) || [];
+            const pins = collabs.some(c => {
+              const id = c.agentId && String(c.agentId).includes(':') ? c.agentId : (c.slug && c.version ? `${c.slug}:${c.version}` : null);
+              return id === `${slug}:${version}`;
+            });
+            if (pins) dependents.push({ slug: s, version: v, agentName: m.agentName || s });
+          });
+        });
+        if (dependents.length && !force) {
+          return sendJSON(res, 409, { ok: false, blocked: true, dependents,
+            error: `${dependents.length} published agent(s) still pin ${slug}:${version}. Re-pin them first, or archive with force.` });
+        }
+        meta.archived = true;
+        meta.archivedAt = new Date().toISOString();
+        meta.archivedBy = req._userId || null;
+      } else {
+        meta.archived = false;
+        meta.archivedAt = null; meta.archivedBy = null;
+      }
+
+      fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2));
+      if (GIT_AVAILABLE) {
+        try {
+          const rel = path.relative(LIBRARY_DIR, metaPath).replace(/\\/g, '/');
+          await git(['add', rel]);
+          const msgFile = path.join(LIBRARY_DIR, '.commit-msg');
+          fs.writeFileSync(msgFile, `${action === 'archive' ? 'Archive' : 'Unarchive'} ${slug} ${version}\n`);
+          try { await git(['commit', '-F', msgFile]); } finally { if (fs.existsSync(msgFile)) fs.unlinkSync(msgFile); }
+        } catch (e) { console.warn('  [warn] archive commit failed:', e.message); }
+      }
+      return sendJSON(res, 200, { ok: true, slug, version, archived: !!meta.archived });
     } catch (e) {
       return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
     }
@@ -726,6 +971,7 @@ const server = http.createServer(async (req, res) => {
             counts: meta.counts || { knowledgeBases: 0, actionGroups: 0, mcpConnectors: 0 },
             memTiers, gov,
             hasMemory: memTiers.length > 0 || !!a.memory,
+            archived: !!meta.archived,
           });
           (a.collaborators || []).forEach(c => {
             let toId = c.agentId && String(c.agentId).includes(':') ? c.agentId : null;
@@ -915,7 +1161,37 @@ PRIOR AGENT (current state — preserve these on every turn unless edited):
 ${JSON.stringify(priorAgent, null, 2)}`;
       fs.writeFileSync(FORK_PROMPT_PATH, forkPrompt, 'utf8');
 
-      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: FORK_PROMPT_PATH });
+      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: FORK_PROMPT_PATH, model: modelFor('chat') });
+      return sendJSON(res, 200, {
+        ok: true,
+        rawResult: result.result || '',
+        sessionId: result.session_id || sessionId || null,
+      });
+    } catch (e) {
+      return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
+    }
+  }
+
+  // ── POST /seed-chat → build an agent SPUN OFF from an app solution ──
+  // Like /fork-chat, but the seed is a PARTIAL agent: preserve what's filled, then
+  // CONTINUE the normal staged elicitation for the unfilled stages toward COMPLETE.
+  if (req.method === 'POST' && url.pathname === '/seed-chat') {
+    try {
+      const body = await readBody(req);
+      const { message, sessionId, seedAgent } = JSON.parse(body || '{}');
+      if (!message)   return sendJSON(res, 400, { ok: false, error: 'message required' });
+      if (!seedAgent) return sendJSON(res, 400, { ok: false, error: 'seedAgent required' });
+
+      const seedPrompt = `${PROVISION_PROMPT}
+
+[SPIN-OFF SEED CONTEXT — IMPORTANT]
+This agent was SPUN OFF from an app solution being designed in the Build App track. The partial agentConfig below is a STARTING POINT carried over from that conversation (its name, purpose, intended role, and suggested tools/connectors). Treat the populated fields as already-decided — do NOT re-ask the use case or persona that are already filled. Your job is to CONTINUE the normal staged elicitation for the stages that are still empty (MODEL → KNOWLEDGE → TOOLS/connectors → GUARDRAILS → MEMORY → ENTERPRISE → COMPLETE), one question at a time, and advance "stage" normally. Pay special attention to TOOLS: confirm the suggested connectors/action groups and gather any others this agent needs. Echo the seeded fields back inside agentConfig on every turn so the UI keeps showing them, and only set readyToGenerate true once you reach COMPLETE with a full instruction written.
+
+SEED AGENT (starting point — preserve and build upon these):
+${JSON.stringify(seedAgent, null, 2)}`;
+      fs.writeFileSync(SEED_PROMPT_PATH, seedPrompt, 'utf8');
+
+      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: SEED_PROMPT_PATH, model: modelFor('chat') });
       return sendJSON(res, 200, {
         ok: true,
         rawResult: result.result || '',
@@ -936,6 +1212,7 @@ ${JSON.stringify(priorAgent, null, 2)}`;
         message: prompt,
         sessionId: null,
         systemPromptPath: SUGGEST_PROMPT_PATH,
+        model: modelFor('suggest'),
       });
       return sendJSON(res, 200, { ok: true, raw: result.result || '' });
     } catch (e) {
@@ -960,7 +1237,7 @@ ${JSON.stringify(priorAgent, null, 2)}`;
         `**Durable facts to upsert into semantic memory:** <comma-separated, or "none">\n`,
         'utf8');
       const message = `Transcript:\n${transcript.map(m => `${m.role === 'user' ? 'User' : 'Agent'}: ${m.content}`).join('\n\n')}`;
-      const result = await callClaude({ message, sessionId: null, systemPromptPath: recapPromptPath, timeoutMs: 90000 });
+      const result = await callClaude({ message, sessionId: null, systemPromptPath: recapPromptPath, model: modelFor('gist'), timeoutMs: 90000 });
       return sendJSON(res, 200, { ok: true, recap: (result.result || '').trim() });
     } catch (e) {
       return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
