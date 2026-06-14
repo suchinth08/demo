@@ -704,6 +704,51 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // ── GET /app/assets/<slug>[/file?path=] → browse the generated solution repo ──
+  // Lets the Hub show what was generated (and read a file) without leaving the portal.
+  if (req.method === 'GET' && url.pathname.startsWith('/app/assets/')) {
+    try {
+      const rest = url.pathname.replace(/^\/app\/assets\//, '').split('/').filter(Boolean).map(decodeURIComponent);
+      const slug = safePart(rest[0] || '');
+      if (!slug) return sendJSON(res, 400, { ok: false, error: 'slug required' });
+      const genRoot = path.join(ROOT, 'generated');
+      const base = path.join(genRoot, slug);
+      if (!base.startsWith(genRoot + path.sep) || !fs.existsSync(base)) return sendJSON(res, 404, { ok: false, error: 'no generated assets for this solution — generate it first' });
+
+      // read a single file: /app/assets/<slug>/file?path=<rel>
+      if (rest[1] === 'file') {
+        const rel = url.searchParams.get('path') || '';
+        const norm = path.normalize(rel).replace(/^(\.\.[\\/])+/, '');
+        const full = path.join(base, norm);
+        if (!full.startsWith(base + path.sep) || !fs.existsSync(full) || !fs.statSync(full).isFile()) return sendJSON(res, 404, { ok: false, error: 'file not found' });
+        const size = fs.statSync(full).size;
+        const CAP = 256 * 1024;
+        const buf = fs.readFileSync(full);
+        const head = buf.subarray(0, Math.min(buf.length, 8000));
+        if (head.includes(0)) return sendJSON(res, 200, { ok: true, path: norm.replace(/\\/g, '/'), size, binary: true, content: null });
+        return sendJSON(res, 200, { ok: true, path: norm.replace(/\\/g, '/'), size, truncated: size > CAP, content: buf.subarray(0, CAP).toString('utf8') });
+      }
+
+      // list the file tree (skip heavy/derived dirs)
+      const SKIP = new Set(['node_modules', 'dist', '.git']);
+      const files = [];
+      const walk = dir => {
+        for (const name of fs.readdirSync(dir)) {
+          if (SKIP.has(name)) continue;
+          const full = path.join(dir, name);
+          let st; try { st = fs.statSync(full); } catch { continue; }
+          if (st.isDirectory()) walk(full);
+          else files.push({ path: path.relative(base, full).replace(/\\/g, '/'), size: st.size });
+        }
+      };
+      walk(base);
+      files.sort((a, b) => a.path.localeCompare(b.path));
+      return sendJSON(res, 200, { ok: true, slug, appRepo: path.relative(ROOT, base).replace(/\\/g, '/'), files });
+    } catch (e) {
+      return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
+    }
+  }
+
   // ── POST /preview → chat with the configured agent (Test tab) ──
   if (req.method === 'POST' && url.pathname === '/preview') {
     try {
