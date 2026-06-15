@@ -2489,6 +2489,44 @@ To begin: <strong>what business problem do you want this agent to solve, and who
   .auth-foot a { color:var(--accent,#A000FF); }
 </style>
 
+<!-- Mobile / responsive overrides — placed last so they win source-order ties -->
+<style>
+@media (max-width: 768px) {
+  .main { padding: 14px 14px 48px; }
+
+  /* Topbar: keep one row (preserves the sticky tab offset), just compact */
+  .topbar { padding: 0 12px; }
+  .brand-logo { height: 44px; }
+  .topbar-meta { gap: 8px; font-size: 11px; overflow-x: auto; }
+
+  /* Tab bar: horizontal scroll instead of overflowing the viewport */
+  .tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tabs::-webkit-scrollbar { height: 0; }
+  .tab { white-space: nowrap; flex: 0 0 auto; }
+
+  /* Card / stat / KPI grids → fewer columns */
+  .mega-row { grid-template-columns: 1fr; gap: 12px; margin-bottom: 18px; }
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .finops-kpis { grid-template-columns: repeat(2, 1fr); }
+  .conn-grid { grid-template-columns: 1fr; }
+  #panel-buildapp .arch-cards { grid-template-columns: 1fr; }
+  #panel-buildapp .appx-check { grid-template-columns: 1fr; }
+  #panel-buildapp .arch-gallery { padding: 16px; }
+
+  /* Build / connector shells already stack <1100/1180 — give the chat usable
+     height, bound the side panel, and keep flex children from overflowing */
+  .prov-chat { min-height: 68vh; }
+  .prov-chat, .prov-side, .conn-list, .conn-side, .finops-main { min-width: 0; }
+  .prov-side { max-height: 70vh; overflow-y: auto; }
+
+  /* DPA sub-nav, track tools, Chat|Form toggle: wrap buttons instead of overflowing */
+  .prov-mode-toggle { flex-wrap: wrap; }
+
+  /* Generated-assets modal: stack the file tree over the viewer */
+  .assets-split { grid-template-columns: 1fr; }
+}
+</style>
+
 <script>
 // ═════════════════════════════════════════════════════════════════════
 // AGENT EYE — single-page app
