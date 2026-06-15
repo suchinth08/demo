@@ -2029,6 +2029,12 @@ To begin: <strong>what business problem do you want this agent to solve, and who
           <button class="pmtoggle-btn" data-dpview="spec">Spec</button>
           <button class="pmtoggle-btn" data-dpview="generate">Generate</button>
         </div>
+        <!-- Track tools (both archetypes): back to archetypes · new chat · save -->
+        <div class="prov-mode-toggle" id="appx-tools" style="display:none;">
+          <button class="pmtoggle-btn" id="appx-back" title="Back to archetypes">← Back</button>
+          <button class="pmtoggle-btn" id="appx-newchat" title="Start a new chat">+ New chat</button>
+          <button class="pmtoggle-btn" id="appx-savechat" title="Save this chat to your workspace">💾 Save</button>
+        </div>
         <div class="chat-scroll" id="appx-scroll">
           <div class="arch-gallery" id="appx-gallery">
             <div>
@@ -6656,12 +6662,52 @@ refreshMemoryCount();
   const journeyEl  = $('appx-journey');
   const provSide   = document.querySelector('#panel-buildapp .prov-side');
   const inputWrap  = $('appx-input-wrap');
+  const toolsEl    = $('appx-tools');
+  const galleryHtml = gallery ? gallery.outerHTML : '';
 
   document.querySelectorAll('#panel-buildapp .arch-card[data-arch]').forEach(card => {
     card.addEventListener('click', () => startArchetype(card.dataset.arch));
   });
   if (dpSubnav) dpSubnav.querySelectorAll('[data-dpview]').forEach(b =>
     b.addEventListener('click', () => dpShowView(b.dataset.dpview)));
+  { const e = $('appx-back');     if (e) e.addEventListener('click', goToGallery); }
+  { const e = $('appx-newchat');  if (e) e.addEventListener('click', newChat); }
+  { const e = $('appx-savechat'); if (e) e.addEventListener('click', saveChat); }
+
+  function showTools(on) { if (toolsEl) toolsEl.style.display = on ? 'flex' : 'none'; }
+  function resetConvState() {
+    appState.sessionId = null; appState.display = []; appState.solution = {}; appState.ready = false;
+    appState.stage = null; appState.convId = null; appState.draftId = null; appState._convVer = null; appState._draftVer = null;
+  }
+  // Back → return to the archetype gallery (the current chat is already autosaved per-turn).
+  function goToGallery() {
+    resetConvState(); appState.started = false; appState.archetype = 'dashboard-portal';
+    if (dpSubnav)  dpSubnav.style.display = 'none';
+    if (modeToggle) modeToggle.style.display = '';
+    if (journeyEl)  journeyEl.style.display = '';
+    if (provSide)   provSide.style.display = '';
+    if (inputWrap)  inputWrap.style.display = 'none';
+    if (solutionFormVisible) { solutionFormVisible = false; const sf = $('solution-form'); if (sf) sf.style.display = 'none'; }
+    showTools(false);
+    scroll.innerHTML = galleryHtml;
+    scroll.querySelectorAll('.arch-card[data-arch]').forEach(card => card.addEventListener('click', () => startArchetype(card.dataset.arch)));
+  }
+  // New chat → fresh conversation in the same track (the previous one stays saved under its convId).
+  function newChat() {
+    resetConvState();
+    if (appState.archetype === 'data-product') { appState.started = false; dpShowView('overview'); }
+    else {
+      appState.started = true; if (inputWrap) inputWrap.style.display = '';
+      appState.display.push({ role: 'assistant', content: "New chat — **what should this portal do, and who logs into it?**" });
+      renderChat(); input.focus();
+    }
+    showTools(true);
+  }
+  function saveChat() {
+    if (typeof AUTH === 'undefined' || !AUTH.token) { toast('Log in to save chats', 'error'); return; }
+    if (!AUTH.activeProject) { toast('Open or create a project in Workspace to save this chat', 'error'); return; }
+    autosaveApp(); toast('Chat saved to your workspace');
+  }
 
   function startArchetype(arch) {
     if (arch === 'data-product') {
@@ -6672,6 +6718,8 @@ refreshMemoryCount();
       if (journeyEl)  journeyEl.style.display = 'none';     // the sub-nav is the DPA navigation
       if (provSide)   provSide.style.display = 'none';      // portal canvas hidden; the Spec tab shows the spec
       if (dpSubnav)   dpSubnav.style.display = 'flex';
+      if (solutionFormVisible) { solutionFormVisible = false; const sf = $('solution-form'); if (sf) sf.style.display = 'none'; }  // never show the portal form in DPA
+      showTools(true);
       dpShowView('overview');
       return;
     }
@@ -6681,7 +6729,7 @@ refreshMemoryCount();
     if (gallery) gallery.style.display = 'none';
     input.disabled = false; input.placeholder = 'Describe the portal you want to build…'; input.focus();
     appState.display.push({ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" });
-    renderChat(); renderJourney();
+    renderChat(); renderJourney(); showTools(true);
   }
 
   // ── DPA contextual views (Overview · Build · Spec · Generate) — all swap #appx-scroll ──
@@ -6721,6 +6769,8 @@ refreshMemoryCount();
       </div>
       <div class="sec-h" style="margin-top:8px;"><span>What you'll get</span></div>
       <div class="lib-sub">A <strong>data contract</strong> per entity · a runnable repo (ingestion · validation engine · exception console · sinks) · entity migrations · IaC + CI/CD · a handover pack (ARCHITECTURE · RUNBOOK · governance).</div>
+      <div class="sec-h" style="margin-top:8px;"><span>How it works</span></div>
+      <div class="lib-sub"><strong>1.</strong> Describe your data operation &nbsp;→&nbsp; <strong>2.</strong> we capture the schema &amp; data contract &nbsp;→&nbsp; <strong>3.</strong> add validation &amp; human exception handling &nbsp;→&nbsp; <strong>4.</strong> generate the repo &amp; IaC &nbsp;→&nbsp; <strong>5.</strong> deploy &amp; operate. Use the <strong>Spec</strong> tab to watch it build as you chat.</div>
       <div class="sec-h" style="margin-top:8px;"><span>Try a starter prompt</span></div>
       <div class="dp-starters">${chips}
         <button id="dp-blank" class="dp-starter" style="font-weight:700;color:var(--accent,#A000FF);">Start from a blank brief →</button>
@@ -6767,6 +6817,7 @@ refreshMemoryCount();
   function beginDataProduct(seed) {
     appState.archetype = 'data-product';
     appState.started = true;
+    showTools(true);
     if (inputWrap) inputWrap.style.display = '';
     input.disabled = false; input.placeholder = 'Describe the data operation you want to build…';
     dpSetActive('build');
