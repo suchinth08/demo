@@ -2598,7 +2598,10 @@ gid('ws-logout').addEventListener('click', async () => {
   try { await fetch('/auth/logout', { method:'POST' }); } catch {}
   AUTH.token = null; AUTH.user = null;
   localStorage.removeItem('agenteye:token');
-  showLogin(); setAuthMode(false);
+  localStorage.removeItem('agenteye:activeProject');
+  // Full reload = clean slate. Prevents the previous user's in-memory chat/state
+  // (appState, provision state, rendered panels) from leaking to the next login.
+  location.reload();
 });
 
 // ───── projects ─────
@@ -6641,8 +6644,27 @@ refreshMemoryCount();
     // Reset version tracking on a fresh load
     appState._convVer = null; appState._draftVer = null;
     if (gallery) gallery.style.display = 'none';
-    input.disabled = false; input.placeholder = 'Describe the portal you want to build…';
-    renderChat(); renderSide();
+    input.disabled = false;
+    const isDP = !!(appState.solution && appState.solution.archetype === 'data-product');
+    appState.archetype = isDP ? 'data-product' : 'dashboard-portal';
+    if (isDP) {
+      // restore the DPA contextual chrome (sub-nav, hidden portal chrome) and show the chat
+      if (modeToggle) modeToggle.style.display = 'none';
+      if (journeyEl)  journeyEl.style.display = 'none';
+      if (provSide)   provSide.style.display = 'none';
+      if (dpSubnav)   dpSubnav.style.display = 'flex';
+      showTools(true);
+      input.placeholder = 'Describe the data operation you want to build…';
+      dpShowView('build');
+    } else {
+      if (modeToggle) modeToggle.style.display = '';
+      if (journeyEl)  journeyEl.style.display = '';
+      if (provSide)   provSide.style.display = '';
+      if (dpSubnav)   dpSubnav.style.display = 'none';
+      showTools(true);
+      input.placeholder = 'Describe the portal you want to build…';
+      renderChat(); renderSide();
+    }
     if (switchToTab) switchTab('buildapp');
   };
 
@@ -6741,7 +6763,7 @@ refreshMemoryCount();
     if (inputWrap) inputWrap.style.display = (view === 'build') ? '' : 'none';
     if (view === 'build') { renderChat(); return; }
     if (view === 'overview')      scroll.innerHTML = dpOverviewHtml();
-    else if (view === 'spec')     scroll.innerHTML = dpSpecHtml();
+    else if (view === 'spec')     { scroll.innerHTML = dpSpecFormHtml(); dpBindSpecForm(); }
     else if (view === 'generate') scroll.innerHTML = dpGenerateHtml();
     scroll.scrollTop = 0;
     if (view === 'overview') bindDpStarters();
@@ -6803,6 +6825,265 @@ refreshMemoryCount();
       ${block('Operations', ops)}
     </div>`;
   }
+  // ── DPA Spec editable form ──────────────────────────────────────────────
+  function dpSpecFormHtml() {
+    if (!appState.solution) appState.solution = {};
+    const s  = appState.solution;
+    if (!s.dataProduct) s.dataProduct = {};
+    const dp = s.dataProduct;
+    if (!dp.entities)   dp.entities   = [];
+    if (!dp.sources)    dp.sources    = [];
+    if (!dp.checks)     dp.checks     = [];
+    if (!dp.smartNodes) dp.smartNodes = [];
+    if (!dp.sinks)      dp.sinks      = [];
+    if (!dp.exceptions) dp.exceptions = { policy: '', reprocess: true };
+    if (!dp.operations) dp.operations = { schedule: '', console: true, lineage: true, audit: true };
+
+    const av = v => String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const sec = (t, body) => `<div class="sec-h" style="margin-top:10px;"><span>${t}</span></div>${body}`;
+    const fld = (lbl, html) => `<div class="af-field"><label class="af-label">${lbl}</label>${html}</div>`;
+
+    // Solution identity
+    const identHtml = fld('Solution name',
+      `<input class="af-input" id="dpf-name" type="text" value="${av(s.name)}" placeholder="e.g. Supplier Price Validator">`) +
+      fld('Description',
+      `<textarea class="af-textarea" id="dpf-desc" placeholder="One-line description.">${av(s.description)}</textarea>`);
+
+    // Entities
+    const entRows = dp.entities.map((e, i) => {
+      const fieldsStr = (e.fields || []).map(f => f.name).join(', ');
+      return `<div class="af-list-row" data-dpf-ent="${i}">
+        <input class="af-input" data-dpf-ent-name="${i}" type="text" value="${av(e.name)}" placeholder="Entity name" style="flex:1.2;">
+        <input class="af-input" data-dpf-ent-fields="${i}" type="text" value="${av(fieldsStr)}" placeholder="Fields (comma-separated)" style="flex:2;">
+        <button class="af-rm-btn" data-dpf-rm-ent="${i}" title="Remove entity">×</button>
+      </div>`;
+    }).join('');
+    const entHtml = `<div class="af-list-rows" id="dpf-ent-rows">${entRows}</div>
+      <button class="af-add-btn" id="dpf-ent-add">+ Add entity</button>`;
+
+    // Sources
+    const srcRows = dp.sources.map((src, i) => `
+      <div class="af-list-row" data-dpf-src="${i}">
+        <select class="af-select" data-dpf-src-kind="${i}" style="flex:1;">
+          ${['file','api','db','stream','scheduled'].map(k => `<option value="${k}"${(src.kind||'file')===k?' selected':''}>${k}</option>`).join('')}
+        </select>
+        <input class="af-input" data-dpf-src-ref="${i}" type="text" value="${av(src.entityRef)}" placeholder="entityRef" style="flex:1.5;">
+        <button class="af-rm-btn" data-dpf-rm-src="${i}" title="Remove source">×</button>
+      </div>`).join('');
+    const srcHtml = `<div class="af-list-rows" id="dpf-src-rows">${srcRows}</div>
+      <button class="af-add-btn" id="dpf-src-add">+ Add source</button>`;
+
+    // Checks
+    const chkRows = dp.checks.map((c, i) => `
+      <div class="af-list-row" data-dpf-chk="${i}">
+        <input class="af-input" data-dpf-chk-ref="${i}" type="text" value="${av(c.entityRef)}" placeholder="entityRef" style="flex:1;">
+        <input class="af-input" data-dpf-chk-field="${i}" type="text" value="${av(c.field)}" placeholder="field" style="flex:1;">
+        <select class="af-select" data-dpf-chk-kind="${i}" style="flex:1.2;">
+          ${['required','type','range','regex','referential','uniqueness','custom'].map(k => `<option value="${k}"${(c.kind||'required')===k?' selected':''}>${k}</option>`).join('')}
+        </select>
+        <select class="af-select" data-dpf-chk-sev="${i}" style="flex:.8;">
+          <option value="error"${(c.severity||'error')==='error'?' selected':''}>error</option>
+          <option value="warn"${c.severity==='warn'?' selected':''}>warn</option>
+        </select>
+        <button class="af-rm-btn" data-dpf-rm-chk="${i}" title="Remove check">×</button>
+      </div>`).join('');
+    const chkHtml = `<div class="af-list-rows" id="dpf-chk-rows">${chkRows}</div>
+      <button class="af-add-btn" id="dpf-chk-add">+ Add check</button>`;
+
+    // Smart nodes
+    const snRows = dp.smartNodes.map((n, i) => `
+      <div class="af-list-row" data-dpf-sn="${i}">
+        <input class="af-input" data-dpf-sn-task="${i}" type="text" value="${av(n.task)}" placeholder="Task description" style="flex:2;">
+        <select class="af-select" data-dpf-sn-prov="${i}" style="flex:1;">
+          ${['ollama','bedrock','openrouter'].map(p => `<option value="${p}"${(n.modelProvider||'ollama')===p?' selected':''}>${p}</option>`).join('')}
+        </select>
+        <input class="af-input" data-dpf-sn-thresh="${i}" type="number" min="0" max="1" step="0.05" value="${av(n.confidenceThreshold)}" placeholder="0.8" style="flex:.7;">
+        <button class="af-rm-btn" data-dpf-rm-sn="${i}" title="Remove smart node">×</button>
+      </div>`).join('');
+    const snHtml = `<div class="af-list-rows" id="dpf-sn-rows">${snRows}</div>
+      <button class="af-add-btn" id="dpf-sn-add">+ Add smart node</button>`;
+
+    // Sinks
+    const sinkRows = dp.sinks.map((sk, i) => `
+      <div class="af-list-row" data-dpf-sink="${i}">
+        <select class="af-select" data-dpf-sink-kind="${i}" style="flex:1;">
+          ${['postgres','api','export','event','dashboard-portal'].map(k => `<option value="${k}"${(sk.kind||'postgres')===k?' selected':''}>${k}</option>`).join('')}
+        </select>
+        <input class="af-input" data-dpf-sink-ref="${i}" type="text" value="${av(sk.entityRef)}" placeholder="entityRef" style="flex:1.5;">
+        <button class="af-rm-btn" data-dpf-rm-sink="${i}" title="Remove sink">×</button>
+      </div>`).join('');
+    const sinkHtml = `<div class="af-list-rows" id="dpf-sink-rows">${sinkRows}</div>
+      <button class="af-add-btn" id="dpf-sink-add">+ Add sink</button>`;
+
+    // Exceptions
+    const exc = dp.exceptions;
+    const excHtml = fld('Policy',
+      `<input class="af-input" id="dpf-exc-policy" type="text" value="${av(exc.policy)}" placeholder="e.g. quarantine-review">`) +
+      fld('Reprocess on fix',
+      `<label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="dpf-exc-reprocess" style="width:14px;height:14px;"${exc.reprocess?' checked':''}> Enable reprocessing</label>`);
+
+    // Operations
+    const ops = dp.operations;
+    const opsHtml = fld('Schedule (cron or description)',
+      `<input class="af-input" id="dpf-ops-schedule" type="text" value="${av(ops.schedule)}" placeholder="e.g. 0 2 * * * or nightly">`) +
+      fld('Console / Lineage / Audit',
+      `<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="dpf-ops-console"${ops.console?' checked':''} style="width:14px;height:14px;"> Console</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="dpf-ops-lineage"${ops.lineage?' checked':''} style="width:14px;height:14px;"> Lineage</label>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;"><input type="checkbox" id="dpf-ops-audit"${ops.audit?' checked':''} style="width:14px;height:14px;"> Audit</label>
+      </div>`);
+
+    return `<div class="arch-gallery" style="max-width:760px;">
+      <div class="sec-h" style="border:0;padding:0;margin-bottom:2px;"><span>Data-product spec</span> <span style="font-weight:400;font-size:12px;opacity:.55;">(editable)</span></div>
+      <div class="lib-sub" style="margin-bottom:6px;">Edit the spec directly — changes save instantly. Fields captured from conversation are pre-filled.</div>
+      <div class="af-section">
+        <div class="af-section-head"><span class="af-section-title">Solution</span></div>
+        <div class="af-section-body">${identHtml}</div>
+      </div>
+      ${sec('Entities &amp; data contract', `<div class="af-section-body">${entHtml}</div>`)}
+      ${sec('Sources', `<div class="af-section-body">${srcHtml}</div>`)}
+      ${sec('Checks', `<div class="af-section-body"><div class="lib-sub" style="margin:0 0 4px;opacity:.7;">entityRef · field · kind · severity</div>${chkHtml}</div>`)}
+      ${sec('Smart nodes', `<div class="af-section-body"><div class="lib-sub" style="margin:0 0 4px;opacity:.7;">task · provider · confidence threshold (0–1)</div>${snHtml}</div>`)}
+      ${sec('Sinks', `<div class="af-section-body">${sinkHtml}</div>`)}
+      ${sec('Exceptions', `<div class="af-section-body">${excHtml}</div>`)}
+      ${sec('Operations', `<div class="af-section-body">${opsHtml}</div>`)}
+    </div>`;
+  }
+
+  function dpBindSpecForm() {
+    function ensureDp() {
+      if (!appState.solution) appState.solution = {};
+      if (!appState.solution.dataProduct) appState.solution.dataProduct = {};
+      return appState.solution.dataProduct;
+    }
+
+    // Solution identity
+    const nameEl = document.getElementById('dpf-name');
+    if (nameEl) nameEl.addEventListener('input', () => { appState.solution.name = nameEl.value; autosaveApp(); });
+    const descEl = document.getElementById('dpf-desc');
+    if (descEl) descEl.addEventListener('input', () => { appState.solution.description = descEl.value; autosaveApp(); });
+
+    // Entities — mutate in place on text edit, re-render on add/remove
+    function wireDpEntRow(row, i) {
+      const nameInput   = row.querySelector(`[data-dpf-ent-name="${i}"]`);
+      const fieldsInput = row.querySelector(`[data-dpf-ent-fields="${i}"]`);
+      const rmBtn       = row.querySelector(`[data-dpf-rm-ent="${i}"]`);
+      if (nameInput) nameInput.addEventListener('input', () => {
+        const dp = ensureDp(); if (dp.entities && dp.entities[i]) { dp.entities[i].name = nameInput.value; autosaveApp(); }
+      });
+      if (fieldsInput) fieldsInput.addEventListener('input', () => {
+        const dp = ensureDp();
+        if (dp.entities && dp.entities[i]) {
+          dp.entities[i].fields = fieldsInput.value.split(',').map(n => ({ name: n.trim(), required: false })).filter(f => f.name);
+          autosaveApp();
+        }
+      });
+      if (rmBtn) rmBtn.addEventListener('click', () => {
+        const dp = ensureDp(); dp.entities.splice(i, 1); dpShowView('spec');
+      });
+    }
+    document.querySelectorAll('[data-dpf-ent]').forEach(r => wireDpEntRow(r, parseInt(r.dataset.dpfEnt, 10)));
+    const entAddBtn = document.getElementById('dpf-ent-add');
+    if (entAddBtn) entAddBtn.addEventListener('click', () => {
+      const dp = ensureDp();
+      dp.entities.push({ id: 'e' + (dp.entities.length + 1), name: '', fields: [], confirmed: false });
+      dpShowView('spec');
+    });
+
+    // Sources
+    function wireDpSrcRow(row, i) {
+      const kindEl = row.querySelector(`[data-dpf-src-kind="${i}"]`);
+      const refEl  = row.querySelector(`[data-dpf-src-ref="${i}"]`);
+      const rmBtn  = row.querySelector(`[data-dpf-rm-src="${i}"]`);
+      if (kindEl) kindEl.addEventListener('change', () => { const dp=ensureDp(); if(dp.sources&&dp.sources[i]){dp.sources[i].kind=kindEl.value;autosaveApp();} });
+      if (refEl)  refEl.addEventListener('input',   () => { const dp=ensureDp(); if(dp.sources&&dp.sources[i]){dp.sources[i].entityRef=refEl.value;autosaveApp();} });
+      if (rmBtn)  rmBtn.addEventListener('click',   () => { const dp=ensureDp(); dp.sources.splice(i,1); dpShowView('spec'); });
+    }
+    document.querySelectorAll('[data-dpf-src]').forEach(r => wireDpSrcRow(r, parseInt(r.dataset.dpfSrc, 10)));
+    const srcAddBtn = document.getElementById('dpf-src-add');
+    if (srcAddBtn) srcAddBtn.addEventListener('click', () => {
+      const dp = ensureDp();
+      dp.sources.push({ id: 's' + (dp.sources.length + 1), kind: 'file', entityRef: '' });
+      dpShowView('spec');
+    });
+
+    // Checks
+    function wireDpChkRow(row, i) {
+      const refEl   = row.querySelector(`[data-dpf-chk-ref="${i}"]`);
+      const fieldEl = row.querySelector(`[data-dpf-chk-field="${i}"]`);
+      const kindEl  = row.querySelector(`[data-dpf-chk-kind="${i}"]`);
+      const sevEl   = row.querySelector(`[data-dpf-chk-sev="${i}"]`);
+      const rmBtn   = row.querySelector(`[data-dpf-rm-chk="${i}"]`);
+      const save = () => autosaveApp();
+      if (refEl)   refEl.addEventListener('input',    () => { const dp=ensureDp(); if(dp.checks&&dp.checks[i]){dp.checks[i].entityRef=refEl.value;save();} });
+      if (fieldEl) fieldEl.addEventListener('input',  () => { const dp=ensureDp(); if(dp.checks&&dp.checks[i]){dp.checks[i].field=fieldEl.value;save();} });
+      if (kindEl)  kindEl.addEventListener('change',  () => { const dp=ensureDp(); if(dp.checks&&dp.checks[i]){dp.checks[i].kind=kindEl.value;save();} });
+      if (sevEl)   sevEl.addEventListener('change',   () => { const dp=ensureDp(); if(dp.checks&&dp.checks[i]){dp.checks[i].severity=sevEl.value;save();} });
+      if (rmBtn)   rmBtn.addEventListener('click',    () => { const dp=ensureDp(); dp.checks.splice(i,1); dpShowView('spec'); });
+    }
+    document.querySelectorAll('[data-dpf-chk]').forEach(r => wireDpChkRow(r, parseInt(r.dataset.dpfChk, 10)));
+    const chkAddBtn = document.getElementById('dpf-chk-add');
+    if (chkAddBtn) chkAddBtn.addEventListener('click', () => {
+      const dp = ensureDp();
+      dp.checks.push({ id: 'c' + (dp.checks.length + 1), entityRef: '', field: '', kind: 'required', severity: 'error' });
+      dpShowView('spec');
+    });
+
+    // Smart nodes
+    function wireDpSnRow(row, i) {
+      const taskEl   = row.querySelector(`[data-dpf-sn-task="${i}"]`);
+      const provEl   = row.querySelector(`[data-dpf-sn-prov="${i}"]`);
+      const threshEl = row.querySelector(`[data-dpf-sn-thresh="${i}"]`);
+      const rmBtn    = row.querySelector(`[data-dpf-rm-sn="${i}"]`);
+      const save = () => autosaveApp();
+      if (taskEl)   taskEl.addEventListener('input',    () => { const dp=ensureDp(); if(dp.smartNodes&&dp.smartNodes[i]){dp.smartNodes[i].task=taskEl.value;save();} });
+      if (provEl)   provEl.addEventListener('change',   () => { const dp=ensureDp(); if(dp.smartNodes&&dp.smartNodes[i]){dp.smartNodes[i].modelProvider=provEl.value;save();} });
+      if (threshEl) threshEl.addEventListener('input',  () => { const dp=ensureDp(); if(dp.smartNodes&&dp.smartNodes[i]){dp.smartNodes[i].confidenceThreshold=parseFloat(threshEl.value)||0;save();} });
+      if (rmBtn)    rmBtn.addEventListener('click',     () => { const dp=ensureDp(); dp.smartNodes.splice(i,1); dpShowView('spec'); });
+    }
+    document.querySelectorAll('[data-dpf-sn]').forEach(r => wireDpSnRow(r, parseInt(r.dataset.dpfSn, 10)));
+    const snAddBtn = document.getElementById('dpf-sn-add');
+    if (snAddBtn) snAddBtn.addEventListener('click', () => {
+      const dp = ensureDp();
+      dp.smartNodes.push({ id: 'sn' + (dp.smartNodes.length + 1), task: '', modelProvider: 'ollama', confidenceThreshold: 0.8 });
+      dpShowView('spec');
+    });
+
+    // Sinks
+    function wireDpSinkRow(row, i) {
+      const kindEl = row.querySelector(`[data-dpf-sink-kind="${i}"]`);
+      const refEl  = row.querySelector(`[data-dpf-sink-ref="${i}"]`);
+      const rmBtn  = row.querySelector(`[data-dpf-rm-sink="${i}"]`);
+      if (kindEl) kindEl.addEventListener('change', () => { const dp=ensureDp(); if(dp.sinks&&dp.sinks[i]){dp.sinks[i].kind=kindEl.value;autosaveApp();} });
+      if (refEl)  refEl.addEventListener('input',   () => { const dp=ensureDp(); if(dp.sinks&&dp.sinks[i]){dp.sinks[i].entityRef=refEl.value;autosaveApp();} });
+      if (rmBtn)  rmBtn.addEventListener('click',   () => { const dp=ensureDp(); dp.sinks.splice(i,1); dpShowView('spec'); });
+    }
+    document.querySelectorAll('[data-dpf-sink]').forEach(r => wireDpSinkRow(r, parseInt(r.dataset.dpfSink, 10)));
+    const sinkAddBtn = document.getElementById('dpf-sink-add');
+    if (sinkAddBtn) sinkAddBtn.addEventListener('click', () => {
+      const dp = ensureDp();
+      dp.sinks.push({ id: 'sk' + (dp.sinks.length + 1), kind: 'postgres', entityRef: '' });
+      dpShowView('spec');
+    });
+
+    // Exceptions
+    const excPolicyEl    = document.getElementById('dpf-exc-policy');
+    const excReprocessEl = document.getElementById('dpf-exc-reprocess');
+    if (excPolicyEl)    excPolicyEl.addEventListener('input',  () => { const dp=ensureDp(); if(!dp.exceptions)dp.exceptions={}; dp.exceptions.policy=excPolicyEl.value; autosaveApp(); });
+    if (excReprocessEl) excReprocessEl.addEventListener('change', () => { const dp=ensureDp(); if(!dp.exceptions)dp.exceptions={}; dp.exceptions.reprocess=excReprocessEl.checked; autosaveApp(); });
+
+    // Operations
+    const opsScheduleEl = document.getElementById('dpf-ops-schedule');
+    const opsConsoleEl  = document.getElementById('dpf-ops-console');
+    const opsLineageEl  = document.getElementById('dpf-ops-lineage');
+    const opsAuditEl    = document.getElementById('dpf-ops-audit');
+    if (opsScheduleEl) opsScheduleEl.addEventListener('input',  () => { const dp=ensureDp(); if(!dp.operations)dp.operations={}; dp.operations.schedule=opsScheduleEl.value; autosaveApp(); });
+    if (opsConsoleEl)  opsConsoleEl.addEventListener('change',  () => { const dp=ensureDp(); if(!dp.operations)dp.operations={}; dp.operations.console=opsConsoleEl.checked; autosaveApp(); });
+    if (opsLineageEl)  opsLineageEl.addEventListener('change',  () => { const dp=ensureDp(); if(!dp.operations)dp.operations={}; dp.operations.lineage=opsLineageEl.checked; autosaveApp(); });
+    if (opsAuditEl)    opsAuditEl.addEventListener('change',    () => { const dp=ensureDp(); if(!dp.operations)dp.operations={}; dp.operations.audit=opsAuditEl.checked; autosaveApp(); });
+  }
+  // ── end DPA Spec editable form ──────────────────────────────────────────
+
   function dpGenerateHtml() {
     const ready = !!appState.ready;
     return `<div class="arch-gallery" style="max-width:760px;">
