@@ -17,11 +17,42 @@ const { buildAgentCfn } = require('./cfn/agent-cfn');
 const { buildDeployBundle } = require('./cfn/deploy-manifest');
 const { generateApp } = require('./appgen/generate');
 const { buildSolutionDeploy } = require('./cfn/solution-deploy');
+const crypto = require('crypto');
+
+// Load .env (if present) BEFORE requiring the workspace modules — db.js selects its
+// backend from DATABASE_URL at require-time, so the env must be populated first.
+// Node 22.5+ ships process.loadEnvFile; no dependency. Missing file is fine (defaults).
+try { process.loadEnvFile?.(path.join(__dirname, '.env')); } catch (e) { /* no .env — fine */ }
+
 const auth = require('./workspace/auth');
 const ws   = require('./workspace/store');
+const wsdb = require('./workspace/db');
 
 const PORT       = parseInt(process.env.PORT, 10) || 7860;
 const ROOT       = __dirname;
+
+// ── Hosted-mode config (additive; localhost defaults unchanged) ──
+// CORS_ORIGIN: allowed browser origin for the API. Default '*' keeps the local
+//   single-process app working; in the split Vercel→Railway deploy set this to
+//   the Vercel origin so the API only answers the hosted frontend.
+// SERVE_STATIC: whether this process also serves AgentEye_Hub.html. Default on
+//   (localhost serves UI + API together); set 'false' on Railway where Vercel
+//   hosts the static Hub and this process is API-only.
+const CORS_ORIGIN   = process.env.CORS_ORIGIN || '*';
+const SERVE_STATIC  = process.env.SERVE_STATIC !== 'false';
+// Bind host. Default 127.0.0.1 (localhost-only, the original security posture).
+// Railway/containers must reach it from outside → set HOST=0.0.0.0 there.
+const HOST          = process.env.HOST || '127.0.0.1';
+
+// LLM_PROVIDER: which gateway answers the builder's turns.
+//   'claude-cli'  (default) → spawns the local `claude -p` (Claude Code login).
+//                  Works on localhost; CANNOT run on Railway (no CLI in a container).
+//   'openrouter'  → OpenRouter's OpenAI-compatible API with the user's
+//                  OPENROUTER_API_KEY — the BYO-key path for the hosted env.
+//   'anthropic'   → Anthropic API directly with ANTHROPIC_API_KEY.
+// The 'openrouter'/'anthropic' adapters are wired in P2 (need a key to verify);
+// until then selecting them returns a clear setup error. Default is unchanged.
+const LLM_PROVIDER  = process.env.LLM_PROVIDER || 'claude-cli';
 const HTML_FILE  = path.join(ROOT, 'AgentEye_Hub.html');
 const PROMPT_DIR = path.join(ROOT, '.agenteye_prompts');
 const PROVISION_PROMPT_PATH = path.join(PROMPT_DIR, 'provision.txt');
@@ -31,6 +62,7 @@ const GIST_PROMPT_PATH      = path.join(PROMPT_DIR, 'gist.txt');
 const FORK_PROMPT_PATH      = path.join(PROMPT_DIR, 'fork.txt');
 const SEED_PROMPT_PATH      = path.join(PROMPT_DIR, 'seed.txt');
 const APP_PROMPT_PATH       = path.join(PROMPT_DIR, 'app.txt');
+const DATAPRODUCT_PROMPT_PATH = path.join(PROMPT_DIR, 'dataproduct.txt');  // IDOA data-product archetype
 const LIBRARY_DIR           = path.join(ROOT, 'library');
 let GIT_AVAILABLE = false;
 const isWin = process.platform === 'win32';
@@ -147,9 +179,109 @@ const MODEL_ROUTES = {
   suggest: process.env.AGENTEYE_SUGGEST_MODEL || 'claude-haiku-4-5',   // structured suggest / connector defaults
   gist:    process.env.AGENTEYE_GIST_MODEL    || 'claude-haiku-4-5',   // gist + memory recap (summarization)
 };
-function modelFor(route) { return process.env.AGENTEYE_MODEL || MODEL_ROUTES[route] || null; }
+// OpenRouter model ids per task route (used when LLM_PROVIDER=openrouter).
+// OpenRouter ids are vendor-namespaced; these map 1:1 to the Claude routes above.
+const OPENROUTER_ROUTES = {
+  chat:    process.env.OPENROUTER_CHAT_MODEL    || 'anthropic/claude-sonnet-4.6',
+  preview: process.env.OPENROUTER_PREVIEW_MODEL || 'anthropic/claude-sonnet-4.6',
+  suggest: process.env.OPENROUTER_SUGGEST_MODEL || 'anthropic/claude-haiku-4.5',
+  gist:    process.env.OPENROUTER_GIST_MODEL    || 'anthropic/claude-haiku-4.5',
+};
+function modelFor(route) {
+  if (LLM_PROVIDER === 'openrouter') {
+    return process.env.OPENROUTER_MODEL || OPENROUTER_ROUTES[route] || OPENROUTER_ROUTES.chat;
+  }
+  return process.env.AGENTEYE_MODEL || MODEL_ROUTES[route] || null;
+}
 
-function callClaude({ message, sessionId, systemPromptPath, model, timeoutMs = DEFAULT_TIMEOUT_MS }) {
+// Provider gateway: dispatch a turn to the configured LLM backend. All adapters
+// return the same shape callers expect: { result: <text>, session_id?: <id> }.
+function callClaude(opts) {
+  switch (LLM_PROVIDER) {
+    case 'claude-cli': return callClaudeCli(opts);
+    case 'openrouter': return callOpenRouter(opts);
+    case 'anthropic':
+      // Wired in a later P2 step (Anthropic SDK). OpenRouter is the BYO-key path
+      // and is live; claude-cli is the local default.
+      return Promise.reject(new Error(
+        `LLM_PROVIDER='anthropic' isn't wired yet. Use 'openrouter' (BYO key) or 'claude-cli' (local).`));
+    default:
+      return Promise.reject(new Error(`Unknown LLM_PROVIDER='${LLM_PROVIDER}' (expected claude-cli | openrouter | anthropic).`));
+  }
+}
+
+// ── OpenRouter adapter (OpenAI-compatible /chat/completions; BYO key) ─────────
+// `claude -p` keeps conversation state via --resume; the API is stateless, so we
+// keep a bounded in-memory transcript per sessionId and replay it each turn.
+// (Single-instance only; the durable store is the DB in P1 — fine for now.)
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const _orTranscripts = new Map();          // sessionId -> [{role,content}] (no system msg)
+const OR_MAX_SESSIONS = 500;
+function _orRemember(id, msgs) {
+  _orTranscripts.delete(id);               // refresh recency (Map keeps insertion order)
+  _orTranscripts.set(id, msgs);
+  while (_orTranscripts.size > OR_MAX_SESSIONS) _orTranscripts.delete(_orTranscripts.keys().next().value);
+}
+
+async function callOpenRouter({ message, sessionId, systemPromptPath, model, timeoutMs = DEFAULT_TIMEOUT_MS }) {
+  const key = process.env.OPENROUTER_API_KEY;
+  if (!key) throw new Error('OPENROUTER_API_KEY not set (required for LLM_PROVIDER=openrouter).');
+
+  const system = fs.readFileSync(systemPromptPath, 'utf8');
+  const id = sessionId || crypto.randomUUID();
+  const history = (sessionId && _orTranscripts.get(sessionId)) ? _orTranscripts.get(sessionId).slice() : [];
+  history.push({ role: 'user', content: message });
+  const messages = [{ role: 'system', content: system }, ...history];
+
+  const ctrl = new AbortController();
+  const killer = setTimeout(() => ctrl.abort(), timeoutMs);
+  const started = Date.now();
+  let resp, text;
+  try {
+    resp = await fetch(OPENROUTER_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'X-Title': 'AgentEye',
+      },
+      // Cap output: without max_tokens OpenRouter reserves the model's full
+      // completion budget (~64K) and rejects on credit headroom. Env-overridable.
+      body: JSON.stringify({
+        model, messages,
+        max_tokens: parseInt(process.env.OPENROUTER_MAX_TOKENS, 10) || 8192,
+        usage: { include: true },
+      }),
+      signal: ctrl.signal,
+    });
+    text = await resp.text();
+  } catch (e) {
+    throw new Error(e.name === 'AbortError'
+      ? `OpenRouter timed out after ${Math.round(timeoutMs / 1000)}s`
+      : `OpenRouter request failed: ${e.message}`);
+  } finally {
+    clearTimeout(killer);
+  }
+  if (!resp.ok) throw new Error(`OpenRouter ${resp.status}: ${text.slice(0, 500)}`);
+
+  let data;
+  try { data = JSON.parse(text); }
+  catch (e) { throw new Error(`OpenRouter returned non-JSON: ${text.slice(0, 300)}`); }
+  if (data.error) throw new Error(`OpenRouter error: ${data.error.message || JSON.stringify(data.error)}`);
+
+  const reply = data.choices?.[0]?.message?.content ?? '';
+  history.push({ role: 'assistant', content: reply });
+  _orRemember(id, history);
+
+  return {
+    result: reply,
+    session_id: id,
+    total_cost_usd: data.usage?.cost || 0,
+    duration_ms: Date.now() - started,
+  };
+}
+
+function callClaudeCli({ message, sessionId, systemPromptPath, model, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   return new Promise((resolve, reject) => {
     const args = [
       '-p',
@@ -445,23 +577,25 @@ function bearerToken(req, url) {
   return (url && url.searchParams.get('token')) || null;
 }
 // Returns the authenticated userId, or null. Routes that need auth should
-// `const userId = requireAuth(req, url); if (!userId) return unauthorized(res);`
-function requireAuth(req, url) {
-  try { return auth.verifyToken(bearerToken(req, url)); } catch { return null; }
+// `const userId = await requireAuth(req, url); if (!userId) return unauthorized(res);`
+async function requireAuth(req, url) {
+  try { return await auth.verifyToken(bearerToken(req, url)); } catch { return null; }
 }
 function unauthorized(res) { return sendJSON(res, 401, { ok: false, error: 'authentication required' }); }
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://localhost:${PORT}`);
 
-  // Permissive CORS — bridge only listens on 127.0.0.1
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS — '*' by default (local single-process); CORS_ORIGIN locks it to the
+  // Vercel origin in the hosted split deploy.
+  res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
+  if (CORS_ORIGIN !== '*') res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') { res.writeHead(204); res.end(); return; }
 
-  // ── GET / → serve UI ──
-  if (req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/AgentEye_Hub.html')) {
+  // ── GET / → serve UI (skipped when SERVE_STATIC=false — Vercel hosts the Hub) ──
+  if (SERVE_STATIC && req.method === 'GET' && (url.pathname === '/' || url.pathname === '/index.html' || url.pathname === '/AgentEye_Hub.html')) {
     fs.readFile(HTML_FILE, (err, data) => {
       if (err) { res.writeHead(500); res.end('AgentEye_Hub.html not found beside server.js'); return; }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -482,7 +616,7 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && url.pathname === '/auth/signup') {
     try {
       const { username, password, displayName } = JSON.parse((await readBody(req)) || '{}');
-      const { token, user } = auth.signup({ username, password, displayName });
+      const { token, user } = await auth.signup({ username, password, displayName });
       return sendJSON(res, 200, { ok: true, token, user });
     } catch (e) { return sendJSON(res, 400, { ok: false, error: String(e.message || e) }); }
   }
@@ -490,20 +624,20 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && url.pathname === '/auth/login') {
     try {
       const { username, password } = JSON.parse((await readBody(req)) || '{}');
-      const { token, user } = auth.login({ username, password });
+      const { token, user } = await auth.login({ username, password });
       return sendJSON(res, 200, { ok: true, token, user });
     } catch (e) { return sendJSON(res, 401, { ok: false, error: String(e.message || e) }); }
   }
   // ── POST /auth/logout ──
   if (req.method === 'POST' && url.pathname === '/auth/logout') {
-    try { auth.logout(bearerToken(req, url)); } catch {}
+    try { await auth.logout(bearerToken(req, url)); } catch {}
     return sendJSON(res, 200, { ok: true });
   }
   // ── GET /auth/me → validate token, return the account ──
   if (req.method === 'GET' && url.pathname === '/auth/me') {
-    const userId = requireAuth(req, url);
+    const userId = await requireAuth(req, url);
     if (!userId) return unauthorized(res);
-    return sendJSON(res, 200, { ok: true, user: auth.getUser(userId) });
+    return sendJSON(res, 200, { ok: true, user: await auth.getUser(userId) });
   }
 
   // ───────────────────────────────────────────────────────────────────────────
@@ -511,55 +645,55 @@ const server = http.createServer(async (req, res) => {
   // (all require a valid session; users only ever touch their own workspace)
   // ───────────────────────────────────────────────────────────────────────────
   if (url.pathname === '/projects' || url.pathname.startsWith('/projects/')) {
-    const userId = requireAuth(req, url);
+    const userId = await requireAuth(req, url);
     if (!userId) return unauthorized(res);
     try {
       const parts = url.pathname.replace(/^\/projects\/?/, '').split('/').filter(Boolean);
       // /projects
       if (parts.length === 0) {
-        if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, projects: ws.listProjects(userId) });
+        if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, projects: await ws.listProjects(userId) });
         if (req.method === 'POST') {
           const { name, description } = JSON.parse((await readBody(req)) || '{}');
-          return sendJSON(res, 200, { ok: true, project: ws.createProject(userId, { name, description }) });
+          return sendJSON(res, 200, { ok: true, project: await ws.createProject(userId, { name, description }) });
         }
       }
       const projectId = parts[0];
       // /projects/:id
       if (parts.length === 1) {
         if (req.method === 'GET') {
-          const p = ws.getProject(userId, projectId);
+          const p = await ws.getProject(userId, projectId);
           return p ? sendJSON(res, 200, { ok: true, project: p }) : sendJSON(res, 404, { ok: false, error: 'project not found' });
         }
         if (req.method === 'PATCH') {
           const { name, description } = JSON.parse((await readBody(req)) || '{}');
-          return sendJSON(res, 200, { ok: true, project: ws.renameProject(userId, projectId, { name, description }) });
+          return sendJSON(res, 200, { ok: true, project: await ws.renameProject(userId, projectId, { name, description }) });
         }
-        if (req.method === 'DELETE') { ws.deleteProject(userId, projectId); return sendJSON(res, 200, { ok: true }); }
+        if (req.method === 'DELETE') { await ws.deleteProject(userId, projectId); return sendJSON(res, 200, { ok: true }); }
       }
       // /projects/:id/stores
       if (parts.length === 2 && parts[1] === 'stores') {
-        if (req.method === 'GET') return sendJSON(res, 200, { ok: true, stores: ws.getStores(userId, projectId) });
+        if (req.method === 'GET') return sendJSON(res, 200, { ok: true, stores: await ws.getStores(userId, projectId) });
         if (req.method === 'PUT') {
           const { stores } = JSON.parse((await readBody(req)) || '{}');
-          return sendJSON(res, 200, { ok: true, stores: ws.putStores(userId, projectId, stores) });
+          return sendJSON(res, 200, { ok: true, stores: await ws.putStores(userId, projectId, stores) });
         }
       }
       // /projects/:id/members  (collaboration / RBAC — S8)
       if (parts[1] === 'members') {
         if (parts.length === 2) {
-          if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, members: ws.listMembers(userId, projectId) });
+          if (req.method === 'GET')  return sendJSON(res, 200, { ok: true, members: await ws.listMembers(userId, projectId) });
           if (req.method === 'POST') {
             const { username, role } = JSON.parse((await readBody(req)) || '{}');
-            return sendJSON(res, 200, { ok: true, member: ws.addMember(userId, projectId, username, role) });
+            return sendJSON(res, 200, { ok: true, member: await ws.addMember(userId, projectId, username, role) });
           }
         }
         if (parts.length === 3) {
           const targetUserId = parts[2];
           if (req.method === 'PATCH') {
             const { role } = JSON.parse((await readBody(req)) || '{}');
-            ws.setMemberRole(userId, projectId, targetUserId, role); return sendJSON(res, 200, { ok: true });
+            await ws.setMemberRole(userId, projectId, targetUserId, role); return sendJSON(res, 200, { ok: true });
           }
-          if (req.method === 'DELETE') { ws.removeMember(userId, projectId, targetUserId); return sendJSON(res, 200, { ok: true }); }
+          if (req.method === 'DELETE') { await ws.removeMember(userId, projectId, targetUserId); return sendJSON(res, 200, { ok: true }); }
         }
       }
       // /projects/:id/drafts  and  /projects/:id/conversations
@@ -570,19 +704,19 @@ const server = http.createServer(async (req, res) => {
         const putOne = kind === 'drafts' ? ws.putDraft       : ws.putConversation;
         const delOne = kind === 'drafts' ? ws.deleteDraft    : ws.deleteConversation;
         // collection
-        if (parts.length === 2 && req.method === 'GET') return sendJSON(res, 200, { ok: true, items: list(userId, projectId) });
+        if (parts.length === 2 && req.method === 'GET') return sendJSON(res, 200, { ok: true, items: await list(userId, projectId) });
         // item
         if (parts.length === 3) {
           const itemId = parts[2];
           if (req.method === 'GET') {
-            const it = getOne(userId, projectId, itemId);
+            const it = await getOne(userId, projectId, itemId);
             return it ? sendJSON(res, 200, { ok: true, item: it }) : sendJSON(res, 404, { ok: false, error: 'not found' });
           }
           if (req.method === 'PUT') {
             const data = JSON.parse((await readBody(req)) || '{}');
-            return sendJSON(res, 200, { ok: true, item: putOne(userId, projectId, itemId, data) });
+            return sendJSON(res, 200, { ok: true, item: await putOne(userId, projectId, itemId, data) });
           }
-          if (req.method === 'DELETE') { delOne(userId, projectId, itemId); return sendJSON(res, 200, { ok: true }); }
+          if (req.method === 'DELETE') { await delOne(userId, projectId, itemId); return sendJSON(res, 200, { ok: true }); }
         }
       }
       return sendJSON(res, 404, { ok: false, error: 'unknown workspace route' });
@@ -598,7 +732,7 @@ const server = http.createServer(async (req, res) => {
   // login page can render its images. Public routes (/, /health, /auth/*) and the
   // per-user /projects/* routes already returned above.
   if (!url.pathname.startsWith('/assets/')) {
-    const userId = requireAuth(req, url);
+    const userId = await requireAuth(req, url);
     if (!userId) return unauthorized(res);
     req._userId = userId;   // stashed for handlers that need the account (e.g. /publish)
   }
@@ -628,13 +762,15 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // ── POST /app/chat → dashboard-portal solution-builder conversation ──
+  // ── POST /app/chat → solution-builder conversation (portal or data-product) ──
+  // archetype:"data-product" routes to the IDOA elicitation prompt; default = dashboard-portal.
   if (req.method === 'POST' && url.pathname === '/app/chat') {
     try {
       const body = await readBody(req);
-      const { message, sessionId } = JSON.parse(body || '{}');
+      const { message, sessionId, archetype } = JSON.parse(body || '{}');
       if (!message || typeof message !== 'string') return sendJSON(res, 400, { ok: false, error: 'message required' });
-      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: APP_PROMPT_PATH, model: modelFor('chat') });
+      const promptPath = archetype === 'data-product' ? DATAPRODUCT_PROMPT_PATH : APP_PROMPT_PATH;
+      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: promptPath, model: modelFor('chat') });
       return sendJSON(res, 200, {
         ok: true,
         rawResult: result.result || '',
@@ -786,7 +922,7 @@ const server = http.createServer(async (req, res) => {
 
       // Author/provenance comes from the logged-in account; the client may pass a
       // display override but the real userId is always recorded for the Catalog.
-      const sessionUser = auth.getUser(req._userId);
+      const sessionUser = await auth.getUser(req._userId);
       const author = (authorOverride && String(authorOverride).trim())
         || (sessionUser ? (sessionUser.displayName || sessionUser.username) : null);
 
@@ -1331,13 +1467,14 @@ ${JSON.stringify(seedAgent, null, 2)}`;
     }
   }
 
-  // ── GET /assets/* → static file from project root (images only) ──
+  // ── GET /assets/* → static file from ./assets (images only); URL path is literal ──
   if (req.method === 'GET' && url.pathname.startsWith('/assets/')) {
+    const ASSETS_DIR = path.join(ROOT, 'assets');
     const requested = decodeURIComponent(url.pathname.replace(/^\/assets\//, ''));
-    // safety: no path traversal, must resolve inside ROOT
+    // safety: no path traversal, must resolve inside ./assets
     const safe = path.normalize(requested).replace(/^(\.\.[\\/])+/, '');
-    const full = path.join(ROOT, safe);
-    if (!full.startsWith(ROOT)) { res.writeHead(403); res.end('forbidden'); return; }
+    const full = path.join(ASSETS_DIR, safe);
+    if (!full.startsWith(ASSETS_DIR)) { res.writeHead(403); res.end('forbidden'); return; }
     const ext = path.extname(full).toLowerCase();
     const mime = { '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.svg':'image/svg+xml', '.webp':'image/webp', '.ico':'image/x-icon', '.gif':'image/gif' }[ext];
     if (!mime) { res.writeHead(415); res.end('unsupported'); return; }
@@ -1353,19 +1490,31 @@ ${JSON.stringify(seedAgent, null, 2)}`;
   res.end('Not found');
 });
 
-ensureLibrary().then(() => {
-  server.listen(PORT, '127.0.0.1', () => {
+wsdb.init().then(ensureLibrary).then(() => {
+  server.listen(PORT, HOST, () => {
+    const provLabel = LLM_PROVIDER === 'claude-cli' ? 'local `claude -p` (Claude Code login)'
+      : LLM_PROVIDER === 'openrouter' ? `OpenRouter API (${OPENROUTER_ROUTES.chat})`
+      : LLM_PROVIDER === 'anthropic'  ? 'Anthropic API'
+      : LLM_PROVIDER;
+    const W = 58;
+    const line = (s) => console.log('  │' + ('  ' + s).padEnd(W).slice(0, W) + '│');
     console.log('');
-    console.log('  ┌──────────────────────────────────────────────────────────┐');
-    console.log('  │  AgentEye Hub — Claude Code bridge                       │');
-    console.log('  │                                                          │');
-    console.log(`  │  → http://localhost:${PORT}${' '.repeat(38 - String(PORT).length)}│`);
-    console.log('  │  → Spawns local `claude -p` for every turn               │');
-    console.log('  │  → Uses your already-logged-in Claude Code session       │');
-    console.log(`  │  → Library: ${GIT_AVAILABLE ? 'Git-backed ' : 'filesystem-only '}at ./library${' '.repeat(GIT_AVAILABLE ? 22 : 18)}│`);
-    console.log('  └──────────────────────────────────────────────────────────┘');
+    console.log('  ┌' + '─'.repeat(W) + '┐');
+    line('AgentEye Hub');
+    line('');
+    line(`→ http://${HOST}:${PORT}`);
+    line(`→ LLM provider: ${provLabel}`);
+    line(`→ Database: ${wsdb.BACKEND}`);
+    line(`→ Static UI: ${SERVE_STATIC ? 'served here' : 'off (API-only)'}`);
+    line(`→ CORS: ${CORS_ORIGIN}`);
+    line(`→ Library: ${GIT_AVAILABLE ? 'Git-backed' : 'filesystem-only'} at ./library`);
+    console.log('  └' + '─'.repeat(W) + '┘');
     console.log('');
   });
+}).catch((err) => {
+  console.error('\nStartup failed:', err.message || err);
+  if (wsdb.BACKEND === 'postgres') console.error('(check DATABASE_URL — Supabase needs the IPv4 pooler string, session mode)\n');
+  process.exit(1);
 });
 
 server.on('error', (err) => {

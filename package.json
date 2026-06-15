@@ -14,9 +14,10 @@
     "solution:bundle": "node cfn/solution-deploy.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.5.0"
   },
   "dependencies": {
-    "js-yaml": "^4.2.0"
+    "js-yaml": "^4.2.0",
+    "pg": "^8.21.0"
   }
 }

@@ -29,21 +29,21 @@ function publicUser(u) {
 }
 const normUsername = s => String(s || '').trim().toLowerCase();
 
-function issueToken(userId) {
-  db.pruneExpiredSessions(Date.now());
+async function issueToken(userId) {
+  await db.pruneExpiredSessions(Date.now());
   const token = crypto.randomBytes(32).toString('hex');
   const now = Date.now();
-  db.insertSession(token, userId, now, now + SESSION_TTL_MS);
+  await db.insertSession(token, userId, now, now + SESSION_TTL_MS);
   return token;
 }
 
-// ── public API ───────────────────────────────────────────────────────────────
-function signup({ username, password, displayName }) {
+// ── public API (async: the DB layer may be Postgres) ────────────────────────────
+async function signup({ username, password, displayName }) {
   const uname = normUsername(username);
   if (!uname || uname.length < 2) throw new Error('username must be at least 2 characters');
   if (!/^[a-z0-9._-]+$/.test(uname)) throw new Error('username may only contain letters, numbers, dot, dash, underscore');
   if (!password || String(password).length < 4) throw new Error('password must be at least 4 characters');
-  if (db.getUserByUsername(uname)) throw new Error('that username is already taken');
+  if (await db.getUserByUsername(uname)) throw new Error('that username is already taken');
 
   const id   = crypto.randomBytes(8).toString('hex');
   const salt = crypto.randomBytes(16).toString('hex');
@@ -51,40 +51,40 @@ function signup({ username, password, displayName }) {
     id, username: uname,
     displayName: String(displayName || username || uname).trim().slice(0, 80) || uname,
     salt, passHash: hashPassword(password, salt),
-    isAdmin: db.usersCount() === 0,             // first account is admin
+    isAdmin: (await db.usersCount()) === 0,     // first account is admin
     orgId: null,
     createdAt: new Date().toISOString(),
   };
-  db.insertUser(user);
-  db.audit(id, 'auth.signup', id, user.username);
-  return { token: issueToken(id), user: publicUser(db.getUserById(id)) };
+  await db.insertUser(user);
+  await db.audit(id, 'auth.signup', id, user.username);
+  return { token: await issueToken(id), user: publicUser(await db.getUserById(id)) };
 }
 
-function login({ username, password }) {
+async function login({ username, password }) {
   const uname = normUsername(username);
-  const user = db.getUserByUsername(uname);
+  const user = await db.getUserByUsername(uname);
   // Run verify even when the user is missing to keep timing roughly uniform.
   const ok = user ? verifyPassword(password, user.salt, user.pass_hash) : verifyPassword(password, 'x', '');
   if (!user || !ok) throw new Error('invalid username or password');
-  db.audit(user.id, 'auth.login', user.id, user.username);
-  return { token: issueToken(user.id), user: publicUser(user) };
+  await db.audit(user.id, 'auth.login', user.id, user.username);
+  return { token: await issueToken(user.id), user: publicUser(user) };
 }
 
-function logout(token) {
-  if (token) db.deleteSession(token);
+async function logout(token) {
+  if (token) await db.deleteSession(token);
 }
 
 // Returns userId for a valid, unexpired token, else null. Sliding-window refresh.
-function verifyToken(token) {
+async function verifyToken(token) {
   if (!token) return null;
-  const s = db.getSession(token);
+  const s = await db.getSession(token);
   if (!s) return null;
-  if (!s.expires_at || s.expires_at < Date.now()) { db.deleteSession(token); return null; }
+  if (!s.expires_at || s.expires_at < Date.now()) { await db.deleteSession(token); return null; }
   const newExp = Date.now() + SESSION_TTL_MS;
-  if (newExp - s.expires_at > 1000 * 60 * 60) db.touchSession(token, newExp);
+  if (newExp - s.expires_at > 1000 * 60 * 60) await db.touchSession(token, newExp);
   return s.user_id;
 }
 
-function getUser(userId) { return publicUser(db.getUserById(userId)); }
+async function getUser(userId) { return publicUser(await db.getUserById(userId)); }
 
 module.exports = { signup, login, logout, verifyToken, getUser };
