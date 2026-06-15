@@ -1,0 +1,77 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "_comment": "Vercel hosts the static Hub (AgentEye_Hub.html + /assets/*). Every API path is rewritten to the Railway backend so the Hub's relative fetch() calls keep working unchanged and the browser sees a same-origin request (no CORS). Replace RAILWAY_API_URL below with your Railway service URL, OR set it via the dashboard and use $RAILWAY_API_URL — Vercel does not interpolate env vars into rewrites, so the literal URL must be committed here for the deployed config.",
+  "buildCommand": null,
+  "outputDirectory": ".",
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/AgentEye_Hub.html"
+    },
+    {
+      "source": "/health",
+      "destination": "https://agenteye-api-production.up.railway.app/health"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/auth/:path*"
+    },
+    {
+      "source": "/projects",
+      "destination": "https://agenteye-api-production.up.railway.app/projects"
+    },
+    {
+      "source": "/projects/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/projects/:path*"
+    },
+    {
+      "source": "/chat",
+      "destination": "https://agenteye-api-production.up.railway.app/chat"
+    },
+    {
+      "source": "/app/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/app/:path*"
+    },
+    {
+      "source": "/preview",
+      "destination": "https://agenteye-api-production.up.railway.app/preview"
+    },
+    {
+      "source": "/publish",
+      "destination": "https://agenteye-api-production.up.railway.app/publish"
+    },
+    {
+      "source": "/library",
+      "destination": "https://agenteye-api-production.up.railway.app/library"
+    },
+    {
+      "source": "/library/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/library/:path*"
+    },
+    {
+      "source": "/graph",
+      "destination": "https://agenteye-api-production.up.railway.app/graph"
+    },
+    {
+      "source": "/finops",
+      "destination": "https://agenteye-api-production.up.railway.app/finops"
+    },
+    {
+      "source": "/fork-chat",
+      "destination": "https://agenteye-api-production.up.railway.app/fork-chat"
+    },
+    {
+      "source": "/seed-chat",
+      "destination": "https://agenteye-api-production.up.railway.app/seed-chat"
+    },
+    {
+      "source": "/suggest",
+      "destination": "https://agenteye-api-production.up.railway.app/suggest"
+    },
+    {
+      "source": "/memory/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/memory/:path*"
+    }
+  ]
+}

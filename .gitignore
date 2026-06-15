@@ -1,6 +1,13 @@
 # dependencies
 node_modules/
 
+# local env (committed template is .env.example)
+.env
+.env.local
+
+# deploy tokens (Railway/Vercel) — never commit
+.deploy.tokens.env
+
 # generated solution repos (regenerable from a SolutionSpec via appgen)
 generated/
 
@@ -14,3 +21,6 @@ memory/
 # private workspace data — accounts, sessions, per-user projects/drafts/conversations
 .auth/
 workspaces/
+
+# vercel static deploy dir (generated)
+agenteye-hub/
