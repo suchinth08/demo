@@ -7575,6 +7575,19 @@ refreshMemoryCount();
   function dpcSend() {
     const ti = $('dpc-chat-input'); if (!ti) return;
     const t = ti.value.trim(); if (!t || appState.busy) return;
+    // On a fresh canvas, map the ask to a known blueprint and load a starter pipeline
+    // instantly (deterministic) instead of a chat round-trip. Novel asks fall through to the AI.
+    const dp = (appState.solution && appState.solution.dataProduct) || {};
+    const emptyCanvas = !['sources', 'entities', 'checks', 'transforms', 'smartNodes', 'sinks'].some(k => (dp[k] || []).length);
+    if (emptyCanvas && !appState._proposed && t.length > 12) {
+      const match = dpcMatchPreset(t);
+      if (match) {
+        ti.value = ''; ti.style.height = 'auto';
+        appState.display.push({ role: 'user', content: t });
+        dpcApplyPreset(match, { force: true, keepDisplay: true, note: `I matched your ask to the **${match.name}** blueprint and loaded a starter pipeline with placeholders. Edit any node, or tell me what to change and I'll propose the edits.` });
+        return;
+      }
+    }
     input.value = t; ti.value = ''; ti.style.height = 'auto';
     send();   // reads input.value; renderChat() writes to the dock via chatTarget
   }
@@ -8179,15 +8192,23 @@ refreshMemoryCount();
         checks:[{ id:'chk_mpan_active', entityRef:'ent_meter', field:'mpan', kind:'referential', severity:'error' },{ id:'chk_ts_monotonic', entityRef:'ent_meter', field:'readTimestamp', kind:'custom', severity:'error' },{ id:'chk_delta_range', entityRef:'ent_meter', field:'consumptionDelta', kind:'range', severity:'error' },{ id:'chk_gap_estimated', entityRef:'ent_meter', field:'estimatedFlag', kind:'custom', severity:'warn' },{ id:'chk_rollover', entityRef:'ent_meter', field:'registerRolloverFlag', kind:'custom', severity:'warn' }],
         transforms:[], smartNodes:[{ id:'sn_fault_classify', task:'Classify root cause of read failure as communications outage, tamper, or meter fault from the anomalous read record', entityRef:'ent_meter', modelProvider:'ollama', model:'', confidenceThreshold:0.8, validatedBy:'chk_delta_range' }],
         sinks:[{ id:'snk_settlement', kind:'api', entityRef:'ent_meter', config:{ target:'settlement-engine', writeMode:'append' } },{ id:'snk_billing', kind:'api', entityRef:'ent_meter', config:{ target:'billing-system', writeMode:'upsert' } },{ id:'snk_ofgem', kind:'export', entityRef:'ent_meter', config:{ target:'ofgem-reporting', format:'regulatory-csv', schedule:'monthly' } }],
-        exceptions:{ policy:'quarantine-review', reviewRoles:['meter-data-analyst'], reprocess:true, approvals:'writes-only' }, operations:{ schedule:'event', retries:3, backfill:true, console:true, lineage:true, audit:true, consoleUrl:null } }, agents:[] }
+        exceptions:{ policy:'quarantine-review', reviewRoles:['meter-data-analyst'], reprocess:true, approvals:'writes-only' }, operations:{ schedule:'event', retries:3, backfill:true, console:true, lineage:true, audit:true, consoleUrl:null } }, agents:[] },
+    { key:'motor-insurance-claims', name:'Motor Insurance Claims Validation', industry:'Insurance / Claims', problem:'Inbound motor claims must be validated against policy and cover before entering the claims-handling system.', kpi:'Under 30 min from claim arrival to claims-system update; low false-quarantine rate.', blueprintPreset:'exception-workspace',
+      dataProduct:{ entities:[{ id:'ent_claim', name:'MotorClaim', confirmed:true, fields:[{name:'claimId',required:true},{name:'policyNumber',required:true},{name:'incidentDate',type:'date'},{name:'vehicleVIN'},{name:'claimAmount',type:'number'},{name:'damageDescription'},{name:'channel'}] }],
+        sources:[{ id:'src_stream', kind:'stream', entityRef:'ent_claim', config:{ transport:'broker-portal', microbatchInterval:'15m' } }],
+        checks:[{ id:'chk_claimid', entityRef:'ent_claim', field:'claimId', kind:'uniqueness', severity:'error' },{ id:'chk_policy', entityRef:'ent_claim', field:'policyNumber', kind:'referential', severity:'error' },{ id:'chk_amount', entityRef:'ent_claim', field:'claimAmount', kind:'range', severity:'error' },{ id:'chk_incident', entityRef:'ent_claim', field:'incidentDate', kind:'custom', severity:'error' },{ id:'chk_damage_cat', entityRef:'ent_claim', field:'damageDescription', kind:'custom', severity:'warn' }],
+        transforms:[], smartNodes:[{ id:'sn_damage', task:'classify free-text damage descriptions into a structured damage-category taxonomy', entityRef:'ent_claim', modelProvider:'ollama', model:'', confidenceThreshold:0.8, validatedBy:'chk_damage_cat' }],
+        sinks:[{ id:'snk_claims', kind:'api', entityRef:'ent_claim', config:{ target:'claims-handling-system', writeMode:'upsert' } },{ id:'snk_dash', kind:'analytical-dashboard', entityRef:'ent_claim', config:{ title:'Claims volumes & exception rates' } }],
+        exceptions:{ policy:'quarantine-review', reviewRoles:['claims-handler'], reprocess:true, approvals:'writes-only' }, operations:{ schedule:'event', retries:3, backfill:true, console:true, lineage:true, audit:true, consoleUrl:null } }, agents:[] }
   ];
   // Apply any preset (blueprint template OR use-case) to the canvas, seed the dock chat,
   // and prime a fresh AI session with the loaded spec so the designer can build/edit on top.
-  function dpcApplyPreset(preset) {
+  function dpcApplyPreset(preset, opts) {
+    opts = opts || {};
     if (appState._proposed) { if (typeof toast === 'function') toast('Accept or reject the AI proposal first'); return; }
     const dp = (appState.solution && appState.solution.dataProduct) || {};
     const existing = ['sources', 'entities', 'checks', 'transforms', 'smartNodes', 'sinks'].some(k => Array.isArray(dp[k]) && dp[k].length);
-    if (existing && !confirm('Load "' + preset.name + '"? This replaces the current pipeline on the canvas.')) return;
+    if (existing && !opts.force && !confirm('Load "' + preset.name + '"? This replaces the current pipeline on the canvas.')) return;
     const clone = JSON.parse(JSON.stringify(preset));
     appState.solution = appState.solution || {};
     appState.solution.archetype = 'data-product';
@@ -8202,11 +8223,14 @@ refreshMemoryCount();
     // fresh AI session, primed with the loaded spec on the next turn
     appState.sessionId = null;
     appState._primeContext = true;
-    appState.display = [{ role: 'assistant', content:
-      `Loaded **${clone.name}**${clone.industry ? ' — _' + clone.industry + '_' : ''} onto the canvas: ` +
+    const summary =
+      `**${clone.name}**${clone.industry ? ' — _' + clone.industry + '_' : ''} on the canvas: ` +
       `${n('sources')} source(s), ${n('entities')} entity/ies, ${n('checks')} check(s)` +
       `${n('smartNodes') ? ', ' + n('smartNodes') + ' AI smart-node(s)' : ''}, ${n('sinks')} sink(s).\n\n` +
-      `Tell me what to change — e.g. *"add a uniqueness check on the invoice number"*, *"make the sink a Postgres table"*, or *"add a smart node to classify free-text notes"*. I'll propose the edits for you to review and accept.` }];
+      `Tell me what to change — e.g. *"add a uniqueness check on the invoice number"*, *"make the sink a Postgres table"*, or *"add a smart node to classify free-text notes"*. I'll propose the edits for you to review and accept.`;
+    const note = opts.note ? (opts.note + '\n\n' + summary) : ('Loaded ' + summary);
+    if (opts.keepDisplay) appState.display.push({ role: 'assistant', content: note });
+    else appState.display = [{ role: 'assistant', content: note }];
     autosaveApp(); dpcSyncTitle();
     if (dpcIsOpen()) { dpcShowView('canvas'); renderChat(); }
     dpcRender(); dpcRenderInspector();
@@ -8214,6 +8238,32 @@ refreshMemoryCount();
   }
   function dpcLoadTemplate(key) { const t = DP_TEMPLATES.find(x => x.key === key); if (t) dpcApplyPreset(t); }
   function dpcLoadUseCase(key) { const u = DP_USECASES.find(x => x.key === key); if (u) dpcApplyPreset(u); }
+
+  // ── Map a free-text ask to a known blueprint so a brief loads a starter pipeline
+  //    on the canvas instantly (deterministic, no LLM) — placeholders the user then edits. ──
+  const DP_UC_KEYWORDS = {
+    'supplier-price-file':           ['price', 'supplier', 'pricing', 'margin', 'sku'],
+    'store-inventory-dedup':         ['inventory', 'store', 'replenish', 'dedup', 'duplicate', 'stock', 'wms'],
+    'invoice-po-reconciliation':     ['invoice', 'reconcil', 'purchase order', ' po ', '3-way', 'three-way', 'vendor', 'erp', 'goods receipt', 'procurement', 'payable'],
+    'product-master-onboarding':     ['product master', 'master data', 'pim', 'gtin', 'catalog', 'catalogue', 'onboard', 'attribute'],
+    'clinical-trial-ingestion':      ['clinical', 'trial', 'cro', 'patient', 'cdisc', 'adverse event', 'dcr', 'protocol'],
+    'financial-close-consolidation': ['financial close', 'consolidation', 'intercompany', 'trial balance', 'p&l', 'journal', 'gl ', 'ledger'],
+    'kyc-aml-document-processing':   ['kyc', 'aml', 'identity document', 'sanctions', 'onboarding', 'compliance', 'passport'],
+    'energy-meter-aggregation':      ['meter', 'energy', 'settlement', 'mpan', 'smart meter', 'utilities', 'ofgem', 'consumption'],
+    'motor-insurance-claims':        ['claim', 'insurance', 'policy', 'cover limit', 'damage', 'claims handler']
+  };
+  function dpcMatchPreset(text) {
+    const t = ' ' + String(text || '').toLowerCase().replace(/[^a-z0-9&\- ]+/g, ' ').replace(/\s+/g, ' ') + ' ';
+    const all = [].concat(typeof DP_USECASES !== 'undefined' ? DP_USECASES : [], typeof DP_TEMPLATES !== 'undefined' ? DP_TEMPLATES : []);
+    let best = null, bestScore = 0;
+    all.forEach(p => {
+      let score = 0;
+      (DP_UC_KEYWORDS[p.key] || []).forEach(k => { if (t.indexOf(k.toLowerCase()) >= 0) score += 2; });
+      (p.name || '').toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length > 3).forEach(w => { if (t.indexOf(w) >= 0) score += 1; });
+      if (score > bestScore) { bestScore = score; best = p; }
+    });
+    return bestScore >= 2 ? best : null;
+  }
 
   function renderChat() {
     chatTarget.innerHTML = appState.display.map(m =>
