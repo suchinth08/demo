@@ -1,0 +1,60 @@
+{
+  "kind": "solution",
+  "schemaVersion": "0.1",
+  "archetype": "data-product",
+  "name": "Claims Exception Workspace",
+  "slug": "claims-exception-workspace",
+  "version": null,
+  "description": "Triage a high-volume claims stream: classify, validate, and route exceptions to reviewers.",
+  "targetUsers": "Operations reviewers",
+  "tenancy": { "scope": "client-workspace", "clientId": null, "promotedFrom": null, "sanitized": false },
+  "environments": ["dev", "stage", "prod"],
+  "blueprintPreset": "exception-workspace",
+  "dataProduct": {
+    "stack": { "frontend": "react-vite", "componentLib": "shadcn-tailwind", "language": "typescript", "bff": "node-fastify", "database": "aurora-serverless-pg", "jobRunner": "lambda-batch" },
+    "entities": [
+      { "id": "ent_claim", "name": "Claim", "confirmed": true, "fields": [
+        { "name": "claimId", "type": "string", "required": true, "pii": false },
+        { "name": "type", "type": "string", "required": false, "pii": false },
+        { "name": "amount", "type": "number", "required": false, "pii": false },
+        { "name": "status", "type": "string", "required": false, "pii": false }
+      ] }
+    ],
+    "sources": [
+      { "id": "src_stream", "kind": "stream", "entityRef": "ent_claim", "config": {} }
+    ],
+    "checks": [
+      { "id": "chk_cid", "entityRef": "ent_claim", "field": "claimId", "kind": "required", "params": {}, "severity": "error" },
+      { "id": "chk_amt", "entityRef": "ent_claim", "field": "amount", "kind": "range", "params": { "min": 0 }, "severity": "error" },
+      { "id": "chk_type", "entityRef": "ent_claim", "field": "type", "kind": "required", "params": {}, "severity": "warn" }
+    ],
+    "transforms": [],
+    "smartNodes": [
+      { "id": "sn_type", "task": "classify claim type from free text", "entityRef": "ent_claim", "modelProvider": "ollama", "model": "qwen2.5", "confidenceThreshold": 0.75, "validatedBy": "chk_type" }
+    ],
+    "exceptions": { "policy": "quarantine-review", "reviewRoles": ["ops-reviewer"], "reprocess": true, "approvals": "all" },
+    "sinks": [
+      { "id": "snk_n2sql", "kind": "n2sql", "entityRef": "ent_claim", "config": {} }
+    ],
+    "operations": { "schedule": "event", "retries": 5, "backfill": true, "console": true, "alerts": ["failed-run", "sla-miss"], "lineage": true, "audit": true, "consoleUrl": null },
+    "modelRuntime": { "defaultProvider": "ollama", "endpointRef": null, "fallbackProvider": "bedrock" },
+    "identity": { "provider": "cognito", "rbacRoles": ["operator", "reviewer", "approver"], "sessionStrategy": "jwt", "propagateToAgent": true },
+    "governance": { "residency": "match-data-region", "piiClassification": "review", "retentionDays": 730, "lineage": true },
+    "enterprise": {
+      "network": { "mode": "vpc", "vpcId": null, "subnetIds": [], "securityGroupIds": [] },
+      "encryption": { "mode": "aws-managed", "kmsKeyArn": null },
+      "approvals": { "mode": "all", "approverGroupArn": null },
+      "observability": { "cloudwatchLogs": true, "xrayTracing": true, "correlationIds": true, "dataLineage": true },
+      "tags": { "Project": "claims-exception-workspace", "Environment": "dev", "Owner": "ops", "CostCenter": null },
+      "dr": { "posture": "single-region", "primaryRegion": null, "secondaryRegion": null },
+      "hosting": { "frontend": "cloudfront-s3", "bff": "lambda-apigw", "batch": "lambda-batch", "iac": "cloudformation" },
+      "cicd": { "platform": "github-actions", "environments": ["dev", "stage", "prod"], "signOffGate": true, "scans": ["sbom", "sca", "sast", "license"], "rollback": true }
+    }
+  },
+  "agents": [
+    { "agentName": "OpsTriageAssistant", "role": "support", "binding": "bff", "useCase": "Summarize an exception and recommend a disposition for the reviewer.", "suggestedTools": [], "status": "target", "slug": null, "version": null }
+  ],
+  "validation": [],
+  "generation": { "blueprintVersion": "data-product@0.1", "modelVersion": null, "skeleton": "deterministic", "regeneration": "one-time", "verificationGate": ["install", "build", "typecheck", "lint", "test"], "generatedAt": null, "promptDigest": null },
+  "artifacts": null
+}

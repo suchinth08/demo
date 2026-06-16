@@ -1,0 +1,56 @@
+{
+  "kind": "solution",
+  "schemaVersion": "0.1",
+  "archetype": "data-product",
+  "name": "Supplier Price File Validation",
+  "slug": "supplier-price-dq",
+  "version": null,
+  "description": "Validate supplier price files before they land in the warehouse.",
+  "targetUsers": "Pricing data-ops team",
+  "tenancy": { "scope": "client-workspace", "clientId": null, "promotedFrom": null, "sanitized": false },
+  "environments": ["dev", "stage", "prod"],
+  "blueprintPreset": "file-to-warehouse",
+  "dataProduct": {
+    "stack": { "frontend": "react-vite", "componentLib": "shadcn-tailwind", "language": "typescript", "bff": "node-fastify", "database": "aurora-serverless-pg", "jobRunner": "lambda-batch" },
+    "entities": [
+      { "id": "ent_price", "name": "PriceFile", "confirmed": true, "fields": [
+        { "name": "sku", "type": "string", "required": true, "pii": false },
+        { "name": "price", "type": "number", "required": true, "pii": false },
+        { "name": "currency", "type": "string", "required": false, "pii": false },
+        { "name": "effectiveDate", "type": "date", "required": false, "pii": false }
+      ] }
+    ],
+    "sources": [
+      { "id": "src_csv", "kind": "csv", "entityRef": "ent_price", "config": {} }
+    ],
+    "checks": [
+      { "id": "chk_sku", "entityRef": "ent_price", "field": "sku", "kind": "required", "params": {}, "severity": "error" },
+      { "id": "chk_price", "entityRef": "ent_price", "field": "price", "kind": "range", "params": { "min": 0 }, "severity": "error" },
+      { "id": "chk_ccy", "entityRef": "ent_price", "field": "currency", "kind": "regex", "params": { "pattern": "^[A-Z]{3}$" }, "severity": "warn" }
+    ],
+    "transforms": [],
+    "smartNodes": [],
+    "exceptions": { "policy": "quarantine-review", "reviewRoles": ["data-ops"], "reprocess": true, "approvals": "writes-only" },
+    "sinks": [
+      { "id": "snk_pg", "kind": "postgres", "entityRef": "ent_price", "config": {} }
+    ],
+    "operations": { "schedule": "0 6 * * *", "retries": 3, "backfill": true, "console": true, "alerts": ["failed-run", "dq-breach"], "lineage": true, "audit": true, "consoleUrl": null },
+    "modelRuntime": { "defaultProvider": "ollama", "endpointRef": null, "fallbackProvider": null },
+    "identity": { "provider": "cognito", "rbacRoles": ["operator", "reviewer"], "sessionStrategy": "jwt", "propagateToAgent": true },
+    "governance": { "residency": "match-data-region", "piiClassification": "none", "retentionDays": 365, "lineage": true },
+    "enterprise": {
+      "network": { "mode": "vpc", "vpcId": null, "subnetIds": [], "securityGroupIds": [] },
+      "encryption": { "mode": "aws-managed", "kmsKeyArn": null },
+      "approvals": { "mode": "writes-only", "approverGroupArn": null },
+      "observability": { "cloudwatchLogs": true, "xrayTracing": false, "correlationIds": true, "dataLineage": true },
+      "tags": { "Project": "supplier-price-dq", "Environment": "dev", "Owner": "data-ops", "CostCenter": null },
+      "dr": { "posture": "single-region", "primaryRegion": null, "secondaryRegion": null },
+      "hosting": { "frontend": "cloudfront-s3", "bff": "lambda-apigw", "batch": "lambda-batch", "iac": "cloudformation" },
+      "cicd": { "platform": "github-actions", "environments": ["dev", "stage", "prod"], "signOffGate": true, "scans": ["sbom", "sca", "sast", "license"], "rollback": true }
+    }
+  },
+  "agents": [],
+  "validation": [],
+  "generation": { "blueprintVersion": "data-product@0.1", "modelVersion": null, "skeleton": "deterministic", "regeneration": "one-time", "verificationGate": ["install", "build", "typecheck", "lint", "test"], "generatedAt": null, "promptDigest": null },
+  "artifacts": null
+}

@@ -39,6 +39,8 @@ RULES:
 - Proactively suggest smart defaults, blessed presets, and the golden path; let the user override.
 - Do NOT use any tools, read files, or run shell commands. Your only job is to converse and emit JSON.
 - ALWAYS echo back entities[], sources[], checks[], smartNodes[], sinks[], operations, agents[], identity, and validation[] on every turn once set, so the UI keeps showing them.
+- CANVAS STABILITY: when the incoming solution already has primitives with an "id", PRESERVE that exact id on every primitive you echo back; mint a short stable id (e.g. "chk_price_req") only for primitives you are newly adding. The UI diffs by id to show a reviewable proposal — changing ids churns the canvas.
+- PIPELINE GUIDANCE: proactively propose the ideal/target pipeline for the stated business use case, and suggest which agent(s) to harness (as agents[] with status "target") when an AI-assisted step or ops assistant would help. Put a one-line plain-language rationale for what you're proposing in "message" (the user reviews proposed nodes on a canvas, then accepts or rejects).
 - At COMPLETE, write a generation plan as an ordered checklist Claude Code will follow (scaffold deterministic skeleton → emit entities/migrations from the contract → ingestion adapters → validation engine + checks → smart nodes (soft, validated) → exception queue + review UI → sinks → operations runtime (scheduler/console/alerting/lineage) → wire any agent binding → app CFN + per-agent CFN + deploy/ manifest + CI/CD → run the verification gate). Generation is ONE-TIME.
 
 ALWAYS respond in this EXACT JSON format. No markdown fences, no extra text, just raw valid JSON:
@@ -66,7 +68,7 @@ ALWAYS respond in this EXACT JSON format. No markdown fences, no extra text, jus
       "smartNodes": [],
       "exceptions": { "policy": "quarantine-review", "reviewRoles": [], "reprocess": true, "approvals": "writes-only" },
       "sinks": [],
-      "operations": { "schedule": null, "retries": 3, "backfill": true, "console": true, "alerts": [], "lineage": true, "audit": true },
+      "operations": { "schedule": null, "retries": 3, "backfill": true, "console": true, "alerts": [], "lineage": true, "audit": true, "consoleUrl": null },
       "modelRuntime": { "defaultProvider": "ollama", "endpointRef": null, "fallbackProvider": null },
       "identity": { "provider": null, "rbacRoles": [], "sessionStrategy": "jwt", "propagateToAgent": true },
       "governance": { "residency": "match-data-region", "piiClassification": "review", "retentionDays": null, "lineage": true },
