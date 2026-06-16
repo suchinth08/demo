@@ -281,6 +281,26 @@ async function callOpenRouter({ message, sessionId, systemPromptPath, model, tim
   };
 }
 
+// ── OpenRouter model catalogue (cached 1h) for the in-chat model picker ──
+let _orModelsCache = { at: 0, list: null };
+async function fetchOpenRouterModels() {
+  const now = Date.now();
+  if (_orModelsCache.list && now - _orModelsCache.at < 3600000) return _orModelsCache.list;
+  const resp = await fetch('https://openrouter.ai/api/v1/models', { headers: { 'X-Title': 'AgentEye' } });
+  if (!resp.ok) throw new Error('OpenRouter /models ' + resp.status);
+  const data = JSON.parse(await resp.text());
+  const list = (data.data || []).map(m => ({
+    id: m.id,
+    name: m.name || m.id,
+    ctx: m.context_length || null,
+    promptPrice: m.pricing ? Number(m.pricing.prompt) : null,
+    completionPrice: m.pricing ? Number(m.pricing.completion) : null,
+    free: m.pricing ? (Number(m.pricing.prompt) === 0 && Number(m.pricing.completion) === 0) : false,
+  })).sort((a, b) => a.id.localeCompare(b.id));
+  _orModelsCache = { at: now, list };
+  return list;
+}
+
 function callClaudeCli({ message, sessionId, systemPromptPath, model, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   return new Promise((resolve, reject) => {
     const args = [
@@ -737,6 +757,26 @@ const server = http.createServer(async (req, res) => {
     req._userId = userId;   // stashed for handlers that need the account (e.g. /publish)
   }
 
+  // ── GET /models → model catalogue for the in-chat picker ──
+  if (req.method === 'GET' && url.pathname === '/models') {
+    try {
+      if (LLM_PROVIDER === 'openrouter') {
+        const list = await fetchOpenRouterModels();
+        return sendJSON(res, 200, { ok: true, provider: 'openrouter', current: modelFor('chat'), models: list });
+      }
+      const claude = [
+        { id: 'claude-opus-4-8',   name: 'Claude Opus 4.8' },
+        { id: 'claude-sonnet-4-6', name: 'Claude Sonnet 4.6' },
+        { id: 'claude-haiku-4-5',  name: 'Claude Haiku 4.5' },
+        { id: 'claude-fable-5',    name: 'Claude Fable 5' },
+      ];
+      return sendJSON(res, 200, { ok: true, provider: LLM_PROVIDER, current: modelFor('chat'), models: claude });
+    } catch (e) {
+      // degrade gracefully — the UI falls back to the routing slugs only
+      return sendJSON(res, 200, { ok: true, provider: LLM_PROVIDER, current: modelFor('chat'), models: [], error: String(e.message || e) });
+    }
+  }
+
   // ── POST /chat → provisioner conversation ──
   if (req.method === 'POST' && url.pathname === '/chat') {
     try {
@@ -767,10 +807,12 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && url.pathname === '/app/chat') {
     try {
       const body = await readBody(req);
-      const { message, sessionId, archetype } = JSON.parse(body || '{}');
+      const { message, sessionId, archetype, model } = JSON.parse(body || '{}');
       if (!message || typeof message !== 'string') return sendJSON(res, 400, { ok: false, error: 'message required' });
       const promptPath = archetype === 'data-product' ? DATAPRODUCT_PROMPT_PATH : APP_PROMPT_PATH;
-      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: promptPath, model: modelFor('chat') });
+      // honor a UI-picked model on the OpenRouter path; otherwise the route default
+      const chosen = (LLM_PROVIDER === 'openrouter' && typeof model === 'string' && model.trim() && model.trim().length < 200) ? model.trim() : modelFor('chat');
+      const result = await callClaude({ message, sessionId: sessionId || null, systemPromptPath: promptPath, model: chosen });
       return sendJSON(res, 200, {
         ok: true,
         rawResult: result.result || '',

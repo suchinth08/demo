@@ -2045,7 +2045,12 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       .dpc-chatdock.collapsed { height:38px; }
       .dpc-chatdock-head { flex:0 0 auto; height:38px; display:flex; align-items:center; gap:8px; padding:0 14px; border-bottom:1px solid var(--border); cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-3); }
       .dpc-chat-scroll { flex:1 1 auto; overflow-y:auto; padding:12px 16px; }
-      .dpc-chatdock.collapsed .dpc-chat-scroll, .dpc-chatdock.collapsed .dpc-chat-input { display:none; }
+      .dpc-chatdock.collapsed .dpc-chat-scroll, .dpc-chatdock.collapsed .dpc-chat-input, .dpc-chatdock.collapsed .dpc-modelbar { display:none; }
+      .dpc-modelbar { flex:0 0 auto; display:flex; align-items:center; gap:8px; padding:6px 14px; border-top:1px solid var(--border); flex-wrap:wrap; }
+      .dpc-modelbar-lbl { font-family:var(--mono); font-size:10px; letter-spacing:.05em; text-transform:uppercase; color:var(--text-4); }
+      .dpc-model-sel { flex:0 1 340px; max-width:380px; font-size:12px; padding:4px 6px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); }
+      .dpc-model-filter { flex:0 1 150px; font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); }
+      .dpc-model-meta { font-size:10.5px; color:var(--text-4); }
       .dpc-chat-input { flex:0 0 auto; display:flex; gap:8px; padding:10px 14px; border-top:1px solid var(--border); }
       .dpc-chat-input textarea { flex:1; resize:none; border:1px solid var(--border); border-radius:8px; padding:8px 12px; font-family:inherit; font-size:13px; line-height:1.5; background:var(--bg); color:var(--text); max-height:120px; }
       .dpc-chat-input button { flex:0 0 auto; width:38px; border:none; border-radius:8px; background:var(--accent); color:#fff; font-size:16px; cursor:pointer; }
@@ -2203,6 +2208,12 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       <div class="dpc-chatdock" id="dpc-chatdock">
         <div class="dpc-chatdock-head" id="dpc-chatdock-head">🤖 AI Pair Solution Designer<span id="dpc-dock-toggle" style="margin-left:auto;font-size:10px;text-transform:none;letter-spacing:0;">collapse ▾</span></div>
         <div class="dpc-chat-scroll" id="dpc-chat-scroll"></div>
+        <div class="dpc-modelbar" id="dpc-modelbar">
+          <span class="dpc-modelbar-lbl">Model</span>
+          <select class="dpc-model-sel" id="dpc-model-sel"><option value="">Platform default</option></select>
+          <input class="dpc-model-filter" id="dpc-model-filter" type="text" placeholder="filter all models…">
+          <span class="dpc-model-meta" id="dpc-model-meta"></span>
+        </div>
         <div class="dpc-chat-input">
           <textarea id="dpc-chat-input" rows="1" placeholder="Describe the data operation, or ask for the ideal pipeline…"></textarea>
           <button id="dpc-chat-send" title="Send">↑</button>
@@ -6882,6 +6893,8 @@ refreshMemoryCount();
   { const e = $('dpc-toggle-palette');   if (e) e.addEventListener('click', () => { const p = $('dpc-palette');   if (p) p.classList.toggle('collapsed'); }); }
   { const e = $('dpc-fullscreen');       if (e) e.addEventListener('click', dpcToggleFullscreen); }
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && appState._fs) dpcSetFullscreen(false); });
+  { const e = $('dpc-model-sel');    if (e) e.addEventListener('change', () => { appState._model = e.value; }); }
+  { const e = $('dpc-model-filter'); if (e) e.addEventListener('input', () => dpcRenderModelSelect(e.value)); }
   { const e = $('dpc-chatdock-head');    if (e) e.addEventListener('click', () => { const p = $('dpc-chatdock'); if (!p) return; const c = p.classList.toggle('collapsed'); const lbl = $('dpc-dock-toggle'); if (lbl) lbl.textContent = c ? 'expand ▴' : 'collapse ▾'; }); }
   { const ti = $('dpc-chat-input'), sb = $('dpc-chat-send');
     if (ti) {
@@ -7334,6 +7347,7 @@ refreshMemoryCount();
     dpcInitStagePan();
     dpcRenderPalette(); dpcWirePalette();
     dpcRenderInspector();
+    dpcLoadModels();
     dpcSyncTitle();
     renderChat();
     dpcShowView(initialView || 'overview');
@@ -7563,6 +7577,41 @@ refreshMemoryCount();
     const t = ti.value.trim(); if (!t || appState.busy) return;
     input.value = t; ti.value = ''; ti.style.height = 'auto';
     send();   // reads input.value; renderChat() writes to the dock via chatTarget
+  }
+
+  // ── In-chat model picker (OpenRouter catalogue + routing slugs) ──
+  let _dpcModels = [], _dpcModelsFetched = false;
+  function dpcRenderModelSelect(filter) {
+    const selEl = $('dpc-model-sel'); if (!selEl) return;
+    if (appState._model == null) appState._model = '';
+    const f = (filter || '').toLowerCase();
+    const opt = (id, label) => `<option value="${esc(id)}"${appState._model === id ? ' selected' : ''}>${esc(label)}</option>`;
+    const routing = [
+      ['', 'Platform default (server setting)'],
+      ['openrouter/auto', 'Auto — best model for the task'],
+      ['openrouter/free', 'Free pool (variable · may be rate-limited)']
+    ];
+    let html = `<optgroup label="Routing">${routing.map(r => opt(r[0], r[1])).join('')}</optgroup>`;
+    const list = _dpcModels.filter(m => !f || (m.id || '').toLowerCase().includes(f) || (m.name || '').toLowerCase().includes(f));
+    if (list.length) {
+      html += `<optgroup label="All models (${list.length})">${list.map(m => {
+        const tag = m.free ? ' · free' : (m.promptPrice != null ? (' · $' + (m.promptPrice * 1e6).toFixed(2) + '/M') : '');
+        return opt(m.id, (m.name || m.id) + tag);
+      }).join('')}</optgroup>`;
+    }
+    selEl.innerHTML = html;
+  }
+  async function dpcLoadModels() {
+    const meta = $('dpc-model-meta');
+    if (_dpcModelsFetched) { dpcRenderModelSelect(($('dpc-model-filter') || {}).value || ''); return; }
+    _dpcModelsFetched = true;
+    try {
+      const r = await fetch('/models'); const d = await r.json();
+      _dpcModels = (d && d.models) || [];
+      if (meta) meta.textContent = (d && d.error) ? 'list unavailable — routing slugs only'
+        : (_dpcModels.length + ' models · ' + ((d && d.provider) || ''));
+    } catch (e) { if (meta) meta.textContent = 'model list unavailable'; }
+    dpcRenderModelSelect('');
   }
 
   // ── DPA Canvas IDE — component palette, drop & per-node inspector (C3) ──
@@ -8389,7 +8438,7 @@ refreshMemoryCount();
         outMsg = '[CONTEXT — the user loaded this pipeline onto the canvas; treat it as the CURRENT spec to refine, preserve existing primitive ids, and echo the full updated solution back]\nCURRENT dataProduct = ' + JSON.stringify({ ...dpc, canvas: undefined }) + '\n\nUser: ' + text;
         appState._primeContext = false;
       }
-      const data = await callBridge('/app/chat', { message: outMsg, sessionId: appState.sessionId, archetype: appState.archetype });
+      const data = await callBridge('/app/chat', { message: outMsg, sessionId: appState.sessionId, archetype: appState.archetype, model: (appState.archetype === 'data-product' ? (appState._model || undefined) : undefined) });
       if (data.sessionId) appState.sessionId = data.sessionId;
       const parsed = parseAI(data.rawResult || '');
       const isDP = appState.archetype === 'data-product' && dpcIsOpen();
