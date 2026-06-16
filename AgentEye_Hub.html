@@ -7948,6 +7948,27 @@ refreshMemoryCount();
     cur.forEach(n => { if (!nextById[n.id] && !nextBySig[n.sig]) removed++; });
     return { added, removed, changed };
   }
+  // Tolerate imperfect AI output: hoist top-level pipeline arrays into dataProduct,
+  // and coerce loose string entries (e.g. checks:["UniqueClaimId"]) into minimal objects
+  // so even a weaker model's reply still renders nodes the user can fix.
+  function dpcNormalizeSolution(sol) {
+    if (!sol || typeof sol !== 'object') return { dataProduct: {} };
+    const out = { ...sol };
+    const ARRS = ['entities', 'sources', 'checks', 'transforms', 'smartNodes', 'sinks'];
+    const dp = (out.dataProduct && typeof out.dataProduct === 'object') ? { ...out.dataProduct } : {};
+    ARRS.forEach(k => { if ((!Array.isArray(dp[k]) || !dp[k].length) && Array.isArray(out[k]) && out[k].length) dp[k] = out[k]; });
+    ['exceptions', 'operations'].forEach(k => { if (!dp[k] && out[k] && typeof out[k] === 'object') dp[k] = out[k]; });
+    const str = (v, mk) => Array.isArray(v) ? v.map((x, i) => (typeof x === 'string' || typeof x === 'number') ? mk(String(x), i) : x) : v;
+    if (dp.entities)   dp.entities   = str(dp.entities,   (s, i) => ({ id: 'ent' + i, name: s }));
+    if (dp.sources)    dp.sources    = str(dp.sources,    (s, i) => ({ id: 'src' + i, kind: 'file', entityRef: '', config: { note: s } }));
+    if (dp.sinks)      dp.sinks      = str(dp.sinks,      (s, i) => ({ id: 'snk' + i, kind: 'postgres', entityRef: '', config: { note: s } }));
+    if (dp.checks)     dp.checks     = str(dp.checks,     (s, i) => ({ id: 'chk' + i, entityRef: '', field: s, kind: 'custom', severity: 'error' }));
+    if (dp.transforms) dp.transforms = str(dp.transforms, (s, i) => ({ id: 'trf' + i, entityRef: '', name: s, kind: 'map' }));
+    if (dp.smartNodes) dp.smartNodes = str(dp.smartNodes, (s, i) => ({ id: 'smt' + i, task: s, entityRef: '', modelProvider: 'ollama' }));
+    out.dataProduct = dp;
+    out.archetype = 'data-product';
+    return out;
+  }
   function dpcStageProposal(sol) {
     if (sol && sol.dataProduct && sol.dataProduct.canvas) delete sol.dataProduct.canvas;   // never let the AI overwrite manual node positions
     appState._proposed = sol;
@@ -8371,10 +8392,22 @@ refreshMemoryCount();
       const data = await callBridge('/app/chat', { message: outMsg, sessionId: appState.sessionId, archetype: appState.archetype });
       if (data.sessionId) appState.sessionId = data.sessionId;
       const parsed = parseAI(data.rawResult || '');
-      appState.display.push({ role: 'assistant', content: parsed.message || data.rawResult || '(empty response)' });
+      const isDP = appState.archetype === 'data-product' && dpcIsOpen();
+      let assistantMsg = parsed.message || data.rawResult || '(empty response)';
+      const rawEmpty = !String(data.rawResult || '').trim();
+      const looksJson = /^\s*[\{\[]/.test(String(assistantMsg).trim());
+      if (rawEmpty) assistantMsg = 'The model returned an empty response — often a rate-limited free model. Try again, or pick a stronger model.';
+      else if (isDP && !parsed.solution && looksJson) assistantMsg = "I couldn't read a complete pipeline from that reply (the model likely returned malformed or truncated JSON). Try rephrasing, or pick a stronger model.";
+      appState.display.push({ role: 'assistant', content: assistantMsg });
       if (parsed.solution) {
-        if (appState.archetype === 'data-product' && dpcIsOpen()) dpcStageProposal(parsed.solution);   // reviewable diff (Accept/Reject)
-        else appState.solution = mergeAgent(appState.solution, parsed.solution);                        // portal track unchanged
+        if (isDP) {
+          const norm = dpcNormalizeSolution(parsed.solution);
+          const hasPipeline = norm.dataProduct && ['entities', 'sources', 'checks', 'transforms', 'smartNodes', 'sinks'].some(k => (norm.dataProduct[k] || []).length);
+          if (hasPipeline) dpcStageProposal(norm);                                   // reviewable diff (Accept/Reject)
+          else if (typeof toast === 'function') toast('No pipeline detected in that reply — try rephrasing.', 'error');
+        } else {
+          appState.solution = mergeAgent(appState.solution, parsed.solution);        // portal track unchanged
+        }
       }
       if (parsed.stage) appState.stage = parsed.stage;
       appState.ready = !!parsed.readyToGenerate;
