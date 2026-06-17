@@ -2106,6 +2106,17 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       .dpc-uc-ind { font-family:var(--mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-deep); }
       .dpc-uc-kpi { font-size:11px; color:var(--text-4); }
       .dpc-uc-build { margin-top:auto; width:100%; }
+      /* Build App worked-example cards (portal landing) + mini dashboard thumbnail */
+      #panel-buildapp .appx-sample-card { text-align:left; display:flex; flex-direction:column; gap:6px; align-items:stretch; }
+      .appx-sample-thumb { height:82px; border:1px solid var(--border); border-radius:8px; overflow:hidden; background:var(--bg); display:flex; flex-direction:column; }
+      .appx-sample-thumb .ast-top { height:14px; background:var(--ast,#A100FF); opacity:.92; }
+      .appx-sample-thumb .ast-kpis { display:flex; gap:4px; padding:5px 5px 3px; }
+      .appx-sample-thumb .ast-kpis i { flex:1; height:13px; border-radius:3px; background:var(--ast,#A100FF); opacity:.18; }
+      .appx-sample-thumb .ast-row { display:flex; gap:4px; padding:0 5px 5px; flex:1; min-height:0; }
+      .appx-sample-thumb .ast-chart { flex:1.5; border-radius:3px; background:linear-gradient(180deg, transparent 45%, var(--ast,#A100FF) 45%); opacity:.45; }
+      .appx-sample-thumb .ast-list { flex:1; display:flex; flex-direction:column; gap:3px; justify-content:center; }
+      .appx-sample-thumb .ast-list b { height:6px; border-radius:2px; background:var(--text-4); opacity:.32; }
+      .appx-sample-build { margin-top:auto; width:100%; }
     </style>
     <div id="appx-journey" aria-label="Build journey"></div>
     <div class="prov-shell">
@@ -6944,9 +6955,8 @@ refreshMemoryCount();
       else dpcEnter('overview');
     }
     else {
-      appState.started = true; if (inputWrap) inputWrap.style.display = '';
-      appState.display.push({ role: 'assistant', content: "New chat — **what should this portal do, and who logs into it?**" });
-      renderChat(); input.focus();
+      appState.started = true;
+      renderAppSamples(); renderSide();   // back to the worked-example landing
     }
     showTools(true);
   }
@@ -6974,9 +6984,102 @@ refreshMemoryCount();
     appState.archetype = 'dashboard-portal';
     appState.started = true;
     if (gallery) gallery.style.display = 'none';
-    input.disabled = false; input.placeholder = 'Describe the portal you want to build…'; input.focus();
-    appState.display.push({ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" });
-    renderChat(); renderJourney(); showTools(true);
+    input.disabled = false; input.placeholder = 'Describe the portal you want to build…';
+    showTools(true);
+    renderAppSamples();   // landing: worked-example cards + live canvas; chat starts on pick/blank
+    renderSide();
+  }
+
+  // ── Dashboard/Portal worked-example apps — a landing gallery that loads onto the live canvas ──
+  const APP_SAMPLES = [
+    { key: 'patient-care', name: 'Patient Care Portal', industry: 'Healthcare', desc: 'Care team monitors patient panels, adherence and risk, with an embedded care assistant.', primary: '#A100FF',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'Patient Care Portal', slug: 'patient-care-portal', description: 'Care-team portal for patient monitoring and care plans.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#A100FF', accent: '#C1A3FF', surface: '#ffffff', ink: '#1a1a1a' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_chart', 'w_table', 'w_assist'] }, { id: 'p_patients', title: 'Patients', widgets: ['w_table'] }, { id: 'p_careplans', title: 'Care Plans', widgets: [] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['Active patients', 'Adherence %', 'Open alerts', 'Visits today'] }, { id: 'w_chart', type: 'chart', title: 'Adherence trend' }, { id: 'w_table', type: 'table', title: 'Patient panel', columns: ['Patient', 'Condition', 'Risk', 'Next visit'] }, { id: 'w_assist', type: 'agent-chat', title: 'Care assistant', agentRef: 'patientcarecoordinator' }],
+          identity: { provider: 'cognito', rbacRoles: ['clinician', 'care-manager'] } },
+        agents: [{ agentName: 'PatientCareCoordinator', role: 'care assistant', binding: 'bff', useCase: 'Explain a patient’s risk drivers and suggest next care actions.', status: 'target' }] } },
+    { key: 'sales-ops', name: 'Sales Ops Dashboard', industry: 'Sales', desc: 'Pipeline health, win rates and top deals, with a sales assistant for deal Q&A.', primary: '#155EEF',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'Sales Ops Dashboard', slug: 'sales-ops-dashboard', description: 'Revenue-ops portal for pipeline and forecast.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#155EEF', accent: '#9DBEFF', surface: '#ffffff', ink: '#101828' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_chart', 'w_table', 'w_assist'] }, { id: 'p_deals', title: 'Deals', widgets: ['w_table'] }, { id: 'p_forecast', title: 'Forecast', widgets: ['w_chart'] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['Pipeline $', 'Win rate %', 'Avg ACV', 'Quota attain %'] }, { id: 'w_chart', type: 'chart', title: 'Pipeline by stage' }, { id: 'w_table', type: 'table', title: 'Top deals', columns: ['Account', 'Stage', 'Value', 'Close date'] }, { id: 'w_assist', type: 'agent-chat', title: 'Sales assistant', agentRef: 'salesinsights' }],
+          identity: { provider: 'entra', rbacRoles: ['rep', 'sales-manager'] } },
+        agents: [{ agentName: 'SalesInsights', role: 'sales assistant', binding: 'bff', useCase: 'Answer deal and pipeline questions and flag at-risk opportunities.', status: 'target' }] } },
+    { key: 'claims-console', name: 'Claims Review Console', industry: 'Insurance', desc: 'Claims queue, cycle times and exceptions, with an assistant that explains flags.', primary: '#B42318',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'Claims Review Console', slug: 'claims-review-console', description: 'Operator console for claims triage and exceptions.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#B42318', accent: '#FDA29B', surface: '#ffffff', ink: '#1a1a1a' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_chart', 'w_table', 'w_assist'] }, { id: 'p_queue', title: 'Queue', widgets: ['w_table'] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['Open claims', 'Avg cycle (h)', 'Exceptions', 'SLA met %'] }, { id: 'w_chart', type: 'chart', title: 'Exceptions trend' }, { id: 'w_table', type: 'table', title: 'Claims queue', columns: ['Claim', 'Type', 'Status', 'Age'] }, { id: 'w_assist', type: 'agent-chat', title: 'Claims assistant', agentRef: 'claimsexplainer' }],
+          identity: { provider: 'cognito', rbacRoles: ['claims-handler', 'approver'] } },
+        agents: [{ agentName: 'ClaimsExplainer', role: 'claims assistant', binding: 'bff', useCase: 'Explain why a claim was flagged and recommend a disposition.', status: 'target' }] } },
+    { key: 'supplier-portal', name: 'Supplier Portal', industry: 'Procurement / Retail', desc: 'Supplier scorecards, on-time delivery, spend and disputes, with a procurement assistant.', primary: '#0E7090',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'Supplier Portal', slug: 'supplier-portal', description: 'Procurement portal for supplier performance.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#0E7090', accent: '#A5E0EC', surface: '#ffffff', ink: '#101828' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_chart', 'w_table', 'w_assist'] }, { id: 'p_orders', title: 'Purchase Orders', widgets: ['w_table'] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['Suppliers', 'On-time %', 'Open disputes', 'Spend $'] }, { id: 'w_chart', type: 'chart', title: 'Spend by category' }, { id: 'w_table', type: 'table', title: 'Purchase orders', columns: ['PO', 'Supplier', 'Status', 'Amount'] }, { id: 'w_assist', type: 'agent-chat', title: 'Procurement assistant', agentRef: 'procurementhelper' }],
+          identity: { provider: 'okta', rbacRoles: ['buyer', 'category-manager'] } },
+        agents: [{ agentName: 'ProcurementHelper', role: 'procurement assistant', binding: 'bff', useCase: 'Summarize supplier performance and surface disputes needing action.', status: 'target' }] } },
+    { key: 'field-service', name: 'Field Service Dashboard', industry: 'Operations', desc: 'Work orders, SLA and technician load, with a dispatch assistant.', primary: '#A65A0F',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'Field Service Dashboard', slug: 'field-service-dashboard', description: 'Dispatch and field-ops portal.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#A65A0F', accent: '#F7C68A', surface: '#ffffff', ink: '#1a1a1a' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_chart', 'w_table', 'w_assist'] }, { id: 'p_orders', title: 'Work Orders', widgets: ['w_table'] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['Jobs today', 'SLA met %', 'Techs active', 'Backlog'] }, { id: 'w_chart', type: 'chart', title: 'Completion trend' }, { id: 'w_table', type: 'table', title: 'Work orders', columns: ['Order', 'Customer', 'Tech', 'Status'] }, { id: 'w_assist', type: 'agent-chat', title: 'Dispatch assistant', agentRef: 'dispatchhelper' }],
+          identity: { provider: 'cognito', rbacRoles: ['dispatcher', 'supervisor'] } },
+        agents: [{ agentName: 'DispatchHelper', role: 'dispatch assistant', binding: 'bff', useCase: 'Recommend technician assignments and flag SLA risks.', status: 'target' }] } },
+    { key: 'hr-onboarding', name: 'HR Onboarding Portal', industry: 'Human Resources', desc: 'New-hire onboarding tasks, time-to-productive and open roles, with an HR assistant.', primary: '#14803C',
+      solution: { kind: 'solution', archetype: 'dashboard-portal', name: 'HR Onboarding Portal', slug: 'hr-onboarding-portal', description: 'HR portal for onboarding and tasks.', environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+        app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#14803C', accent: '#A6E9C0', surface: '#ffffff', ink: '#101828' } },
+          pages: [{ id: 'p_overview', title: 'Overview', widgets: ['w_kpi', 'w_table', 'w_assist'] }, { id: 'p_tasks', title: 'Tasks', widgets: ['w_table'] }],
+          widgets: [{ id: 'w_kpi', type: 'kpi', metrics: ['New hires', 'Tasks open', 'Time-to-productive', 'Open roles'] }, { id: 'w_table', type: 'table', title: 'Onboarding tasks', columns: ['New hire', 'Task', 'Owner', 'Due'] }, { id: 'w_assist', type: 'agent-chat', title: 'HR assistant', agentRef: 'hrhelper' }],
+          identity: { provider: 'entra', rbacRoles: ['employee', 'hr-admin'] } },
+        agents: [{ agentName: 'HRHelper', role: 'HR assistant', binding: 'bff', useCase: 'Answer onboarding questions and surface overdue tasks.', status: 'target' }] } }
+  ];
+  function appSampleThumb(u) {
+    return `<div class="appx-sample-thumb" style="--ast:${esc(u.primary || '#A100FF')}"><div class="ast-top"></div><div class="ast-kpis"><i></i><i></i><i></i><i></i></div><div class="ast-row"><div class="ast-chart"></div><div class="ast-list"><b></b><b></b><b></b></div></div></div>`;
+  }
+  function renderAppSamples() {
+    if (inputWrap) inputWrap.style.display = 'none';
+    const card = u => `<div class="arch-card appx-sample-card">
+      ${appSampleThumb(u)}
+      <div class="dpc-uc-ind">${esc(u.industry)}</div>
+      <div class="ac-title">${esc(u.name)}</div>
+      <div class="ac-desc">${esc(u.desc)}</div>
+      <button class="dpc-btn dpc-accent appx-sample-build" data-app="${esc(u.key)}">Build this app ↗</button>
+    </div>`;
+    scroll.innerHTML = `<div class="arch-gallery" style="max-width:920px;">
+      <div><div class="sec-h" style="border:0;padding:0;margin-bottom:4px;">Build an app</div>
+      <div class="lib-sub">Start from a worked example — it loads pages, widgets, theme and a pinned-agent stub onto the live canvas (right), ready to edit. Or describe your own in the chat.</div></div>
+      <div class="sec-h" style="margin-top:4px;"><span>Sample apps</span></div>
+      <div class="arch-cards">${APP_SAMPLES.map(card).join('')}</div>
+      <div class="dp-starters" style="margin-top:10px;"><button id="appx-blank" class="dp-starter" style="font-weight:700;color:var(--accent,#A000FF);">Start from a blank brief →</button></div>
+    </div>`;
+    scroll.querySelectorAll('.appx-sample-build[data-app]').forEach(b => b.addEventListener('click', () => loadAppSample(b.dataset.app)));
+    const blank = $('appx-blank'); if (blank) blank.addEventListener('click', startBlankPortal);
+  }
+  function loadAppSample(key) {
+    const u = APP_SAMPLES.find(x => x.key === key); if (!u) return;
+    const clone = JSON.parse(JSON.stringify(u.solution));
+    appState.solution = clone;
+    appState.archetype = 'dashboard-portal';
+    appState.started = true;
+    appState.stage = 'PAGES_AND_WIDGETS';
+    appState.sessionId = null; appState._primeContext = true;   // refine on top of the loaded app
+    if (inputWrap) inputWrap.style.display = '';
+    input.disabled = false;
+    const np = (clone.app && clone.app.pages || []).length, nw = (clone.app && clone.app.widgets || []).length, na = (clone.agents || []).length;
+    appState.display = [{ role: 'assistant', content:
+      `Loaded **${clone.name}** onto the canvas — ${np} page(s), ${nw} widget(s), ${na} agent(s). ` +
+      `Tell me what to change — *"add a page for billing"*, *"swap the chart for a funnel"*, *"rebrand to the client's colours"*, or *"pin a real agent"*. I'll update the preview.` }];
+    renderChat(); renderSide(); renderJourney();
+    autosaveApp();
+    if (typeof toast === 'function') toast('Loaded: ' + clone.name);
+  }
+  function startBlankPortal() {
+    if (inputWrap) inputWrap.style.display = '';
+    input.disabled = false;
+    appState.display = [{ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" }];
+    renderChat(); renderSide(); renderJourney(); input.focus();
   }
 
   // ── DPA contextual views (Overview · Build · Spec · Generate) — all swap #appx-scroll ──
@@ -8495,9 +8598,12 @@ refreshMemoryCount();
     appState.busy = true; renderChat();
     try {
       let outMsg = text;
-      if (appState.archetype === 'data-product' && appState._primeContext) {
-        const dpc = (appState.solution && appState.solution.dataProduct) || {};
-        outMsg = '[CONTEXT — the user loaded this pipeline onto the canvas; treat it as the CURRENT spec to refine, preserve existing primitive ids, and echo the full updated solution back]\nCURRENT dataProduct = ' + JSON.stringify({ ...dpc, canvas: undefined }) + '\n\nUser: ' + text;
+      if (appState._primeContext) {
+        const sol = appState.solution || {};
+        const ctx = (appState.archetype === 'data-product')
+          ? { dataProduct: { ...(sol.dataProduct || {}), canvas: undefined } }
+          : { name: sol.name, app: sol.app, agents: sol.agents };
+        outMsg = '[CONTEXT — the user loaded this onto the canvas; treat it as the CURRENT spec to refine, preserve existing ids, and echo the full updated solution back]\nCURRENT = ' + JSON.stringify(ctx) + '\n\nUser: ' + text;
         appState._primeContext = false;
       }
       const data = await callBridge('/app/chat', { message: outMsg, sessionId: appState.sessionId, archetype: appState.archetype, model: (appState.archetype === 'data-product' ? (appState._model || undefined) : undefined) });
