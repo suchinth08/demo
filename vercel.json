@@ -34,6 +34,10 @@
       "destination": "https://agenteye-api-production.up.railway.app/models"
     },
     {
+      "source": "/figma/:path*",
+      "destination": "https://agenteye-api-production.up.railway.app/figma/:path*"
+    },
+    {
       "source": "/app/:path*",
       "destination": "https://agenteye-api-production.up.railway.app/app/:path*"
     },

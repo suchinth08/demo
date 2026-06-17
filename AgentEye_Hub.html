@@ -2117,6 +2117,21 @@ To begin: <strong>what business problem do you want this agent to solve, and who
       .appx-sample-thumb .ast-list { flex:1; display:flex; flex-direction:column; gap:3px; justify-content:center; }
       .appx-sample-thumb .ast-list b { height:6px; border-radius:2px; background:var(--text-4); opacity:.32; }
       .appx-sample-build { margin-top:auto; width:100%; }
+      /* import-a-design cards + Figma modal + imported-layout thumbnails */
+      #panel-buildapp .appx-import-card { text-align:left; display:flex; flex-direction:column; gap:6px; align-items:stretch; border-style:dashed; cursor:pointer; }
+      #panel-buildapp .appx-import-card:hover { border-color:var(--accent); }
+      .appx-import-ic { font-size:24px; }
+      #panel-buildapp .appx-import-card .dpc-btn { margin-top:auto; width:100%; }
+      .appx-layouts { border:1px solid var(--border); border-radius:10px; padding:10px; margin-bottom:14px; background:var(--bg-soft); }
+      .appx-layouts-h { font-family:var(--mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-4); margin-bottom:6px; }
+      .appx-layouts-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+      .appx-layouts-grid img { width:100%; height:64px; object-fit:cover; border:1px solid var(--border); border-radius:6px; background:var(--bg); }
+      .appx-modal { position:fixed; inset:0; z-index:80; background:rgba(20,16,30,.45); display:flex; align-items:center; justify-content:center; padding:20px; }
+      .appx-modal-card { width:100%; max-width:460px; background:var(--bg); border:1px solid var(--border); border-radius:12px; box-shadow:var(--shadow-lg); overflow:hidden; }
+      .appx-modal-head { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--border); font-weight:600; }
+      .appx-modal-x { border:none; background:transparent; font-size:20px; line-height:1; cursor:pointer; color:var(--text-3); }
+      .appx-modal-body { padding:16px; }
+      .appx-modal-foot { display:flex; justify-content:flex-end; gap:8px; padding:12px 16px; border-top:1px solid var(--border); }
     </style>
     <div id="appx-journey" aria-label="Build journey"></div>
     <div class="prov-shell">
@@ -2230,6 +2245,23 @@ To begin: <strong>what business problem do you want this agent to solve, and who
           <button id="dpc-chat-send" title="Send">↑</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Build App: import-a-design helpers (hidden file input + Figma modal) -->
+  <input type="file" id="appx-upload-input" accept="image/*" multiple style="display:none;">
+  <div class="appx-modal" id="figma-modal" style="display:none;">
+    <div class="appx-modal-card">
+      <div class="appx-modal-head"><span>Import from Figma</span><button class="appx-modal-x" id="figma-x" title="Close">×</button></div>
+      <div class="appx-modal-body">
+        <label class="af-label">Figma file URL</label>
+        <input class="af-input" id="figma-url" type="text" placeholder="https://www.figma.com/design/FILEKEY/...">
+        <label class="af-label" style="margin-top:10px;">Personal access token</label>
+        <input class="af-input" id="figma-token" type="password" placeholder="figd_...">
+        <div class="lib-sub" style="margin-top:8px;">Create one in Figma → Settings → Security → <em>Personal access tokens</em>. Used once to read the file's pages &amp; frames — never stored.</div>
+        <div class="lib-sub" id="figma-err" style="color:var(--risk);display:none;margin-top:8px;"></div>
+      </div>
+      <div class="appx-modal-foot"><button class="dpc-btn" id="figma-cancel">Cancel</button><button class="dpc-btn dpc-accent" id="figma-go">Import</button></div>
     </div>
   </div>
 
@@ -6918,6 +6950,11 @@ refreshMemoryCount();
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && appState._fs) dpcSetFullscreen(false); });
   { const e = $('dpc-model-sel');    if (e) e.addEventListener('change', () => { appState._model = e.value; }); }
   { const e = $('dpc-model-filter'); if (e) e.addEventListener('input', () => dpcRenderModelSelect(e.value)); }
+  { const e = $('appx-upload-input'); if (e) e.addEventListener('change', () => { onUploadLayouts(e.target.files); e.value = ''; }); }
+  { const e = $('figma-go');     if (e) e.addEventListener('click', doFigmaImport); }
+  { const e = $('figma-x');      if (e) e.addEventListener('click', closeFigmaModal); }
+  { const e = $('figma-cancel'); if (e) e.addEventListener('click', closeFigmaModal); }
+  { const e = $('figma-modal');  if (e) e.addEventListener('click', ev => { if (ev.target === e) closeFigmaModal(); }); }
   { const e = $('dpc-chatdock-head');    if (e) e.addEventListener('click', () => { const p = $('dpc-chatdock'); if (!p) return; const c = p.classList.toggle('collapsed'); const lbl = $('dpc-dock-toggle'); if (lbl) lbl.textContent = c ? 'expand ▴' : 'collapse ▾'; }); }
   { const ti = $('dpc-chat-input'), sb = $('dpc-chat-send');
     if (ti) {
@@ -7049,12 +7086,19 @@ refreshMemoryCount();
     </div>`;
     scroll.innerHTML = `<div class="arch-gallery" style="max-width:920px;">
       <div><div class="sec-h" style="border:0;padding:0;margin-bottom:4px;">Build an app</div>
-      <div class="lib-sub">Start from a worked example — it loads pages, widgets, theme and a pinned-agent stub onto the live canvas (right), ready to edit. Or describe your own in the chat.</div></div>
-      <div class="sec-h" style="margin-top:4px;"><span>Sample apps</span></div>
+      <div class="lib-sub">Start from a worked example, bring in an existing design, or describe your own — it loads pages, widgets, theme and a pinned-agent stub onto the live canvas (right), ready to edit.</div></div>
+      <div class="sec-h" style="margin-top:4px;"><span>Start from an existing design</span></div>
+      <div class="arch-cards">
+        <div class="arch-card appx-import-card" data-import="upload"><div class="appx-import-ic">📤</div><div class="ac-title">Upload screen layouts</div><div class="ac-desc">Bring screenshots or exported screens — each becomes a page with a reference thumbnail, then we build the widgets.</div><button class="dpc-btn dpc-accent">Upload images ↗</button></div>
+        <div class="arch-card appx-import-card" data-import="figma"><div class="appx-import-ic">🎨</div><div class="ac-title">Import from Figma</div><div class="ac-desc">Paste a Figma file URL + access token — its pages &amp; frames become pages on the canvas.</div><button class="dpc-btn dpc-accent">Connect Figma ↗</button></div>
+      </div>
+      <div class="sec-h" style="margin-top:8px;"><span>Sample apps</span></div>
       <div class="arch-cards">${APP_SAMPLES.map(card).join('')}</div>
       <div class="dp-starters" style="margin-top:10px;"><button id="appx-blank" class="dp-starter" style="font-weight:700;color:var(--accent,#A000FF);">Start from a blank brief →</button></div>
     </div>`;
     scroll.querySelectorAll('.appx-sample-build[data-app]').forEach(b => b.addEventListener('click', () => loadAppSample(b.dataset.app)));
+    scroll.querySelectorAll('.appx-import-card[data-import="upload"]').forEach(b => b.addEventListener('click', triggerUpload));
+    scroll.querySelectorAll('.appx-import-card[data-import="figma"]').forEach(b => b.addEventListener('click', openFigmaModal));
     const blank = $('appx-blank'); if (blank) blank.addEventListener('click', startBlankPortal);
   }
   function loadAppSample(key) {
@@ -7080,6 +7124,58 @@ refreshMemoryCount();
     input.disabled = false;
     appState.display = [{ role: 'assistant', content: "Great — a **dashboard / portal**. We'll shape it together, one question at a time.\n\nTo start: **what should this portal do, and who logs into it?**" }];
     renderChat(); renderSide(); renderJourney(); input.focus();
+  }
+
+  // ── Import a design → load a draft portal onto the canvas (screens become pages) ──
+  function loadImportedApp(opts) {
+    const pages = [], widgets = [];
+    (opts.pages || []).forEach((p, i) => {
+      const wid = 'w_imp' + i;
+      widgets.push({ id: wid, type: 'panel', title: p.title || ('Screen ' + (i + 1)) });
+      pages.push({ id: 'p_imp' + i, title: p.title || ('Screen ' + (i + 1)), widgets: [wid] });
+    });
+    const nm = opts.name || 'Imported app';
+    appState.solution = { kind: 'solution', archetype: 'dashboard-portal', name: nm, slug: nm.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''), description: 'Imported from ' + (opts.source || 'a design'), environments: ['dev', 'stage', 'prod'], tenancy: { scope: 'client-workspace' },
+      app: { theme: { palette: 'accenture', mode: 'light', tokens: { primary: '#A100FF', accent: '#C1A3FF', surface: '#ffffff', ink: '#1a1a1a' } }, pages, widgets, identity: { provider: null, rbacRoles: [] } }, agents: [] };
+    appState._layouts = opts.layouts || null;
+    appState.archetype = 'dashboard-portal'; appState.started = true; appState.stage = 'PAGES_AND_WIDGETS';
+    appState.sessionId = null; appState._primeContext = true;
+    if (inputWrap) inputWrap.style.display = ''; input.disabled = false;
+    appState.display = [{ role: 'assistant', content: opts.note || `Imported **${nm}** — ${pages.length} screen(s) became pages on the canvas. Tell me what each screen shows (KPIs, tables, charts, an assistant) and I'll build the widgets, set sign-in, and pin an agent.` }];
+    renderChat(); renderSide(); renderJourney(); autosaveApp();
+    if (typeof toast === 'function') toast('Imported: ' + nm);
+  }
+  function triggerUpload() { const i = $('appx-upload-input'); if (i) i.click(); }
+  async function onUploadLayouts(fileList) {
+    const files = Array.from(fileList || []).slice(0, 12);
+    if (!files.length) return;
+    const layouts = await Promise.all(files.map(f => new Promise(res => {
+      const r = new FileReader(); r.onload = () => res({ name: f.name, dataUrl: r.result }); r.onerror = () => res({ name: f.name, dataUrl: null }); r.readAsDataURL(f);
+    })));
+    const clean = n => String(n || '').replace(/\.[a-z0-9]+$/i, '').replace(/[_-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase()).trim() || 'Screen';
+    loadImportedApp({ name: 'Imported layouts', source: 'uploaded screens', layouts, pages: layouts.map(l => ({ title: clean(l.name) })),
+      note: `Imported **${layouts.length} screen layout(s)** — each became a page (see the canvas), with your originals as reference thumbnails on the right. Describe what each screen contains (KPIs, tables, charts, an assistant) and I'll turn them into widgets, then set sign-in and pin an agent.` });
+  }
+  function figmaErr(m) { const e = $('figma-err'); if (e) { e.textContent = m; e.style.display = ''; } }
+  function openFigmaModal() { const m = $('figma-modal'); if (m) m.style.display = 'flex'; const e = $('figma-err'); if (e) e.style.display = 'none'; const u = $('figma-url'); if (u) setTimeout(() => u.focus(), 30); }
+  function closeFigmaModal() { const m = $('figma-modal'); if (m) m.style.display = 'none'; }
+  async function doFigmaImport() {
+    const u = ($('figma-url') || {}).value || '', tk = ($('figma-token') || {}).value || '', go = $('figma-go');
+    if (!u.trim()) { figmaErr('Paste a Figma file URL'); return; }
+    if (!tk.trim()) { figmaErr('Paste a Figma personal access token'); return; }
+    if (go) { go.disabled = true; go.textContent = 'Importing…'; }
+    try {
+      const r = await fetch('/figma/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: u.trim(), token: tk.trim() }) });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'import failed');
+      const pages = [];
+      (d.pages || []).forEach(pg => { if (pg.frames && pg.frames.length) pg.frames.forEach(fr => pages.push({ title: fr })); else pages.push({ title: pg.title }); });
+      if (!pages.length) pages.push({ title: 'Home' });
+      closeFigmaModal();
+      loadImportedApp({ name: d.name || 'Figma import', source: 'Figma', pages,
+        note: `Imported **${d.name || 'Figma file'}** from Figma — ${pages.length} frame(s) became pages on the canvas. Tell me what each screen shows and I'll build the widgets, set sign-in, and pin an agent.` });
+    } catch (e) { figmaErr(e.message); }
+    finally { if (go) { go.disabled = false; go.textContent = 'Import'; } }
   }
 
   // ── DPA contextual views (Overview · Build · Spec · Generate) — all swap #appx-scroll ──
@@ -8565,7 +8661,10 @@ refreshMemoryCount();
     const genLabel = !canGen ? '⚙ Name your solution to generate'
       : complete ? '⚙ Generate solution'
       : `⚙ Generate preview (${rd.doneCount}/${rd.total})`;
-    side.innerHTML = renderCanvas(s) + `<div class="appx-summary">${rows.map(([k, v]) => `<div><span class="k">${k}:</span> ${v}</div>`).join('')}</div>` +
+    const layoutsHtml = (appState._layouts && appState._layouts.length)
+      ? `<div class="appx-layouts"><div class="appx-layouts-h">Imported layouts (${appState._layouts.length})</div><div class="appx-layouts-grid">${appState._layouts.map(l => l.dataUrl ? `<img src="${l.dataUrl}" alt="${esc(l.name)}" title="${esc(l.name)}">` : '').join('')}</div></div>`
+      : '';
+    side.innerHTML = layoutsHtml + renderCanvas(s) + `<div class="appx-summary">${rows.map(([k, v]) => `<div><span class="k">${k}:</span> ${v}</div>`).join('')}</div>` +
       checklistHtml +
       `<button class="btn primary appx-gen" id="appx-gen-btn" ${canGen ? '' : 'disabled'} data-complete="${complete ? '1' : '0'}">${genLabel}</button>` +
       (canGen && !complete ? `<div class="appx-genhint">You can generate a preview now (anything unfinished is stubbed). Finish the checklist above for the full deploy bundle.</div>` : '') +

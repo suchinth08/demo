@@ -777,6 +777,27 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // ── POST /figma/import → read a Figma file's pages/frames (BYO personal access token) ──
+  // The token is used once to call the Figma REST API and is never stored or logged.
+  if (req.method === 'POST' && url.pathname === '/figma/import') {
+    try {
+      const body = await readBody(req);
+      const { url: figUrl, fileKey, token } = JSON.parse(body || '{}');
+      const key = (fileKey || '').trim() || ((String(figUrl || '').match(/(?:file|design)\/([A-Za-z0-9]+)/) || [])[1]);
+      if (!key)   return sendJSON(res, 400, { ok: false, error: 'A Figma file URL or key is required' });
+      if (!token) return sendJSON(res, 400, { ok: false, error: 'A Figma personal access token is required' });
+      const r = await fetch(`https://api.figma.com/v1/files/${encodeURIComponent(key)}?depth=2`, { headers: { 'X-Figma-Token': token } });
+      const txt = await r.text();
+      if (!r.ok) return sendJSON(res, 200, { ok: false, error: `Figma API ${r.status}: ${txt.slice(0, 160)}` });
+      const data = JSON.parse(txt);
+      const canvases = ((data.document && data.document.children) || []).filter(c => c.type === 'CANVAS');
+      const pages = canvases.map(c => ({ title: c.name, frames: (c.children || []).filter(n => n.type === 'FRAME').map(f => f.name) }));
+      return sendJSON(res, 200, { ok: true, name: data.name || 'Figma import', pages });
+    } catch (e) {
+      return sendJSON(res, 500, { ok: false, error: String(e.message || e) });
+    }
+  }
+
   // ── POST /chat → provisioner conversation ──
   if (req.method === 'POST' && url.pathname === '/chat') {
     try {
