@@ -1741,7 +1741,7 @@
         <div class="mc-foot">→ Build App</div>
       </div>
 
-      <div class="mega-card" data-jump="buildapp">
+      <div class="mega-card" id="home-dpa-card">
         <div class="mc-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.66 3.58 3 8 3s8-1.34 8-3V5" stroke-linecap="round"/><path d="M4 11v6c0 1.66 3.58 3 8 3s8-1.34 8-3v-6" stroke-linecap="round"/></svg>
         </div>
@@ -3228,11 +3228,17 @@ const panels = { home: $('panel-home'), workspace: $('panel-workspace'), library
 // ───── Tab routing ─────
 tabs.forEach(t => t.addEventListener('click', () => switchTab(t.dataset.panel)));
 document.querySelectorAll('[data-jump]').forEach(el => el.addEventListener('click', () => switchTab(el.dataset.jump)));
+{ const c = document.getElementById('home-dpa-card'); if (c) c.addEventListener('click', () => { switchTab('buildapp'); if (typeof window.__enterDataPlatform === 'function') window.__enterDataPlatform(); }); }
 function switchTab(name) {
   if (name === 'test' && !state.ready) return;   // locked until COMPLETE
   if (name === 'connectors' && !connectorsAvailable()) return;
   tabs.forEach(t => t.classList.toggle('active', t.dataset.panel === name));
   Object.entries(panels).forEach(([k, el]) => el.classList.toggle('active', k === name));
+  // Build App tab = the app-dev portal (archetype gallery). The Data Platform canvas
+  // is a fixed overlay that otherwise persists; reset to the gallery on entry (unless a
+  // saved conversation is being restored), and hide the overlay when leaving the tab.
+  if (name === 'buildapp') { if (!window.__appRestoring && typeof window.__buildAppEnter === 'function') window.__buildAppEnter(); }
+  else if (typeof window.__buildAppLeave === 'function') window.__buildAppLeave();
   if (name === 'config') renderFullConfig();
   if (name === 'deploy') renderYAML();
   if (name === 'connectors') { renderConnectors(); renderConnSide(); }
@@ -6852,8 +6858,14 @@ refreshMemoryCount();
       input.placeholder = 'Describe the portal you want to build…';
       renderChat(); renderSide();
     }
-    if (switchToTab) switchTab('buildapp');
+    if (switchToTab) { window.__appRestoring = true; switchTab('buildapp'); window.__appRestoring = false; }
   };
+
+  // Tab routing hooks (used by the global switchTab): Build App → app-dev gallery;
+  // leaving the tab hides the Data Platform canvas overlay; Home's DPA card deep-links in.
+  window.__buildAppEnter = goToGallery;
+  window.__buildAppLeave = dpcExit;
+  window.__enterDataPlatform = function () { startArchetype('data-product'); };
 
   // Live status: when a spun-off agent is published & pinned, reflect it in the
   // in-memory solution and re-render the canvas/side so the agent shows as pinned.
